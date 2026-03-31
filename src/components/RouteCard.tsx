@@ -1,7 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { StatusBadge } from '@/components/StatusBadge';
-import { TRANSPORT_LABELS, WEEKDAY_LABELS, type CommuteRoute, type RouteStatusData } from '@/lib/types';
-import { Star, BellOff, MapPin, Clock, ChevronRight } from 'lucide-react';
+import { TRANSPORT_LABELS, type CommuteRoute, type RouteStatusData } from '@/lib/types';
+import { Star, BellOff, MapPin, Clock, ChevronRight, ArrowDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 
@@ -12,6 +12,8 @@ interface RouteCardProps {
 
 export function RouteCard({ route, status }: RouteCardProps) {
   const navigate = useNavigate();
+  const firstConnection = route.connections[0];
+  const weekdays = firstConnection?.weekdays || [];
 
   return (
     <Card
@@ -31,24 +33,36 @@ export function RouteCard({ route, status }: RouteCardProps) {
             </div>
             <div className="flex items-center gap-1.5 text-muted-foreground text-xs mb-2">
               <MapPin className="h-3 w-3 shrink-0" />
-              <span className="truncate">{route.origin}</span>
+              <span className="truncate">{route.origin.name}</span>
               <span>→</span>
-              <span className="truncate">{route.destination}</span>
+              <span className="truncate">{route.destination.name}</span>
             </div>
-            <div className="flex items-center gap-3 text-xs text-muted-foreground">
-              <div className="flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                <span>{route.preferred_departure}</span>
+
+            {/* Show connection legs */}
+            {firstConnection && (
+              <div className="space-y-1 mb-2">
+                {firstConnection.legs.map((leg, i) => (
+                  <div key={i} className="flex items-center gap-2 text-xs">
+                    <Clock className="h-3 w-3 text-muted-foreground shrink-0" />
+                    <span className="font-medium">{leg.plannedDeparture}</span>
+                    <span className="bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded text-[10px] font-semibold">
+                      {leg.lineName}
+                    </span>
+                    <span className="text-muted-foreground truncate">{leg.originName} → {leg.destinationName}</span>
+                  </div>
+                ))}
               </div>
-              <span className="text-border">|</span>
-              <span>{TRANSPORT_LABELS[route.transport_type]}</span>
-            </div>
-            <div className="flex gap-1 mt-2">
-              {route.weekdays.map(day => (
-                <span key={day} className="text-[10px] bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded-sm font-medium">
-                  {WEEKDAY_LABELS[day]}
-                </span>
-              ))}
+            )}
+
+            <div className="flex gap-1">
+              {weekdays.map(day => {
+                const labels: Record<string, string> = { mon: 'Mo', tue: 'Di', wed: 'Mi', thu: 'Do', fri: 'Fr', sat: 'Sa', sun: 'So' };
+                return (
+                  <span key={day} className="text-[10px] bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded-sm font-medium">
+                    {labels[day]}
+                  </span>
+                );
+              })}
             </div>
           </div>
           <div className="flex flex-col items-end gap-2 shrink-0">

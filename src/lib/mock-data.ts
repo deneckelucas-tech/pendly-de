@@ -1,60 +1,70 @@
-import type { CommuteRoute, RouteStatusData, Alert, RouteStatus, AlertType } from './types';
+import type { CommuteRoute, RouteStatusData, Alert, RouteStatus, AlertType, Station } from './types';
+
+const STATIONS: Record<string, Station> = {
+  '8002830': { id: '8002830', name: 'Hildesheim Ost', type: 'station', products: { regional: true, bus: true } },
+  '8000152': { id: '8000152', name: 'Hannover Hbf', type: 'station', products: { nationalExpress: true, national: true, regionalExpress: true, regional: true, suburban: true, bus: true, tram: true } },
+  '8004158': { id: '8004158', name: 'Altwarmbüchen Opelstraße', type: 'station', products: { suburban: true } },
+};
 
 const MOCK_ROUTES: CommuteRoute[] = [
   {
     id: '1',
     user_id: 'demo',
     name: 'Zur Arbeit',
-    origin: 'Berlin Hbf',
-    destination: 'Berlin Friedrichstraße',
-    preferred_departure: '07:45',
-    preferred_arrival: '08:05',
-    weekdays: ['mon', 'tue', 'wed', 'thu', 'fri'],
-    transport_type: 'sbahn',
+    origin: STATIONS['8002830'],
+    destination: STATIONS['8004158'],
+    transportTypes: ['regional', 'suburban'],
     notification_type: 'both',
     is_favorite: true,
     is_paused: false,
+    connections: [
+      {
+        id: 'c1',
+        routeId: '1',
+        weekdays: ['mon', 'tue', 'wed', 'thu', 'fri'],
+        notificationsEnabled: true,
+        legs: [
+          { originId: '8002830', originName: 'Hildesheim Ost', destinationId: '8000152', destinationName: 'Hannover Hbf', plannedDeparture: '07:39', plannedArrival: '08:10', lineName: 'RE10', productName: 'erixx' },
+          { originId: '8000152', originName: 'Hannover Hbf', destinationId: '8004158', destinationName: 'Altwarmbüchen Opelstraße', plannedDeparture: '08:18', plannedArrival: '08:32', lineName: 'S3', productName: 'S-Bahn' },
+        ],
+      },
+    ],
     created_at: new Date().toISOString(),
   },
   {
     id: '2',
     user_id: 'demo',
     name: 'Nach Hause',
-    origin: 'Berlin Friedrichstraße',
-    destination: 'Berlin Hbf',
-    preferred_departure: '17:30',
-    preferred_arrival: '17:50',
-    weekdays: ['mon', 'tue', 'wed', 'thu', 'fri'],
-    transport_type: 'sbahn',
+    origin: STATIONS['8004158'],
+    destination: STATIONS['8002830'],
+    transportTypes: ['suburban', 'regional'],
     notification_type: 'email',
     is_favorite: true,
     is_paused: false,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: '3',
-    user_id: 'demo',
-    name: 'Wochenendbesuch',
-    origin: 'Hannover Hbf',
-    destination: 'Hildesheim Hbf',
-    preferred_departure: '10:00',
-    weekdays: ['sat'],
-    transport_type: 'regional',
-    notification_type: 'push',
-    is_favorite: false,
-    is_paused: true,
+    connections: [
+      {
+        id: 'c2',
+        routeId: '2',
+        weekdays: ['mon', 'tue', 'wed', 'thu', 'fri'],
+        notificationsEnabled: true,
+        legs: [
+          { originId: '8004158', originName: 'Altwarmbüchen Opelstraße', destinationId: '8000152', destinationName: 'Hannover Hbf', plannedDeparture: '17:00', plannedArrival: '17:14', lineName: 'S3', productName: 'S-Bahn' },
+          { originId: '8000152', originName: 'Hannover Hbf', destinationId: '8002830', destinationName: 'Hildesheim Ost', plannedDeparture: '17:48', plannedArrival: '18:19', lineName: 'RE10', productName: 'erixx' },
+        ],
+      },
+    ],
     created_at: new Date().toISOString(),
   },
 ];
 
 const MOCK_MESSAGES: Record<RouteStatus, string[]> = {
-  on_time: ['S-Bahn fährt planmäßig', 'RE2 pünktlich', 'Fahrt nach Plan'],
-  minor_delay: ['RE2 ca. 8 Min. Verspätung', 'S3 verzögert sich um ca. 5 Min.', 'Kurzer Halt wegen Verspätung im Betriebsablauf'],
-  major_delay: ['RE2 ca. 25 Min. Verspätung', 'ICE 579 verspätet sich voraussichtlich um 40 Min.', 'Erhebliche Verspätung wegen Signalstörung'],
-  cancelled: ['Zug fällt aus zwischen Hannover Hbf und Hildesheim Hbf', 'S3 fällt heute aus', 'RE5 ersatzlos gestrichen'],
-  disruption: ['S-Bahn-Störung wegen Signalstörung', 'Schienenersatzverkehr aktiv', 'Streckensperrung zwischen Potsdam und Berlin'],
-  platform_change: ['Gleisänderung von Gleis 4 auf Gleis 7', 'Abfahrt heute von Gleis 12', 'Achtung: Gleisänderung!'],
-  no_data: ['Keine Echtzeitdaten verfügbar', 'Daten werden geladen...'],
+  on_time: ['S3 fährt planmäßig', 'RE10 pünktlich', 'Fahrt nach Plan'],
+  minor_delay: ['RE10 ca. 8 Min. Verspätung', 'S3 verzögert sich um ca. 5 Min.'],
+  major_delay: ['RE10 ca. 25 Min. Verspätung', 'Erhebliche Verspätung wegen Signalstörung'],
+  cancelled: ['Zug fällt aus zwischen Hannover Hbf und Hildesheim Ost', 'S3 fällt heute aus'],
+  disruption: ['S-Bahn-Störung wegen Signalstörung', 'Schienenersatzverkehr aktiv'],
+  platform_change: ['Gleisänderung von Gleis 4 auf Gleis 7', 'Abfahrt heute von Gleis 12'],
+  no_data: ['Keine Echtzeitdaten verfügbar'],
 };
 
 export function generateMockStatus(routeId: string): RouteStatusData {
@@ -79,76 +89,24 @@ export function getMockRoutes(): CommuteRoute[] {
 }
 
 export function generateMockAlerts(routes: CommuteRoute[]): Alert[] {
-  const alertTypes: AlertType[] = ['delay', 'cancellation', 'disruption', 'platform_change', 'alternative_route', 'daily_summary'];
-  const alerts: Alert[] = [
+  return [
     {
-      id: 'a1',
-      user_id: 'demo',
-      route_id: '1',
-      route_name: 'Zur Arbeit',
-      type: 'delay',
+      id: 'a1', user_id: 'demo', route_id: '1', route_name: 'Zur Arbeit', type: 'delay',
       title: 'Verspätung auf deiner Strecke',
-      message: 'S-Bahn S3 Richtung Friedrichstraße hat ca. 12 Min. Verspätung.',
-      is_read: false,
-      created_at: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
+      message: 'erixx RE10 Richtung Hannover hat ca. 12 Min. Verspätung.',
+      is_read: false, created_at: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
     },
     {
-      id: 'a2',
-      user_id: 'demo',
-      route_id: '3',
-      route_name: 'Wochenendbesuch',
-      type: 'cancellation',
-      title: 'Zugausfall',
-      message: 'RE2 zwischen Hannover Hbf und Hildesheim Hbf fällt heute aus. Nächste Alternative: 10:30 Uhr.',
-      is_read: false,
-      created_at: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
-    },
-    {
-      id: 'a3',
-      user_id: 'demo',
-      route_id: '1',
-      route_name: 'Zur Arbeit',
-      type: 'platform_change',
+      id: 'a2', user_id: 'demo', route_id: '2', route_name: 'Nach Hause', type: 'platform_change',
       title: 'Gleisänderung',
-      message: 'Dein Zug fährt heute von Gleis 7 statt Gleis 4 ab.',
-      is_read: true,
-      created_at: new Date(Date.now() - 1000 * 60 * 120).toISOString(),
+      message: 'S3 nach Hannover Hbf fährt heute von Gleis 3 statt Gleis 1 ab.',
+      is_read: false, created_at: new Date(Date.now() - 1000 * 60 * 45).toISOString(),
     },
     {
-      id: 'a4',
-      user_id: 'demo',
-      route_id: '2',
-      route_name: 'Nach Hause',
-      type: 'daily_summary',
+      id: 'a3', user_id: 'demo', route_id: '1', route_name: 'Zur Arbeit', type: 'daily_summary',
       title: 'Tägliche Zusammenfassung',
-      message: 'Deine Abendverbindung um 17:30 fährt planmäßig. Keine Störungen gemeldet.',
-      is_read: true,
-      created_at: new Date(Date.now() - 1000 * 60 * 60 * 8).toISOString(),
-    },
-    {
-      id: 'a5',
-      user_id: 'demo',
-      route_id: '1',
-      route_name: 'Zur Arbeit',
-      type: 'disruption',
-      title: 'Streckenstörung',
-      message: 'Schienenersatzverkehr zwischen Hauptbahnhof und Ostbahnhof wegen Bauarbeiten.',
-      is_read: true,
-      created_at: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
+      message: 'Deine Morgenverbindung um 07:39 fährt planmäßig. Keine Störungen gemeldet.',
+      is_read: true, created_at: new Date(Date.now() - 1000 * 60 * 60 * 8).toISOString(),
     },
   ];
-  return alerts;
 }
-
-export const GERMAN_STATIONS = [
-  'Berlin Hbf', 'Berlin Friedrichstraße', 'Berlin Ostbahnhof', 'Berlin Südkreuz',
-  'München Hbf', 'München Ost', 'München Pasing',
-  'Hamburg Hbf', 'Hamburg-Altona', 'Hamburg Dammtor',
-  'Frankfurt (Main) Hbf', 'Frankfurt (Main) Süd',
-  'Köln Hbf', 'Köln Messe/Deutz',
-  'Stuttgart Hbf', 'Hannover Hbf', 'Hildesheim Hbf',
-  'Düsseldorf Hbf', 'Dortmund Hbf', 'Essen Hbf',
-  'Leipzig Hbf', 'Dresden Hbf', 'Nürnberg Hbf',
-  'Potsdam Hbf', 'Bonn Hbf', 'Mannheim Hbf',
-  'Karlsruhe Hbf', 'Freiburg (Breisgau) Hbf', 'Augsburg Hbf',
-];

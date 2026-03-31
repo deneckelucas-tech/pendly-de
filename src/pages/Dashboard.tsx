@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import { RouteCard } from '@/components/RouteCard';
-import { StatusBadge } from '@/components/StatusBadge';
 import { EmptyState } from '@/components/EmptyState';
 import { Button } from '@/components/ui/button';
 import { getMockRoutes, generateMockAlerts, generateMockStatus } from '@/lib/mock-data';
@@ -20,11 +19,8 @@ export default function Dashboard() {
   const loadData = useCallback(() => {
     const mockRoutes = getMockRoutes();
     setRoutes(mockRoutes);
-
     const newStatuses: Record<string, RouteStatusData> = {};
-    mockRoutes.forEach(r => {
-      newStatuses[r.id] = generateMockStatus(r.id);
-    });
+    mockRoutes.forEach(r => { newStatuses[r.id] = generateMockStatus(r.id); });
     setStatuses(newStatuses);
     setAlerts(generateMockAlerts(mockRoutes));
     setLastChecked(new Date());
@@ -39,13 +35,16 @@ export default function Dashboard() {
     setRefreshing(false);
   };
 
-  const todayDay = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'][new Date().getDay()] as any;
-  const todayRoutes = routes.filter(r => r.weekdays.includes(todayDay));
+  // Determine today's routes based on connections' weekdays
+  const todayKey = (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const)[new Date().getDay()];
+  const todayRoutes = routes.filter(r =>
+    r.connections.some(c => c.weekdays.includes(todayKey))
+  );
+  const otherRoutes = routes.filter(r => !todayRoutes.includes(r));
   const unreadAlerts = alerts.filter(a => !a.is_read);
 
   return (
     <div className="px-4 pt-6">
-      {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-bold">Guten Morgen 👋</h1>
@@ -63,7 +62,6 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Important Updates */}
       {unreadAlerts.length > 0 && (
         <motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
           <h2 className="text-sm font-semibold mb-3 flex items-center gap-2">
@@ -72,11 +70,7 @@ export default function Dashboard() {
           </h2>
           <div className="space-y-2">
             {unreadAlerts.slice(0, 3).map(alert => (
-              <div
-                key={alert.id}
-                className="bg-card border rounded-xl p-3 cursor-pointer hover:shadow-sm transition-shadow"
-                onClick={() => navigate('/notifications')}
-              >
+              <div key={alert.id} className="bg-card border rounded-xl p-3 cursor-pointer hover:shadow-sm transition-shadow" onClick={() => navigate('/notifications')}>
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
                     <p className="font-medium text-xs">{alert.title}</p>
@@ -92,41 +86,28 @@ export default function Dashboard() {
         </motion.section>
       )}
 
-      {/* Today's Routes */}
       <section className="mb-6">
         <h2 className="text-sm font-semibold mb-3">Heutige Routen</h2>
         {todayRoutes.length > 0 ? (
           <div className="space-y-3">
             {todayRoutes.map((route, i) => (
-              <motion.div
-                key={route.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
-              >
+              <motion.div key={route.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
                 <RouteCard route={route} status={statuses[route.id]} />
               </motion.div>
             ))}
           </div>
         ) : (
-          <EmptyState
-            icon="route"
-            title="Keine Routen für heute"
-            description="Füge eine Route hinzu oder ändere die aktiven Tage."
-          >
-            <Button onClick={() => navigate('/onboarding')} className="font-semibold">
-              Route hinzufügen
-            </Button>
+          <EmptyState icon="route" title="Keine Routen für heute" description="Füge eine Route hinzu oder ändere die aktiven Tage.">
+            <Button onClick={() => navigate('/onboarding')} className="font-semibold">Route hinzufügen</Button>
           </EmptyState>
         )}
       </section>
 
-      {/* All Routes */}
-      {routes.length > todayRoutes.length && (
+      {otherRoutes.length > 0 && (
         <section className="mb-6">
-          <h2 className="text-sm font-semibold mb-3">Alle Routen</h2>
+          <h2 className="text-sm font-semibold mb-3">Weitere Routen</h2>
           <div className="space-y-3">
-            {routes.filter(r => !todayRoutes.includes(r)).map(route => (
+            {otherRoutes.map(route => (
               <RouteCard key={route.id} route={route} status={statuses[route.id]} />
             ))}
           </div>

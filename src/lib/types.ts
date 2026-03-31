@@ -1,6 +1,6 @@
 export type RouteStatus = 'on_time' | 'minor_delay' | 'major_delay' | 'cancelled' | 'disruption' | 'platform_change' | 'no_data';
 
-export type TransportType = 'regional' | 'long_distance' | 'sbahn' | 'ubahn' | 'tram' | 'bus' | 'mixed';
+export type TransportType = 'nationalExpress' | 'national' | 'regionalExpress' | 'regional' | 'suburban' | 'bus' | 'ferry' | 'subway' | 'tram';
 
 export type NotificationType = 'email' | 'push' | 'both';
 
@@ -8,19 +8,76 @@ export type Weekday = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
 
 export type AlertType = 'delay' | 'cancellation' | 'disruption' | 'platform_change' | 'alternative_route' | 'daily_summary';
 
+/** A verified station from the transport.rest API */
+export interface Station {
+  id: string;
+  name: string;
+  type: string;
+  products: Partial<Record<TransportType, boolean>>;
+}
+
+/** A single leg of a journey (e.g. erixx Hildesheim Ost → Hannover Hbf) */
+export interface JourneyLeg {
+  origin: Station;
+  destination: Station;
+  departure: string; // ISO datetime
+  arrival: string;
+  plannedDeparture?: string;
+  plannedArrival?: string;
+  departureDelay?: number | null; // seconds
+  arrivalDelay?: number | null;
+  departurePlatform?: string | null;
+  plannedDeparturePlatform?: string | null;
+  line?: {
+    id?: string;
+    name?: string;
+    productName?: string;
+    mode?: string;
+    operator?: { name?: string };
+  };
+  direction?: string;
+  cancelled?: boolean;
+}
+
+/** A full journey with one or more legs */
+export interface Journey {
+  id: string;
+  legs: JourneyLeg[];
+}
+
+/** A saved connection that a user wants to be notified about */
+export interface SavedConnection {
+  id: string;
+  routeId: string;
+  weekdays: Weekday[];
+  legs: SavedLeg[];
+  notificationsEnabled: boolean;
+}
+
+/** A saved leg — stores the key info to match against live data */
+export interface SavedLeg {
+  originId: string;
+  originName: string;
+  destinationId: string;
+  destinationName: string;
+  plannedDeparture: string; // HH:mm
+  plannedArrival: string;   // HH:mm
+  lineName: string;
+  productName: string;
+}
+
+/** A user's commute route (group of saved connections) */
 export interface CommuteRoute {
   id: string;
   user_id: string;
   name: string;
-  origin: string;
-  destination: string;
-  preferred_departure: string;
-  preferred_arrival?: string;
-  weekdays: Weekday[];
-  transport_type: TransportType;
+  origin: Station;
+  destination: Station;
+  transportTypes: TransportType[];
   notification_type: NotificationType;
   is_favorite: boolean;
   is_paused: boolean;
+  connections: SavedConnection[];
   created_at: string;
 }
 
@@ -69,13 +126,15 @@ export const WEEKDAY_LABELS: Record<Weekday, string> = {
 };
 
 export const TRANSPORT_LABELS: Record<TransportType, string> = {
-  regional: 'Regionalbahn',
-  long_distance: 'Fernverkehr',
-  sbahn: 'S-Bahn',
-  ubahn: 'U-Bahn',
-  tram: 'Straßenbahn',
+  nationalExpress: 'ICE/IC',
+  national: 'Fernverkehr',
+  regionalExpress: 'RE/IRE',
+  regional: 'RB/erixx',
+  suburban: 'S-Bahn',
   bus: 'Bus',
-  mixed: 'Gemischt',
+  ferry: 'Fähre',
+  subway: 'U-Bahn',
+  tram: 'Straßenbahn',
 };
 
 export const STATUS_CONFIG: Record<RouteStatus, { label: string; colorClass: string }> = {

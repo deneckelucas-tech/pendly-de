@@ -19,9 +19,7 @@ export default function RouteDetail() {
     const r = getMockRoutes().find(r => r.id === id);
     if (r) {
       setRoute(r);
-      const s = generateMockStatus(r.id);
-      setStatus(s);
-      // Generate mock history
+      setStatus(generateMockStatus(r.id));
       const hist = Array.from({ length: 5 }, () => generateMockStatus(r.id));
       hist.forEach((h, i) => {
         h.checked_at = new Date(Date.now() - (i + 1) * 1000 * 60 * 60 * 4).toISOString();
@@ -39,9 +37,11 @@ export default function RouteDetail() {
 
   if (!route) return <div className="p-4 text-center text-muted-foreground">Route nicht gefunden.</div>;
 
+  const firstConnection = route.connections[0];
+  const weekdays = firstConnection?.weekdays || [];
+
   return (
     <div className="px-4 pt-4 pb-6">
-      {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
           <ArrowLeft className="h-5 w-5" />
@@ -57,7 +57,6 @@ export default function RouteDetail() {
         </Button>
       </div>
 
-      {/* Status */}
       {status && (
         <Card className="mb-4">
           <CardContent className="p-4">
@@ -82,24 +81,18 @@ export default function RouteDetail() {
           <div className="flex items-start gap-3">
             <MapPin className="h-4 w-4 text-primary mt-0.5 shrink-0" />
             <div>
-              <p className="text-sm font-medium">{route.origin}</p>
-              <p className="text-xs text-muted-foreground">→ {route.destination}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <Clock className="h-4 w-4 text-primary shrink-0" />
-            <div>
-              <p className="text-sm">{route.preferred_departure}{route.preferred_arrival ? ` – ${route.preferred_arrival}` : ''}</p>
+              <p className="text-sm font-medium">{route.origin.name}</p>
+              <p className="text-xs text-muted-foreground">→ {route.destination.name}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             <Train className="h-4 w-4 text-primary shrink-0" />
-            <p className="text-sm">{TRANSPORT_LABELS[route.transport_type]}</p>
+            <p className="text-sm">{route.transportTypes.map(t => TRANSPORT_LABELS[t]).join(', ')}</p>
           </div>
           <div className="flex items-center gap-3">
             <Calendar className="h-4 w-4 text-primary shrink-0" />
             <div className="flex gap-1">
-              {route.weekdays.map(d => (
+              {weekdays.map(d => (
                 <span key={d} className="text-[10px] bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded-sm font-medium">
                   {WEEKDAY_LABELS[d]}
                 </span>
@@ -112,6 +105,33 @@ export default function RouteDetail() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Saved Connections */}
+      {route.connections.length > 0 && (
+        <Card className="mb-4">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm">Gespeicherte Verbindungen</CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 pt-0">
+            {route.connections.map(conn => (
+              <div key={conn.id} className="space-y-2 py-2 border-b last:border-0">
+                {conn.legs.map((leg, i) => (
+                  <div key={i} className="flex items-center gap-2 text-xs">
+                    <Clock className="h-3 w-3 text-muted-foreground shrink-0" />
+                    <span className="font-medium w-10">{leg.plannedDeparture}</span>
+                    <span className="bg-secondary text-secondary-foreground px-1.5 py-0.5 rounded text-[10px] font-semibold">
+                      {leg.lineName}
+                    </span>
+                    <span className="text-muted-foreground truncate">
+                      {leg.originName} → {leg.destinationName}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Disruption History */}
       <Card className="mb-4">
@@ -135,14 +155,14 @@ export default function RouteDetail() {
         </CardContent>
       </Card>
 
-      {/* Placeholder for live API */}
+      {/* Placeholder */}
       <Card>
         <CardContent className="p-4 text-center">
           <div className="gradient-hero-subtle rounded-lg p-4">
             <Train className="h-6 w-6 text-primary mx-auto mb-2" />
-            <p className="text-xs font-medium mb-1">Live-Daten (bald verfügbar)</p>
+            <p className="text-xs font-medium mb-1">Live-Daten via transport.rest</p>
             <p className="text-[10px] text-muted-foreground">
-              Echtzeitdaten von Deutsche Bahn & regionalen Verkehrsverbünden werden hier angezeigt.
+              Echtzeitdaten von Deutsche Bahn werden über die HAFAS API geladen.
             </p>
           </div>
         </CardContent>
