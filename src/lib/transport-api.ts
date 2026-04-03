@@ -88,6 +88,9 @@ export async function searchJourneys(
   if (options?.departure) {
     params.set('departure', options.departure);
   }
+  if (options?.arrival) {
+    params.set('arrival', options.arrival);
+  }
 
   // Set product filters
   if (options?.products) {
