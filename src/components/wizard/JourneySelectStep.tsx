@@ -28,7 +28,11 @@ export function JourneySelectStep({ origin, destination, transportTypes, onNext,
     try {
       const products: Partial<Record<TransportType, boolean>> = {};
       for (const t of ALL_TRANSPORT) products[t] = transportTypes.includes(t);
-      const results = await searchJourneys(origin.id, destination.id, { results: 8, products });
+      let results = await searchJourneys(origin.id, destination.id, { results: 8, products });
+      // If no results with filters, retry without product filters
+      if (results.length === 0) {
+        results = await searchJourneys(origin.id, destination.id, { results: 8 });
+      }
       setJourneys(results);
     } catch {
       setError(true);
@@ -94,7 +98,13 @@ export function JourneySelectStep({ origin, destination, transportTypes, onNext,
         )}
 
         {!loading && !error && journeys.length === 0 && (
-          <p className="text-sm text-muted-foreground text-center py-12">Keine Verbindungen gefunden</p>
+          <div className="text-center py-12">
+            <p className="text-sm text-muted-foreground mb-2">Keine Verbindungen gefunden</p>
+            <p className="text-xs text-muted-foreground mb-4">Versuche es mit anderen Haltestellen oder Verkehrsmitteln.</p>
+            <Button variant="outline" onClick={fetchJourneys} className="rounded-xl card-amber-border">
+              <RefreshCw className="h-4 w-4 mr-2" /> Erneut suchen
+            </Button>
+          </div>
         )}
 
         {!loading && journeys.map(journey => {
