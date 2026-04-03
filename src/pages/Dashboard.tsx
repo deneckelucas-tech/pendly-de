@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { getMockRoutes, generateMockAlerts, generateMockStatus } from '@/lib/mock-data';
 import type { CommuteRoute, RouteStatusData, Alert } from '@/lib/types';
 import { useNavigate } from 'react-router-dom';
