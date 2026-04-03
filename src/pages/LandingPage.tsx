@@ -704,7 +704,7 @@ export default function LandingPage() {
           <p className="bf-final-sub">
             Hör auf, jeden Morgen die Bahn-App zu checken.
             <br />
-            Bahnfrei macht das für dich.
+            Pendly macht das für dich.
           </p>
           <button className="bf-btn">Jetzt kostenlos herunterladen</button>
           <p className="bf-trial-note" style={{ marginTop: 12 }}>
