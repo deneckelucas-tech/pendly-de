@@ -112,7 +112,7 @@ export default function LandingPage() {
           border-bottom:1px solid var(--divider);
         }
         .lp-logo{display:flex;align-items:center;gap:10px}
-        .lp-logo img{height:46px;width:auto}
+        .lp-logo img{height:56px;width:auto}
         .lp-logo-text{
           font-family:'Bebas Neue',sans-serif;
           font-size:28px;letter-spacing:2px;color:var(--text);
