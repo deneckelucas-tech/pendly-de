@@ -667,7 +667,7 @@ export default function LandingPage() {
           <div className="bf-testimonials">
             {[
               {
-                text: "Endlich muss ich morgens nicht mehr den DB Navigator checken. Bahnfrei schreibt mir einfach wenn was schiefläuft.",
+                text: "Endlich muss ich morgens nicht mehr den DB Navigator checken. Pendly schreibt mir einfach wenn was schiefläuft.",
                 initials: "MK",
                 name: "Markus K.",
                 route: "Pendler · Frankfurt → Darmstadt",
