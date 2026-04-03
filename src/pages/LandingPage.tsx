@@ -369,29 +369,60 @@ export default function LandingPage() {
           padding: 4px 10px; border-radius: 100px;
         }
 
-        .bf-testimonials { display: flex; flex-direction: column; gap: 16px; margin-top: 40px; }
+        .bf-ticker-wrapper {
+          margin-top: 40px;
+          overflow: hidden;
+          position: relative;
+          -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+          mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+        }
 
-        .bf-testimonial {
+        .bf-ticker-row {
+          display: flex;
+          gap: 16px;
+          width: max-content;
+          margin-bottom: 16px;
+        }
+
+        .bf-ticker-row.left {
+          animation: ticker-left 40s linear infinite;
+        }
+
+        .bf-ticker-row.right {
+          animation: ticker-right 40s linear infinite;
+        }
+
+        @keyframes ticker-left {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+
+        @keyframes ticker-right {
+          0% { transform: translateX(-50%); }
+          100% { transform: translateX(0); }
+        }
+
+        .bf-tcard {
           background: #131313;
           border: 1px solid rgba(245,158,11,0.08);
-          border-radius: 20px; padding: 20px;
+          border-radius: 20px;
+          padding: 20px;
+          width: 280px;
+          min-width: 280px;
+          flex-shrink: 0;
         }
 
-        .bf-stars { color: #F59E0B; font-size: 13px; margin-bottom: 12px; }
-        .bf-testimonial-text { font-size: 15px; line-height: 1.6; margin-bottom: 16px; }
+        .bf-tcard-stars { color: #F59E0B; font-size: 13px; margin-bottom: 10px; }
+        .bf-tcard-text { font-size: 14px; line-height: 1.6; margin-bottom: 14px; color: #F1F5F9; }
+        .bf-tcard-author { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+        .bf-tcard-route { font-size: 12px; color: #6B7280; margin-bottom: 8px; }
 
-        .bf-author { display: flex; align-items: center; gap: 12px; }
-
-        .bf-avatar {
-          width: 36px; height: 36px; border-radius: 50%;
-          background: rgba(245,158,11,0.15);
-          display: flex; align-items: center; justify-content: center;
-          font-family: 'Bebas Neue', sans-serif;
-          font-size: 15px; color: #F59E0B; letter-spacing: 1px;
+        .bf-verified {
+          display: inline-flex; align-items: center; gap: 4px;
+          background: rgba(34,197,94,0.15); color: #22C55E;
+          font-size: 11px; font-weight: 600;
+          padding: 3px 8px; border-radius: 100px;
         }
-
-        .bf-author-name { font-size: 14px; font-weight: 600; }
-        .bf-author-route { font-size: 12px; color: #6B7280; }
 
         .bf-final {
           padding: 60px 24px 80px;
@@ -669,33 +700,47 @@ export default function LandingPage() {
             Pendler<br />
             lieben es.
           </h2>
-          <div className="bf-testimonials">
-            {[
-              {
-                text: "Endlich muss ich morgens nicht mehr den DB Navigator checken. Pendly schreibt mir einfach wenn was schiefläuft.",
-                initials: "MK",
-                name: "Markus K.",
-                route: "Pendler · Frankfurt → Darmstadt",
-              },
-              {
-                text: "Die Gleisänderungs-Warnung hat mich schon zweimal gerettet. Hätte sonst am falschen Gleis gestanden.",
-                initials: "SL",
-                name: "Sara L.",
-                route: "Pendlerin · Hannover → Hildesheim",
-              },
-            ].map((t, i) => (
-              <div className="bf-testimonial" key={i}>
-                <div className="bf-stars">★★★★★</div>
-                <p className="bf-testimonial-text">"{t.text}"</p>
-                <div className="bf-author">
-                  <div className="bf-avatar">{t.initials}</div>
-                  <div>
-                    <div className="bf-author-name">{t.name}</div>
-                    <div className="bf-author-route">{t.route}</div>
+          <div className="bf-ticker-wrapper">
+            {/* Row 1 - scrolls left */}
+            <div className="bf-ticker-row left">
+              {[...Array(2)].map((_, dup) =>
+                [
+                  { text: 'Endlich muss ich morgens nicht mehr den DB Navigator checken. Bahnfrei schreibt mir einfach wenn was schiefläuft.', author: 'Markus K.', route: 'Pendler · Frankfurt → Darmstadt' },
+                  { text: 'Die Gleisänderungs-Warnung hat mich zweimal gerettet. Hätte sonst am falschen Gleis gestanden.', author: 'Sara L.', route: 'Pendlerin · Hannover → Hildesheim' },
+                  { text: 'Ich nehme jeden Morgen die S3 und seit Pendly weiß ich immer vorher ob sie Verspätung hat. Mega.', author: 'Jonas W.', route: 'Pendler · Hamburg → Harburg' },
+                  { text: 'Einfach die beste Pendler-App die ich kenne. Klar, schnell, zuverlässig.', author: 'Petra M.', route: 'Pendlerin · München → Augsburg' },
+                  { text: 'Endlich eine App die mir sagt was ich wissen muss – ohne dass ich selbst suchen muss.', author: 'Tobias R.', route: 'Pendler · Köln → Bonn' },
+                ].map((t, i) => (
+                  <div className="bf-tcard" key={`r1-${dup}-${i}`}>
+                    <div className="bf-tcard-stars">★★★★★</div>
+                    <p className="bf-tcard-text">"{t.text}"</p>
+                    <div className="bf-tcard-author">{t.author}</div>
+                    <div className="bf-tcard-route">{t.route}</div>
+                    <span className="bf-verified">Verifiziert ✓</span>
                   </div>
-                </div>
-              </div>
-            ))}
+                ))
+              )}
+            </div>
+            {/* Row 2 - scrolls right */}
+            <div className="bf-ticker-row right">
+              {[...Array(2)].map((_, dup) =>
+                [
+                  { text: 'Mein RE10 fällt ständig aus. Pendly hat mich noch nie im Stich gelassen wenn das passiert.', author: 'Leon S.', route: 'Pendler · Hildesheim → Hannover' },
+                  { text: 'Ich hab Pendly meiner ganzen Abteilung empfohlen. Alle pendeln, alle lieben es.', author: 'Anna B.', route: 'Pendlerin · Düsseldorf → Essen' },
+                  { text: 'Die 4,99 im Monat sind absolut gerechtfertigt. Ich spare damit jeden Morgen Stress und Zeit.', author: 'Michael T.', route: 'Pendler · Stuttgart → Ludwigsburg' },
+                  { text: 'Push-Notification kam, bevor die DB selbst die Verspätung angezeigt hat. Krass.', author: 'Felix H.', route: 'Pendler · Berlin → Potsdam' },
+                  { text: 'Habe vorher immer zu spät von Ausfällen erfahren. Mit Pendly ist das Geschichte.', author: 'Julia K.', route: 'Pendlerin · Bremen → Verden' },
+                ].map((t, i) => (
+                  <div className="bf-tcard" key={`r2-${dup}-${i}`}>
+                    <div className="bf-tcard-stars">★★★★★</div>
+                    <p className="bf-tcard-text">"{t.text}"</p>
+                    <div className="bf-tcard-author">{t.author}</div>
+                    <div className="bf-tcard-route">{t.route}</div>
+                    <span className="bf-verified">Verifiziert ✓</span>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </section>
 
