@@ -50,9 +50,13 @@ export default function LandingPage() {
         }
 
         .bf-logo {
-          display: flex; align-items: center; gap: 8px;
+          display: flex; align-items: center; gap: 10px;
         }
-        .bf-logo img { height: 32px; width: auto; }
+        .bf-logo img { height: 38px; width: auto; }
+        .bf-logo-text {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 24px; letter-spacing: 1px; color: #F1F5F9;
+        }
 
         .bf-nav-cta {
           background: #F59E0B; color: #000;
