@@ -64,7 +64,7 @@ const MOCK_MESSAGES: Record<RouteStatus, string[]> = {
   cancelled: ['Zug fällt aus zwischen Hannover Hbf und Hildesheim Ost', 'S3 fällt heute aus'],
   disruption: ['S-Bahn-Störung wegen Signalstörung', 'Schienenersatzverkehr aktiv'],
   platform_change: ['Gleisänderung von Gleis 4 auf Gleis 7', 'Abfahrt heute von Gleis 12'],
-  no_data: ['Keine Echtzeitdaten verfügbar'],
+  no_data: ['Laut Fahrplan planmäßig – keine Echtzeitdaten verfügbar'],
 };
 
 export function generateMockStatus(routeId: string): RouteStatusData {
