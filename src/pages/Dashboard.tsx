@@ -8,6 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
+import { DebugPanel } from '@/components/DebugPanel';
 
 function getStatusLabel(status: string, delayMinutes?: number) {
   if (status === 'on_time') return 'Pünktlich';
