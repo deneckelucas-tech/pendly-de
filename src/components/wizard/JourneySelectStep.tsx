@@ -16,20 +16,23 @@ interface JourneySelectStepProps {
   onManual: () => void;
 }
 
-export function JourneySelectStep({ origin, destination, transportTypes, arrivalTime, onNext, onBack, onManual }: JourneySelectStepProps) {
+export function JourneySelectStep({ origin, destination, transportTypes, arrivalTime: initialArrivalTime, onNext, onBack, onManual }: JourneySelectStepProps) {
   const [journeys, setJourneys] = useState<Journey[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [localArrivalTime, setLocalArrivalTime] = useState(initialArrivalTime || '08:00');
+  const [hasSearched, setHasSearched] = useState(false);
 
   const fetchJourneys = useCallback(async () => {
     setLoading(true);
     setError(false);
+    setHasSearched(true);
     try {
       const params: any = { results: 8 };
-      if (arrivalTime) {
+      if (localArrivalTime) {
         const now = new Date();
-        const [h, m] = arrivalTime.split(':').map(Number);
+        const [h, m] = localArrivalTime.split(':').map(Number);
         const arr = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m);
         if (arr < now) arr.setDate(arr.getDate() + 1);
         params.arrival = arr.toISOString();
@@ -51,9 +54,7 @@ export function JourneySelectStep({ origin, destination, transportTypes, arrival
     } finally {
       setLoading(false);
     }
-  }, [origin.id, destination.id, transportTypes, arrivalTime]);
-
-  useEffect(() => { fetchJourneys(); }, [fetchJourneys]);
+  }, [origin.id, destination.id, transportTypes, localArrivalTime]);
 
   const toggleJourney = (id: string) => {
     setSelected(prev => {
