@@ -37,8 +37,21 @@ export default function Settings() {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await signOut();
     navigate('/');
+  };
+
+  const handleManageSubscription = async () => {
+    setPortalLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('customer-portal');
+      if (error) throw error;
+      if (data?.url) window.open(data.url, '_blank');
+    } catch (err) {
+      console.error('Portal error:', err);
+    } finally {
+      setPortalLoading(false);
+    }
   };
 
   return (
