@@ -289,6 +289,7 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, onSave, 
               key={`${dep.tripId}-${i}`}
               onClick={() => addLeg(dep)}
               className="w-full text-left px-4 py-3.5 rounded-2xl hover:bg-card transition-colors"
+              style={{ borderBottom: '1px solid #1A1A1A' }}
             >
               <div className="flex items-center gap-3">
                 <span className="font-display text-xl text-foreground w-14">{formatTime(dep.when)}</span>
@@ -298,8 +299,11 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, onSave, 
                 >
                   {dep.line.name}
                 </span>
-                <ArrowRight className="h-3 w-3 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground truncate flex-1">{dep.direction}</span>
+              </div>
+              <div className="flex items-center gap-1.5 mt-1 ml-14">
+                <span className="text-xs text-foreground font-medium">{currentOrigin.name.split(',')[0]}</span>
+                <ArrowRight className="h-3 w-3 text-primary" />
+                <span className="text-xs text-muted-foreground truncate">{dep.direction}</span>
               </div>
               {dep.platform && <p className="text-[10px] text-muted-foreground mt-0.5 ml-14">Gleis {dep.platform}</p>}
             </button>
