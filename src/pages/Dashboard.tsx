@@ -48,6 +48,8 @@ export default function Dashboard() {
   const [routes, setRoutes] = useState<CommuteRoute[]>([]);
   const [statuses, setStatuses] = useState<Record<string, RouteStatusData>>({});
   const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [secondsAgo, setSecondsAgo] = useState(0);
 
   const loadData = useCallback(() => {
     const mockRoutes = getMockRoutes();
@@ -56,9 +58,25 @@ export default function Dashboard() {
     mockRoutes.forEach(r => { newStatuses[r.id] = generateMockStatus(r.id); });
     setStatuses(newStatuses);
     setAlerts(generateMockAlerts(mockRoutes));
+    setLastUpdated(new Date());
   }, []);
 
-  useEffect(() => { loadData(); }, [loadData]);
+  // Initial load + 30s polling
+  useEffect(() => {
+    loadData();
+    const interval = setInterval(loadData, 30_000);
+    return () => clearInterval(interval);
+  }, [loadData]);
+
+  // Tick the "seconds ago" counter every second
+  useEffect(() => {
+    const tick = setInterval(() => {
+      if (lastUpdated) {
+        setSecondsAgo(Math.floor((Date.now() - lastUpdated.getTime()) / 1000));
+      }
+    }, 1000);
+    return () => clearInterval(tick);
+  }, [lastUpdated]);
 
   const todayKey = (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const)[new Date().getDay()];
   const todayRoutes = routes.filter(r =>
