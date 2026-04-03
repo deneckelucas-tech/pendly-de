@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { RouteCard } from '@/components/RouteCard';
 import { EmptyState } from '@/components/EmptyState';
-import { Button } from '@/components/ui/button';
 import { getMockRoutes, generateMockStatus } from '@/lib/mock-data';
 import type { CommuteRoute, RouteStatusData } from '@/lib/types';
 import { useNavigate } from 'react-router-dom';
@@ -21,17 +20,20 @@ export default function ManageRoutes() {
   }, []);
 
   return (
-    <div className="px-4 pt-4 pb-6">
+    <div className="px-5 pt-5 pb-6">
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')}>
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-          <h1 className="font-bold text-lg">Meine Routen</h1>
+          <button onClick={() => navigate('/dashboard')} className="p-2 -ml-2 rounded-full hover:bg-secondary/50 transition-colors">
+            <ArrowLeft className="h-5 w-5 text-muted-foreground" />
+          </button>
+          <h1 className="font-display text-2xl text-foreground">MEINE ROUTEN</h1>
         </div>
-        <Button size="sm" onClick={() => navigate('/route-setup')} className="gap-1 font-semibold rounded-xl">
+        <button
+          onClick={() => navigate('/route-setup')}
+          className="h-10 px-4 rounded-full bg-primary text-primary-foreground font-bold text-xs flex items-center gap-1.5"
+        >
           <Plus className="h-4 w-4" /> Neue Route
-        </Button>
+        </button>
       </div>
 
       {routes.length > 0 ? (
@@ -42,9 +44,12 @@ export default function ManageRoutes() {
         </div>
       ) : (
         <EmptyState icon="route" title="Noch keine Routen" description="Füge deine erste Pendelroute hinzu.">
-          <Button onClick={() => navigate('/route-setup')} className="font-semibold rounded-xl">
+          <button
+            onClick={() => navigate('/route-setup')}
+            className="h-14 px-8 rounded-full bg-primary text-primary-foreground font-bold text-sm"
+          >
             Route hinzufügen
-          </Button>
+          </button>
         </EmptyState>
       )}
     </div>
