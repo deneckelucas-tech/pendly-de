@@ -526,7 +526,7 @@ export default function LandingPage() {
             als Erster.
           </h2>
           <p className="bf-section-sub">
-            Kein manuelles Checken mehr. Bahnfrei überwacht deine Strecken rund
+            Kein manuelles Checken mehr. Pendly überwacht deine Strecken rund
             um die Uhr.
           </p>
           <div className="bf-features">
