@@ -184,8 +184,9 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, onSave, 
       {/* Current search */}
       <div className="space-y-3 mb-4">
         <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium">
-          {legs.length === 0 ? 'Erste Verbindung' : 'Umstieg hinzufügen'}
+          {legs.length === 0 ? 'Erste Verbindung wählen' : 'Nächsten Umstieg wählen'}
         </p>
+        <p className="text-xs text-muted-foreground">Ab: <span className="text-foreground font-medium">{currentOrigin.name.split(',')[0]}</span> → Richtung <span className="text-foreground font-medium">{finalDestination.name.split(',')[0]}</span></p>
 
         <button
           onClick={() => setShowStationSearch(!showStationSearch)}
