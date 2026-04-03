@@ -20,12 +20,13 @@ interface ManualJourneyBuilderProps {
 export function ManualJourneyBuilder({ initialOrigin, finalDestination, onSave, onBack }: ManualJourneyBuilderProps) {
   const [legs, setLegs] = useState<ManualLeg[]>([]);
   const [currentOrigin, setCurrentOrigin] = useState<Station>(initialOrigin);
+  const [currentDirection, setCurrentDirection] = useState<Station>(finalDestination);
   const [departureTime, setDepartureTime] = useState('07:00');
   const [departures, setDepartures] = useState<Departure[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [filterText, setFilterText] = useState('');
-  const [showStationSearch, setShowStationSearch] = useState(false);
+  const [editingField, setEditingField] = useState<'origin' | 'direction' | null>(null);
   const [stationQuery, setStationQuery] = useState('');
   const [stationResults, setStationResults] = useState<Station[]>([]);
   const [stationLoading, setStationLoading] = useState(false);
@@ -57,8 +58,12 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, onSave, 
   }, []);
 
   const selectStation = (station: Station) => {
-    setCurrentOrigin(station);
-    setShowStationSearch(false);
+    if (editingField === 'direction') {
+      setCurrentDirection(station);
+    } else {
+      setCurrentOrigin(station);
+    }
+    setEditingField(null);
     setStationQuery('');
     setStationResults([]);
     setDepartures([]);
@@ -76,7 +81,7 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, onSave, 
     setSearched(false);
     setFilterText('');
     // After adding a leg, auto-open station search so user can change intermediate stop
-    setShowStationSearch(true);
+    setEditingField('origin');
     if (dep.when) {
       const arr = new Date(dep.when);
       arr.setMinutes(arr.getMinutes() + 30);
@@ -121,6 +126,15 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, onSave, 
   };
 
   const filteredDepartures = departures.filter(dep => {
+    // Filter by direction station name if set (fuzzy match on direction string)
+    const dirName = currentDirection.name.split(',')[0].toLowerCase();
+    if (dirName && !dep.direction.toLowerCase().includes(dirName)) {
+      // Also check if the line passes through the direction (partial match)
+      const lineDir = dep.direction.toLowerCase();
+      const dirParts = dirName.split(/[\s-]+/);
+      const dirMatch = dirParts.some(part => part.length > 2 && lineDir.includes(part));
+      if (!dirMatch) return false;
+    }
     if (!filterText) return true;
     const q = filterText.toLowerCase();
     return dep.direction.toLowerCase().includes(q) || dep.line.name.toLowerCase().includes(q) || dep.line.productName.toLowerCase().includes(q);
@@ -188,33 +202,53 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, onSave, 
         <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium">
           {legs.length === 0 ? 'Erste Verbindung wählen' : 'Nächsten Umstieg wählen'}
         </p>
-        <p className="text-xs text-muted-foreground mb-1">Ab: <span className="text-foreground font-medium">{currentOrigin.name.split(',')[0]}</span> → Richtung <span className="text-foreground font-medium">{finalDestination.name.split(',')[0]}</span></p>
 
-        {/* Umstiegsbahnhof: current origin with change option */}
-        <div className="rounded-[20px] p-3 space-y-2" style={{ backgroundColor: '#111111', border: '1px solid #1F1F1F' }}>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <MapPin className="h-4 w-4 text-primary shrink-0" />
-              <div>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{legs.length === 0 ? 'Startbahnhof' : 'Umstieg an'}</p>
-                <p className="text-sm font-semibold text-foreground">{currentOrigin.name.split(',')[0]}</p>
+        {/* Two-field station picker: Ab + Richtung */}
+        <div className="rounded-[20px] p-3 space-y-0" style={{ backgroundColor: '#111111', border: '1px solid #1F1F1F' }}>
+          {/* Ab (origin) */}
+          <div className="flex items-center justify-between py-2">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <div className="h-2.5 w-2.5 rounded-full bg-primary shrink-0" />
+              <div className="min-w-0">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Ab</p>
+                <p className="text-sm font-semibold text-foreground truncate">{currentOrigin.name.split(',')[0]}</p>
               </div>
             </div>
             <button
-              onClick={() => { setShowStationSearch(!showStationSearch); setStationQuery(''); setStationResults([]); }}
-              className="text-xs text-primary font-medium px-3 py-1.5 rounded-full hover:bg-primary/10 transition-colors"
+              onClick={() => { setEditingField(editingField === 'origin' ? null : 'origin'); setStationQuery(''); setStationResults([]); }}
+              className="text-xs text-primary font-medium px-3 py-1.5 rounded-full hover:bg-primary/10 transition-colors shrink-0"
             >
-              {showStationSearch ? 'Schließen' : 'Ändern'}
+              {editingField === 'origin' ? 'Schließen' : 'Ändern'}
             </button>
           </div>
 
-          {showStationSearch && (
+          <div className="h-px" style={{ backgroundColor: '#1A1A1A' }} />
+
+          {/* Richtung (direction/destination) */}
+          <div className="flex items-center justify-between py-2">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
+              <div className="min-w-0">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Richtung</p>
+                <p className="text-sm font-semibold text-foreground truncate">{currentDirection.name.split(',')[0]}</p>
+              </div>
+            </div>
+            <button
+              onClick={() => { setEditingField(editingField === 'direction' ? null : 'direction'); setStationQuery(''); setStationResults([]); }}
+              className="text-xs text-primary font-medium px-3 py-1.5 rounded-full hover:bg-primary/10 transition-colors shrink-0"
+            >
+              {editingField === 'direction' ? 'Schließen' : 'Ändern'}
+            </button>
+          </div>
+
+          {/* Search overlay for whichever field is being edited */}
+          {editingField && (
             <div className="space-y-2 pt-2" style={{ borderTop: '1px solid #1A1A1A' }}>
               <input
                 type="text"
                 value={stationQuery}
                 onChange={e => handleStationSearch(e.target.value)}
-                placeholder="Anderen Umstiegsbahnhof suchen..."
+                placeholder={editingField === 'origin' ? 'Abfahrtsbahnhof suchen...' : 'Zielbahnhof / Richtung suchen...'}
                 autoFocus
                 className="w-full h-12 rounded-2xl px-4 text-sm text-foreground placeholder:text-muted-foreground outline-none border border-transparent focus:border-primary"
                 style={{ backgroundColor: '#1A1A1A' }}
@@ -235,11 +269,6 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, onSave, 
                   </button>
                 ))}
               </div>
-              {!showStationSearch && legs.length > 0 && (
-                <p className="text-[10px] text-muted-foreground text-center py-1">
-                  Oder übernimm den vorgeschlagenen Bahnhof und suche direkt Abfahrten
-                </p>
-              )}
             </div>
           )}
         </div>
@@ -295,7 +324,10 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, onSave, 
         )}
 
         {!loading && searched && filteredDepartures.length === 0 && departures.length > 0 && (
-          <p className="text-sm text-muted-foreground text-center py-8">Kein Treffer für "{filterText}"</p>
+          <div className="text-center py-8">
+            <p className="text-sm text-muted-foreground mb-2">Keine Abfahrten Richtung {currentDirection.name.split(',')[0]}</p>
+            <p className="text-xs text-muted-foreground">Ändere die Richtung oben oder nutze den Filter</p>
+          </div>
         )}
 
         {!loading && filteredDepartures.map((dep, i) => {
