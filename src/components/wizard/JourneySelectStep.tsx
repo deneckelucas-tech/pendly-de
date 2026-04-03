@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ArrowLeft, Check, RefreshCw, Wrench, ArrowRight, Repeat } from 'lucide-react';
+import { ArrowLeft, Check, RefreshCw, Wrench, ArrowRight, Repeat, Footprints, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { searchJourneys, formatTime, formatDelay } from '@/lib/transport-api';
@@ -72,28 +72,41 @@ export function JourneySelectStep({ origin, destination, transportTypes, arrival
     return `${Math.floor(mins / 60)}h ${mins % 60}m`;
   };
 
+  const getWalkingLegs = (journey: Journey) => {
+    return journey.legs.filter(l => !l.line || l.line.productName === 'walking' || l.line.mode === 'walking');
+  };
+
+  const getPrimaryColor = (journey: Journey): string => {
+    const firstTransitLeg = journey.legs.find(l => l.line && l.line.productName !== 'walking');
+    if (!firstTransitLeg?.line) return '#374151';
+    return getLineBadgeStyle(firstTransitLeg.line.productName || '', firstTransitLeg.line.name || '').bg;
+  };
+
   const selectedJourneys = journeys.filter(j => selected.has(j.id));
+  const originShort = origin.name.split(',')[0];
+  const destShort = destination.name.split(',')[0];
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: 60 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -60 }}
-      transition={{ duration: 0.3, ease: 'easeOut' }}
-      className="flex flex-col min-h-[calc(100vh-3rem)]"
-    >
+    <div className="flex flex-col min-h-[calc(100vh-3rem)]">
       {/* Nav */}
-      <div className="flex items-center gap-3 mb-6">
+      <div className="flex items-center gap-3 mb-5">
         <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-secondary/50 transition-colors">
           <ArrowLeft className="h-5 w-5 text-muted-foreground" />
         </button>
       </div>
 
-      <h1 className="font-display text-4xl tracking-tight text-foreground mb-1">WÄHLE DEINE ZÜGE</h1>
-      <p className="text-sm text-muted-foreground mb-1">
-        {origin.name.split(',')[0]} → {destination.name.split(',')[0]}
-      </p>
-      <p className="text-xs text-muted-foreground mb-6">Wähle alle Verbindungen die du regelmäßig nimmst</p>
+      <h1 className="font-display tracking-tight text-foreground mb-4" style={{ fontSize: 44, lineHeight: 1 }}>WÄHLE DEINE ZÜGE</h1>
+
+      {/* Journey map strip */}
+      <div className="flex items-center gap-2 mb-5 px-1">
+        <div className="h-2.5 w-2.5 rounded-full bg-primary shrink-0" />
+        <span className="text-xs font-semibold text-foreground truncate">{originShort}</span>
+        <div className="flex-1 h-px bg-primary/30 mx-1" />
+        <span className="text-xs font-semibold text-foreground truncate">{destShort}</span>
+        <div className="h-2.5 w-2.5 rounded-full bg-primary shrink-0" />
+      </div>
+
+      <p className="text-xs text-muted-foreground mb-5">Wähle alle Verbindungen die du regelmäßig nimmst</p>
 
       <div className="flex-1 space-y-3 overflow-y-auto pb-28">
         {loading && (
@@ -125,7 +138,10 @@ export function JourneySelectStep({ origin, destination, transportTypes, arrival
           const lastLeg = journey.legs[journey.legs.length - 1];
           if (!firstLeg || !lastLeg) return null;
 
-          const transfers = journey.legs.length - 1;
+          const transfers = journey.legs.filter(l => l.line && l.line.productName !== 'walking').length - 1;
+          const isDirect = transfers <= 0;
+          const walkLegs = getWalkingLegs(journey);
+          const primaryColor = getPrimaryColor(journey);
 
           return (
             <button
@@ -133,14 +149,12 @@ export function JourneySelectStep({ origin, destination, transportTypes, arrival
               onClick={() => toggleJourney(journey.id)}
               className={cn(
                 'w-full text-left p-4 rounded-[20px] transition-all relative',
-                'active:scale-[0.99]',
-                isSelected
-                  ? 'border border-primary'
-                  : 'border hover:border-primary/30'
+                'active:scale-[0.99]'
               )}
               style={{
                 backgroundColor: isSelected ? 'rgba(245,158,11,0.04)' : '#111111',
-                borderColor: isSelected ? '#F59E0B' : '#1F1F1F',
+                border: isSelected ? '1px solid #F59E0B' : '1px solid #1F1F1F',
+                borderLeft: `3px solid ${isSelected ? '#F59E0B' : primaryColor}`,
               }}
             >
               {/* Selected checkmark */}
@@ -151,48 +165,76 @@ export function JourneySelectStep({ origin, destination, transportTypes, arrival
               )}
 
               {/* Times row */}
-              <div className="flex items-center gap-2 mb-1">
-                <span className="font-display text-4xl text-foreground leading-none">{formatTime(firstLeg.departure)}</span>
-                <ArrowRight className="h-4 w-4 text-primary shrink-0 mx-1" />
-                <span className="font-display text-4xl text-foreground leading-none">{formatTime(lastLeg.arrival)}</span>
+              <div className="flex items-center justify-between mb-1 pr-8">
+                <span className="font-display text-foreground leading-none" style={{ fontSize: 40 }}>{formatTime(firstLeg.departure)}</span>
+                <ArrowRight className="h-4 w-4 text-primary shrink-0" />
+                <span className="font-display text-foreground leading-none" style={{ fontSize: 40 }}>{formatTime(lastLeg.arrival)}</span>
               </div>
 
-              {/* Duration */}
-              <p className="text-xs text-muted-foreground text-right mb-3 -mt-1">{getDuration(journey)}</p>
+              {/* Duration right-aligned */}
+              <p className="text-xs text-muted-foreground text-right mb-3">{getDuration(journey)}</p>
 
               {/* Line badges */}
               <div className="flex items-center gap-1.5 flex-wrap mb-2">
-                {journey.legs.map((leg, i) => {
-                  const style = getLineBadgeStyle(
-                    leg.line?.productName || '',
-                    leg.line?.name || ''
-                  );
+                {journey.legs
+                  .filter(l => l.line && l.line.productName !== 'walking')
+                  .map((leg, i) => {
+                    const style = getLineBadgeStyle(leg.line?.productName || '', leg.line?.name || '');
+                    return (
+                      <span
+                        key={i}
+                        style={{
+                          backgroundColor: style.bg,
+                          color: style.text,
+                          borderRadius: 6,
+                          padding: '6px 10px',
+                          fontSize: 12,
+                          fontWeight: 700,
+                          lineHeight: 1,
+                        }}
+                      >
+                        {leg.line?.name || leg.line?.productName || '?'}
+                      </span>
+                    );
+                  })}
+                {isDirect && (
+                  <span
+                    style={{
+                      backgroundColor: '#16A34A',
+                      color: '#FFFFFF',
+                      borderRadius: 6,
+                      padding: '6px 10px',
+                      fontSize: 11,
+                      fontWeight: 700,
+                      lineHeight: 1,
+                    }}
+                  >
+                    Direktverbindung
+                  </span>
+                )}
+              </div>
+
+              {/* Bottom row: transfers + walking */}
+              <div className="flex items-center gap-3 flex-wrap">
+                {!isDirect && (
+                  <div className="flex items-center gap-1">
+                    <Repeat className="h-3 w-3 text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">{transfers}x Umstieg</span>
+                  </div>
+                )}
+                {walkLegs.map((wl, i) => {
+                  const walkMins = wl.departure && wl.arrival
+                    ? Math.round((new Date(wl.arrival).getTime() - new Date(wl.departure).getTime()) / 60000)
+                    : 0;
+                  if (walkMins <= 0) return null;
                   return (
-                    <span
-                      key={i}
-                      className="font-bold text-xs"
-                      style={{
-                        backgroundColor: style.bg,
-                        color: style.text,
-                        borderRadius: 6,
-                        padding: '6px 10px',
-                        fontSize: 12,
-                        fontWeight: 700,
-                      }}
-                    >
-                      {leg.line?.name || leg.line?.productName || '?'}
-                    </span>
+                    <div key={`walk-${i}`} className="flex items-center gap-1">
+                      <Footprints className="h-3 w-3 text-muted-foreground" />
+                      <span className="text-xs text-muted-foreground">{walkMins} Min Fußweg</span>
+                    </div>
                   );
                 })}
               </div>
-
-              {/* Transfers */}
-              {transfers > 0 && (
-                <div className="flex items-center gap-1.5">
-                  <Repeat className="h-3 w-3 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">{transfers}x Umstieg</span>
-                </div>
-              )}
 
               {firstLeg.cancelled && <span className="text-xs font-semibold text-destructive mt-1 block">Ausfall</span>}
             </button>
@@ -214,7 +256,7 @@ export function JourneySelectStep({ origin, destination, transportTypes, arrival
       {/* Bottom action bar */}
       <div
         className="fixed bottom-0 left-0 right-0 px-5 py-4"
-        style={{ backgroundColor: '#000000', borderTop: '1px solid #1A1A1A' }}
+        style={{ backgroundColor: '#000000', borderTop: '1px solid #1A1A1A', paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}
       >
         <div className="max-w-lg mx-auto flex items-center justify-between">
           <p className="text-xs text-muted-foreground">
@@ -237,6 +279,6 @@ export function JourneySelectStep({ origin, destination, transportTypes, arrival
           </button>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
