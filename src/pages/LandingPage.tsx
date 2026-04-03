@@ -49,10 +49,9 @@ export default function LandingPage() {
         }
 
         .bf-logo {
-          font-family: 'Bebas Neue', sans-serif;
-          font-size: 26px; letter-spacing: 1px; color: #F1F5F9;
+          display: flex; align-items: center; gap: 8px;
         }
-        .bf-logo span { color: #F59E0B; }
+        .bf-logo img { height: 32px; width: auto; }
 
         .bf-nav-cta {
           background: #F59E0B; color: #000;
@@ -447,7 +446,7 @@ export default function LandingPage() {
         {/* NAV */}
         <nav className="bf-nav">
           <div className="bf-logo">
-            BAHN<span>FREI</span>
+            <img src="/lovable-uploads/5C4500CB-B0E1-418B-84A5-E1972203A123.png" alt="Pendly Logo" />
           </div>
           <button className="bf-nav-cta">Kostenlos testen</button>
         </nav>
