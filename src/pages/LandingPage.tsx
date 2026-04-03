@@ -369,29 +369,60 @@ export default function LandingPage() {
           padding: 4px 10px; border-radius: 100px;
         }
 
-        .bf-testimonials { display: flex; flex-direction: column; gap: 16px; margin-top: 40px; }
+        .bf-ticker-wrapper {
+          margin-top: 40px;
+          overflow: hidden;
+          position: relative;
+          -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+          mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+        }
 
-        .bf-testimonial {
+        .bf-ticker-row {
+          display: flex;
+          gap: 16px;
+          width: max-content;
+          margin-bottom: 16px;
+        }
+
+        .bf-ticker-row.left {
+          animation: ticker-left 40s linear infinite;
+        }
+
+        .bf-ticker-row.right {
+          animation: ticker-right 40s linear infinite;
+        }
+
+        @keyframes ticker-left {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+
+        @keyframes ticker-right {
+          0% { transform: translateX(-50%); }
+          100% { transform: translateX(0); }
+        }
+
+        .bf-tcard {
           background: #131313;
           border: 1px solid rgba(245,158,11,0.08);
-          border-radius: 20px; padding: 20px;
+          border-radius: 20px;
+          padding: 20px;
+          width: 280px;
+          min-width: 280px;
+          flex-shrink: 0;
         }
 
-        .bf-stars { color: #F59E0B; font-size: 13px; margin-bottom: 12px; }
-        .bf-testimonial-text { font-size: 15px; line-height: 1.6; margin-bottom: 16px; }
+        .bf-tcard-stars { color: #F59E0B; font-size: 13px; margin-bottom: 10px; }
+        .bf-tcard-text { font-size: 14px; line-height: 1.6; margin-bottom: 14px; color: #F1F5F9; }
+        .bf-tcard-author { font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+        .bf-tcard-route { font-size: 12px; color: #6B7280; margin-bottom: 8px; }
 
-        .bf-author { display: flex; align-items: center; gap: 12px; }
-
-        .bf-avatar {
-          width: 36px; height: 36px; border-radius: 50%;
-          background: rgba(245,158,11,0.15);
-          display: flex; align-items: center; justify-content: center;
-          font-family: 'Bebas Neue', sans-serif;
-          font-size: 15px; color: #F59E0B; letter-spacing: 1px;
+        .bf-verified {
+          display: inline-flex; align-items: center; gap: 4px;
+          background: rgba(34,197,94,0.15); color: #22C55E;
+          font-size: 11px; font-weight: 600;
+          padding: 3px 8px; border-radius: 100px;
         }
-
-        .bf-author-name { font-size: 14px; font-weight: 600; }
-        .bf-author-route { font-size: 12px; color: #6B7280; }
 
         .bf-final {
           padding: 60px 24px 80px;
