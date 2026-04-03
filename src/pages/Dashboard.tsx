@@ -84,6 +84,7 @@ export default function Dashboard() {
 
   return (
     <div className="px-4 pt-5 pb-4 min-h-screen">
+      <DebugPanel />
       {/* Header */}
       <motion.header
         initial={{ opacity: 0, y: -10 }}
