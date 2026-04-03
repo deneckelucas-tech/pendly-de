@@ -49,9 +49,11 @@ export function StationSearch({ label, placeholder = 'Bahnhof suchen...', value,
 
     debounceRef.current = setTimeout(async () => {
       setLoading(true);
+      setError(false);
       const stations = await searchStations(q);
       setResults(stations);
       setOpen(stations.length > 0);
+      if (stations.length === 0 && q.length >= 2) setError(true);
       setLoading(false);
     }, 300);
   };
