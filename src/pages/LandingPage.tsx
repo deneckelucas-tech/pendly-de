@@ -452,6 +452,7 @@ export default function LandingPage() {
         <nav className="bf-nav">
           <div className="bf-logo">
             <img src={pendlyLogo} alt="Pendly Logo" />
+            <span className="bf-logo-text">Pendly</span>
           </div>
           <button className="bf-nav-cta">Kostenlos testen</button>
         </nav>
