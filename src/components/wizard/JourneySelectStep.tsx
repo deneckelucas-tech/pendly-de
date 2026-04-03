@@ -107,7 +107,31 @@ export function JourneySelectStep({ origin, destination, transportTypes, arrival
         <div className="h-2.5 w-2.5 rounded-full bg-primary shrink-0" />
       </div>
 
-      <p className="text-xs text-muted-foreground mb-5">Wähle alle Verbindungen die du regelmäßig nimmst</p>
+      {/* Arrival time picker */}
+      <div className="flex gap-2 mb-4">
+        <div className="flex-1">
+          <label className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1 block">Wann musst du da sein?</label>
+          <input
+            type="time"
+            value={localArrivalTime}
+            onChange={e => setLocalArrivalTime(e.target.value)}
+            className="w-full h-12 rounded-2xl px-4 text-sm text-foreground outline-none border border-transparent focus:border-primary transition-all"
+            style={{ backgroundColor: '#1A1A1A' }}
+          />
+        </div>
+        <div className="flex items-end">
+          <button
+            onClick={fetchJourneys}
+            disabled={loading}
+            className="h-12 px-5 rounded-full bg-primary text-primary-foreground font-bold text-sm flex items-center gap-2 disabled:opacity-50"
+          >
+            {loading ? <div className="amber-spinner" style={{ width: 16, height: 16, borderColor: 'rgba(0,0,0,0.2)', borderTopColor: '#000' }} /> : <RefreshCw className="h-4 w-4" />}
+            Suchen
+          </button>
+        </div>
+      </div>
+
+      <p className="text-xs text-muted-foreground mb-4">Wähle alle Verbindungen die du regelmäßig nimmst</p>
 
       <div className="flex-1 space-y-3 overflow-y-auto pb-28">
         {loading && (
