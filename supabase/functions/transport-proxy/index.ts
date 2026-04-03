@@ -168,42 +168,6 @@ Deno.serve(async (req) => {
     );
   } catch (err: any) {
     console.error("Transport proxy error:", err);
-    
-    // Try to serve stale cache as last resort
-    try {
-      const url = new URL(req.url);
-      const endpoint = url.searchParams.get("endpoint") || "";
-      const params: Record<string, string> = {};
-      for (const [k, v] of url.searchParams.entries()) {
-        if (k !== "endpoint") params[k] = v;
-      }
-      const cacheKey = generateCacheKey(endpoint, params);
-      
-      const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-      const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-      const supabase = createClient(supabaseUrl, supabaseKey);
-      
-      const { data: stale } = await supabase
-        .from("transport_cache")
-        .select("response_data")
-        .eq("cache_key", cacheKey)
-        .single();
-      
-      if (stale) {
-        return new Response(
-          JSON.stringify(stale.response_data),
-          { 
-            headers: { 
-              ...corsHeaders, 
-              "Content-Type": "application/json",
-              "X-Cache": "STALE",
-            } 
-          }
-        );
-      }
-    } catch {
-      // ignore stale cache errors
-    }
 
     return new Response(
       JSON.stringify({ error: "Transport API temporarily unavailable. Please try again later." }),
