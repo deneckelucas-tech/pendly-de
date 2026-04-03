@@ -4,7 +4,9 @@ import { AnimatePresence } from 'framer-motion';
 import { WizardProgress } from '@/components/wizard/WizardProgress';
 import { StationStep } from '@/components/wizard/StationStep';
 import { TransportStep } from '@/components/wizard/TransportStep';
+import { ArrivalTimeStep } from '@/components/wizard/ArrivalTimeStep';
 import { JourneySelectStep } from '@/components/wizard/JourneySelectStep';
+import { ManualJourneyBuilder } from '@/components/wizard/ManualJourneyBuilder';
 import { SaveStep } from '@/components/wizard/SaveStep';
 import type { Station, TransportType, Journey } from '@/lib/types';
 
@@ -14,15 +16,18 @@ export default function RouteWizard() {
   const [origin, setOrigin] = useState<Station | null>(null);
   const [destination, setDestination] = useState<Station | null>(null);
   const [transportTypes, setTransportTypes] = useState<TransportType[]>([]);
+  const [arrivalTime, setArrivalTime] = useState<string>('08:00');
   const [selectedJourneys, setSelectedJourneys] = useState<Journey[]>([]);
 
   const handleCancel = () => navigate(-1);
 
+  // Steps: 1=origin, 2=destination, 3=transport, 4=arrival time, 5=journey select, 5m=manual, 6=save
+  const totalSteps = 6;
+
   return (
     <div className="min-h-screen bg-background px-4 pt-4">
-      {/* Progress bar */}
       <div className="mb-4">
-        <WizardProgress currentStep={step} totalSteps={5} />
+        <WizardProgress currentStep={step === 99 ? 5 : step} totalSteps={totalSteps} />
       </div>
 
       <AnimatePresence mode="wait">
@@ -55,18 +60,39 @@ export default function RouteWizard() {
           />
         )}
 
-        {step === 4 && origin && destination && (
-          <JourneySelectStep
-            key="journeys"
-            origin={origin}
-            destination={destination}
-            transportTypes={transportTypes}
-            onNext={(journeys) => { setSelectedJourneys(journeys); setStep(5); }}
+        {step === 4 && destination && (
+          <ArrivalTimeStep
+            key="arrival"
+            destinationName={destination.name.split(',')[0]}
+            onNext={(time) => { setArrivalTime(time); setStep(5); }}
             onBack={() => setStep(3)}
           />
         )}
 
         {step === 5 && origin && destination && (
+          <JourneySelectStep
+            key="journeys"
+            origin={origin}
+            destination={destination}
+            transportTypes={transportTypes}
+            arrivalTime={arrivalTime}
+            onNext={(journeys) => { setSelectedJourneys(journeys); setStep(6); }}
+            onBack={() => setStep(4)}
+            onManual={() => setStep(99)}
+          />
+        )}
+
+        {step === 99 && origin && destination && (
+          <ManualJourneyBuilder
+            key="manual"
+            initialOrigin={origin}
+            finalDestination={destination}
+            onSave={(journey) => { setSelectedJourneys([journey]); setStep(6); }}
+            onBack={() => setStep(5)}
+          />
+        )}
+
+        {step === 6 && origin && destination && (
           <SaveStep
             key="save"
             origin={origin}
@@ -74,7 +100,7 @@ export default function RouteWizard() {
             transportTypes={transportTypes}
             journeys={selectedJourneys}
             onSave={() => navigate('/dashboard')}
-            onBack={() => setStep(4)}
+            onBack={() => setStep(5)}
           />
         )}
       </AnimatePresence>

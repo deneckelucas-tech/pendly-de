@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { ArrowLeft, Loader2, Check, RefreshCw } from 'lucide-react';
+import { ArrowLeft, Loader2, Check, RefreshCw, Wrench } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
@@ -10,11 +10,13 @@ interface JourneySelectStepProps {
   origin: Station;
   destination: Station;
   transportTypes: TransportType[];
+  arrivalTime?: string; // HH:mm
   onNext: (journeys: Journey[]) => void;
   onBack: () => void;
+  onManual: () => void;
 }
 
-export function JourneySelectStep({ origin, destination, transportTypes, onNext, onBack }: JourneySelectStepProps) {
+export function JourneySelectStep({ origin, destination, transportTypes, arrivalTime, onNext, onBack, onManual }: JourneySelectStepProps) {
   const [journeys, setJourneys] = useState<Journey[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
@@ -28,10 +30,21 @@ export function JourneySelectStep({ origin, destination, transportTypes, onNext,
     try {
       const products: Partial<Record<TransportType, boolean>> = {};
       for (const t of ALL_TRANSPORT) products[t] = transportTypes.includes(t);
-      let results = await searchJourneys(origin.id, destination.id, { results: 8, products });
-      // If no results with filters, retry without product filters
+
+      // Build time option
+      const now = new Date();
+      let timeOpts: { arrival?: string; departure?: string } = {};
+      if (arrivalTime) {
+        const [h, m] = arrivalTime.split(':').map(Number);
+        const arr = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m);
+        if (arr < now) arr.setDate(arr.getDate() + 1);
+        timeOpts = { arrival: arr.toISOString() };
+      }
+
+      let results = await searchJourneys(origin.id, destination.id, { results: 10, products, ...timeOpts });
+      // Fallback without product filters
       if (results.length === 0) {
-        results = await searchJourneys(origin.id, destination.id, { results: 8 });
+        results = await searchJourneys(origin.id, destination.id, { results: 10, ...timeOpts });
       }
       setJourneys(results);
     } catch {
@@ -39,7 +52,7 @@ export function JourneySelectStep({ origin, destination, transportTypes, onNext,
     } finally {
       setLoading(false);
     }
-  }, [origin.id, destination.id, transportTypes]);
+  }, [origin.id, destination.id, transportTypes, arrivalTime]);
 
   useEffect(() => { fetchJourneys(); }, [fetchJourneys]);
 
@@ -80,6 +93,9 @@ export function JourneySelectStep({ origin, destination, transportTypes, onNext,
         </div>
       </div>
 
+      {arrivalTime && (
+        <p className="text-xs text-muted-foreground mb-2 ml-1">Ankunft bis {arrivalTime} Uhr</p>
+      )}
       <p className="text-xs text-muted-foreground mb-4 ml-1">Wähle die Verbindungen, mit denen du normalerweise fährst.</p>
 
       <div className="flex-1 space-y-2.5 overflow-y-auto">
@@ -152,7 +168,18 @@ export function JourneySelectStep({ origin, destination, transportTypes, onNext,
         })}
       </div>
 
-      <div className="mt-4 pb-4">
+      {/* Manual option */}
+      {!loading && (
+        <button
+          onClick={onManual}
+          className="flex items-center justify-center gap-2 py-3 text-xs text-muted-foreground hover:text-foreground transition-colors mt-2"
+        >
+          <Wrench className="h-3.5 w-3.5" />
+          Route manuell zusammenstellen
+        </button>
+      )}
+
+      <div className="pb-4">
         <Button
           onClick={() => onNext(selectedJourneys)}
           disabled={selected.size === 0}
