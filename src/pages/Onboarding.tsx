@@ -75,7 +75,7 @@ export default function Onboarding() {
         <div className="h-16 w-16 bg-card card-amber-border rounded-2xl flex items-center justify-center mx-auto mb-4">
           <Train className="h-8 w-8 text-primary" />
         </div>
-        <h2 className="text-xl font-bold mb-2">Willkommen bei Bahnfrei!</h2>
+        <h2 className="text-xl font-bold mb-2">Willkommen bei Pendly!</h2>
         <p className="text-muted-foreground text-sm mb-6 max-w-[280px] mx-auto">
           Lass uns deine Pendelroute einrichten. Du kannst echte Verbindungen suchen und genau die auswählen, mit denen du fährst.
         </p>

@@ -468,7 +468,7 @@ export default function LandingPage() {
           </h1>
 
           <p className="bf-hero-sub">
-            Bahnfrei warnt dich bevor dein Zug ausfällt – nicht danach.
+            Pendly warnt dich bevor dein Zug ausfällt – nicht danach.
           </p>
 
           <div className="bf-actions">
@@ -512,7 +512,7 @@ export default function LandingPage() {
           </div>
           <div className="bf-stat">
             <div className="bf-stat-num">0 s</div>
-            <div className="bf-stat-label">Reaktionszeit Bahnfrei</div>
+            <div className="bf-stat-label">Reaktionszeit Pendly</div>
           </div>
         </div>
 
@@ -520,13 +520,13 @@ export default function LandingPage() {
 
         {/* FEATURES */}
         <section className="bf-section bf-reveal" ref={reveal(0)}>
-          <div className="bf-section-label">Warum Bahnfrei</div>
+          <div className="bf-section-label">Warum Pendly</div>
           <h2 className="bf-section-title">
             Du erfährst es<br />
             als Erster.
           </h2>
           <p className="bf-section-sub">
-            Kein manuelles Checken mehr. Bahnfrei überwacht deine Strecken rund
+            Kein manuelles Checken mehr. Pendly überwacht deine Strecken rund
             um die Uhr.
           </p>
           <div className="bf-features">
@@ -544,7 +544,7 @@ export default function LandingPage() {
               {
                 icon: "🔀",
                 title: "Automatische Alternativen",
-                desc: "Fällt dein Zug aus? Bahnfrei zeigt dir sofort die beste Alternative – inkl. ob du es noch rechtzeitig schaffst.",
+                desc: "Fällt dein Zug aus? Pendly zeigt dir sofort die beste Alternative – inkl. ob du es noch rechtzeitig schaffst.",
               },
               {
                 icon: "📊",
@@ -575,7 +575,7 @@ export default function LandingPage() {
               {
                 n: "1",
                 title: "Route einrichten",
-                desc: "Gib deine Start- und Zielhaltestelle ein. Bahnfrei findet deine Verbindungen automatisch.",
+                desc: "Gib deine Start- und Zielhaltestelle ein. Pendly findet deine Verbindungen automatisch.",
               },
               {
                 n: "2",
@@ -585,7 +585,7 @@ export default function LandingPage() {
               {
                 n: "3",
                 title: "Entspannt pendeln",
-                desc: "Bahnfrei überwacht alles. Du bekommst nur eine Nachricht, wenn wirklich etwas los ist.",
+                desc: "Pendly überwacht alles. Du bekommst nur eine Nachricht, wenn wirklich etwas los ist.",
               },
             ].map((s, i) => (
               <div className="bf-step" key={i}>
@@ -667,7 +667,7 @@ export default function LandingPage() {
           <div className="bf-testimonials">
             {[
               {
-                text: "Endlich muss ich morgens nicht mehr den DB Navigator checken. Bahnfrei schreibt mir einfach wenn was schiefläuft.",
+                text: "Endlich muss ich morgens nicht mehr den DB Navigator checken. Pendly schreibt mir einfach wenn was schiefläuft.",
                 initials: "MK",
                 name: "Markus K.",
                 route: "Pendler · Frankfurt → Darmstadt",
@@ -704,7 +704,7 @@ export default function LandingPage() {
           <p className="bf-final-sub">
             Hör auf, jeden Morgen die Bahn-App zu checken.
             <br />
-            Bahnfrei macht das für dich.
+            Pendly macht das für dich.
           </p>
           <button className="bf-btn">Jetzt kostenlos herunterladen</button>
           <p className="bf-trial-note" style={{ marginTop: 12 }}>
@@ -715,7 +715,7 @@ export default function LandingPage() {
         {/* FOOTER */}
         <footer className="bf-footer">
           <p>
-            © 2025 Bahnfrei ·{" "}
+            © 2025 Pendly ·{" "}
             <a href="#">Datenschutz</a> ·{" "}
             <a href="#">Impressum</a> ·{" "}
             <a href="#">AGB</a>

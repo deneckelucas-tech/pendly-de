@@ -79,7 +79,7 @@ export default function Landing() {
           Nie wieder die Bahn verpassen.
         </h1>
         <p className="text-sm leading-relaxed" style={{ color: '#6B7280' }}>
-          Bahnfrei hält dich informiert – bevor es zu spät ist.
+          Pendly hält dich informiert – bevor es zu spät ist.
         </p>
       </motion.div>
 

@@ -111,7 +111,8 @@ export default function Dashboard() {
         className="flex items-center justify-between mb-6"
       >
         <div className="flex items-center gap-2.5">
-          <h1 className="text-xl font-bold text-foreground tracking-tight">Bahnfrei</h1>
+          <img src="/logo.png" alt="Pendly" className="h-7 w-7 rounded-lg" />
+          <h1 className="text-xl font-bold text-foreground tracking-tight">Pendly</h1>
           <span className="flex items-center gap-1.5 bg-primary/15 text-primary text-[10px] font-semibold px-2 py-0.5 rounded-full">
             <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse-dot" />
             Live
