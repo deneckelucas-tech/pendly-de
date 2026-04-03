@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { DebugPanel } from '@/components/DebugPanel';
+import { TrialBanner } from '@/components/TrialBanner';
 
 function getStatusLabel(status: string, delayMinutes?: number) {
   if (status === 'on_time') return 'Pünktlich';
