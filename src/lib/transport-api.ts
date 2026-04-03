@@ -99,7 +99,7 @@ export async function searchJourneys(
   }
 
   try {
-    const res = await fetch(`${BASE_URL}/journeys?${params}`);
+    const res = await fetchWithRetry(`${BASE_URL}/journeys?${params}`);
     if (!res.ok) throw new Error(`API error: ${res.status}`);
     const data = await res.json();
 
