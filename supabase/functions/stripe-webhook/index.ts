@@ -33,17 +33,11 @@ serve(async (req) => {
   const sig = req.headers.get("stripe-signature");
 
   let event: Stripe.Event;
-  const testMode = req.headers.get("x-test-mode") === "true";
-  if (testMode) {
-    logStep("TEST MODE - skipping signature verification");
-    event = JSON.parse(body) as Stripe.Event;
-  } else {
-    try {
-      event = await stripe.webhooks.constructEventAsync(body, sig!, webhookSecret);
-    } catch (err) {
-      logStep("Signature verification failed", { error: String(err) });
-      return new Response(JSON.stringify({ error: "Invalid signature" }), { status: 400 });
-    }
+  try {
+    event = await stripe.webhooks.constructEventAsync(body, sig!, webhookSecret);
+  } catch (err) {
+    logStep("Signature verification failed", { error: String(err) });
+    return new Response(JSON.stringify({ error: "Invalid signature" }), { status: 400 });
   }
 
   logStep("Event received", { type: event.type, id: event.id });
