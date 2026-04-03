@@ -8,6 +8,7 @@ import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
+import { DebugPanel } from '@/components/DebugPanel';
 
 function getStatusLabel(status: string, delayMinutes?: number) {
   if (status === 'on_time') return 'Pünktlich';
@@ -83,6 +84,7 @@ export default function Dashboard() {
 
   return (
     <div className="px-4 pt-5 pb-4 min-h-screen">
+      <DebugPanel />
       {/* Header */}
       <motion.header
         initial={{ opacity: 0, y: -10 }}
