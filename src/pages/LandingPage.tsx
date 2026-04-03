@@ -106,7 +106,7 @@ export default function LandingPage() {
         .lp-nav{
           position:fixed;top:0;left:0;right:0;z-index:100;
           display:flex;align-items:center;justify-content:space-between;
-          padding:18px 24px;
+          padding:12px 24px;
           background:rgba(10,10,10,0.8);
           backdrop-filter:blur(24px);
           border-bottom:1px solid var(--divider);
