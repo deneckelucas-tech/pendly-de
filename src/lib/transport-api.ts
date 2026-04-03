@@ -70,6 +70,7 @@ export async function searchJourneys(
   toId: string,
   options?: {
     departure?: string; // ISO datetime
+    arrival?: string; // ISO datetime — search by arrival time
     results?: number;
     transfers?: number;
     products?: Partial<Record<TransportType, boolean>>;
