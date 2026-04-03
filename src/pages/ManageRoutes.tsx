@@ -42,7 +42,7 @@ export default function ManageRoutes() {
         </div>
       ) : (
         <EmptyState icon="route" title="Noch keine Routen" description="Füge deine erste Pendelroute hinzu.">
-          <Button onClick={() => navigate('/onboarding')} className="font-semibold rounded-xl">
+          <Button onClick={() => navigate('/route-setup')} className="font-semibold rounded-xl">
             Route hinzufügen
           </Button>
         </EmptyState>
