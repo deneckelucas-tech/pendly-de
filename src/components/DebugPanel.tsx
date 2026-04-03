@@ -67,9 +67,11 @@ export function DebugPanel() {
 
     setEntries(results);
     setLoading(false);
-  }, []);
+  }, [isProd]);
 
   const lastSuccess = entries.find(e => e.status === 'success');
+
+  if (isProd) return null;
 
   return (
     <div className="fixed bottom-20 right-3 z-50" style={{ maxWidth: 'calc(100vw - 24px)' }}>
