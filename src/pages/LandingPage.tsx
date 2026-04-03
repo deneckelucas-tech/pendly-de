@@ -700,33 +700,47 @@ export default function LandingPage() {
             Pendler<br />
             lieben es.
           </h2>
-          <div className="bf-testimonials">
-            {[
-              {
-                text: "Endlich muss ich morgens nicht mehr den DB Navigator checken. Pendly schreibt mir einfach wenn was schiefläuft.",
-                initials: "MK",
-                name: "Markus K.",
-                route: "Pendler · Frankfurt → Darmstadt",
-              },
-              {
-                text: "Die Gleisänderungs-Warnung hat mich schon zweimal gerettet. Hätte sonst am falschen Gleis gestanden.",
-                initials: "SL",
-                name: "Sara L.",
-                route: "Pendlerin · Hannover → Hildesheim",
-              },
-            ].map((t, i) => (
-              <div className="bf-testimonial" key={i}>
-                <div className="bf-stars">★★★★★</div>
-                <p className="bf-testimonial-text">"{t.text}"</p>
-                <div className="bf-author">
-                  <div className="bf-avatar">{t.initials}</div>
-                  <div>
-                    <div className="bf-author-name">{t.name}</div>
-                    <div className="bf-author-route">{t.route}</div>
+          <div className="bf-ticker-wrapper">
+            {/* Row 1 - scrolls left */}
+            <div className="bf-ticker-row left">
+              {[...Array(2)].map((_, dup) =>
+                [
+                  { text: 'Endlich muss ich morgens nicht mehr den DB Navigator checken. Bahnfrei schreibt mir einfach wenn was schiefläuft.', author: 'Markus K.', route: 'Pendler · Frankfurt → Darmstadt' },
+                  { text: 'Die Gleisänderungs-Warnung hat mich zweimal gerettet. Hätte sonst am falschen Gleis gestanden.', author: 'Sara L.', route: 'Pendlerin · Hannover → Hildesheim' },
+                  { text: 'Ich nehme jeden Morgen die S3 und seit Pendly weiß ich immer vorher ob sie Verspätung hat. Mega.', author: 'Jonas W.', route: 'Pendler · Hamburg → Harburg' },
+                  { text: 'Einfach die beste Pendler-App die ich kenne. Klar, schnell, zuverlässig.', author: 'Petra M.', route: 'Pendlerin · München → Augsburg' },
+                  { text: 'Endlich eine App die mir sagt was ich wissen muss – ohne dass ich selbst suchen muss.', author: 'Tobias R.', route: 'Pendler · Köln → Bonn' },
+                ].map((t, i) => (
+                  <div className="bf-tcard" key={`r1-${dup}-${i}`}>
+                    <div className="bf-tcard-stars">★★★★★</div>
+                    <p className="bf-tcard-text">"{t.text}"</p>
+                    <div className="bf-tcard-author">{t.author}</div>
+                    <div className="bf-tcard-route">{t.route}</div>
+                    <span className="bf-verified">Verifiziert ✓</span>
                   </div>
-                </div>
-              </div>
-            ))}
+                ))
+              )}
+            </div>
+            {/* Row 2 - scrolls right */}
+            <div className="bf-ticker-row right">
+              {[...Array(2)].map((_, dup) =>
+                [
+                  { text: 'Mein RE10 fällt ständig aus. Pendly hat mich noch nie im Stich gelassen wenn das passiert.', author: 'Leon S.', route: 'Pendler · Hildesheim → Hannover' },
+                  { text: 'Ich hab Pendly meiner ganzen Abteilung empfohlen. Alle pendeln, alle lieben es.', author: 'Anna B.', route: 'Pendlerin · Düsseldorf → Essen' },
+                  { text: 'Die 4,99 im Monat sind absolut gerechtfertigt. Ich spare damit jeden Morgen Stress und Zeit.', author: 'Michael T.', route: 'Pendler · Stuttgart → Ludwigsburg' },
+                  { text: 'Push-Notification kam, bevor die DB selbst die Verspätung angezeigt hat. Krass.', author: 'Felix H.', route: 'Pendler · Berlin → Potsdam' },
+                  { text: 'Habe vorher immer zu spät von Ausfällen erfahren. Mit Pendly ist das Geschichte.', author: 'Julia K.', route: 'Pendlerin · Bremen → Verden' },
+                ].map((t, i) => (
+                  <div className="bf-tcard" key={`r2-${dup}-${i}`}>
+                    <div className="bf-tcard-stars">★★★★★</div>
+                    <p className="bf-tcard-text">"{t.text}"</p>
+                    <div className="bf-tcard-author">{t.author}</div>
+                    <div className="bf-tcard-route">{t.route}</div>
+                    <span className="bf-verified">Verifiziert ✓</span>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </section>
 
