@@ -1,16 +1,15 @@
 import { useState } from 'react';
-import { Shield, Check, CreditCard } from 'lucide-react';
+import { Shield, Check, CreditCard, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-
-const MONTHLY_PRICE = '4,99';
-const YEARLY_PRICE = '39,99';
-const YEARLY_MONTHLY = '3,33';
+import { useSearchParams } from 'react-router-dom';
 
 export default function Paywall() {
   const [loading, setLoading] = useState<string | null>(null);
-  const { subscription } = useAuth();
+  const { subscription, checkSubscription } = useAuth();
+  const [searchParams] = useSearchParams();
+  const checkoutError = searchParams.get('checkout') === 'cancel';
 
   const handleCheckout = async (plan: 'monthly' | 'yearly') => {
     setLoading(plan);
@@ -20,7 +19,7 @@ export default function Paywall() {
       });
       if (error) throw error;
       if (data?.url) {
-        window.open(data.url, '_blank');
+        window.location.href = data.url;
       }
     } catch (err) {
       console.error('Checkout error:', err);
@@ -39,7 +38,7 @@ export default function Paywall() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-background">
-      <div className="w-full max-w-sm space-y-6">
+      <div className="w-full max-w-sm space-y-5">
         <div className="text-center space-y-3">
           <div className="h-14 w-14 rounded-2xl bg-card card-amber-border flex items-center justify-center mx-auto">
             <Shield className="h-7 w-7 text-primary" />
@@ -50,17 +49,30 @@ export default function Paywall() {
           </p>
         </div>
 
-        {/* Monthly */}
+        {checkoutError && (
+          <div className="rounded-xl bg-destructive/10 border border-destructive/20 p-3 text-center">
+            <p className="text-sm text-destructive">Zahlung fehlgeschlagen oder abgebrochen. Bitte versuche es erneut.</p>
+          </div>
+        )}
+
+        {/* Yearly - Highlighted */}
         <div
-          className="rounded-2xl p-5 space-y-4 card-amber-glow"
-          style={{ backgroundColor: '#131313' }}
+          className="rounded-2xl p-5 space-y-4 relative card-amber-glow"
+          style={{ backgroundColor: '#131313', border: '1px solid rgba(245, 158, 11, 0.25)' }}
         >
-          <div className="flex items-center justify-between">
+          <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] font-bold px-3 py-1 rounded-full flex items-center gap-1">
+            <Star className="h-3 w-3" />
+            Beliebteste Wahl
+          </div>
+          <div className="flex items-center justify-between pt-1">
             <div>
-              <p className="text-sm font-semibold text-foreground">Monatlich</p>
-              <p className="text-2xl font-bold text-foreground">{MONTHLY_PRICE} <span className="text-sm font-normal text-muted-foreground">€/Monat</span></p>
+              <p className="text-sm font-semibold text-foreground">Jährlich</p>
+              <p className="text-2xl font-bold text-foreground">39,99 <span className="text-sm font-normal text-muted-foreground">€/Jahr</span></p>
+              <p className="text-xs text-primary font-medium">3,33 € pro Monat · 33% sparen</p>
             </div>
-            <CreditCard className="h-5 w-5 text-primary" />
+            <div className="bg-primary/15 rounded-xl p-2">
+              <CreditCard className="h-5 w-5 text-primary" />
+            </div>
           </div>
           <ul className="space-y-2">
             {features.map((f, i) => (
@@ -72,35 +84,31 @@ export default function Paywall() {
           </ul>
           <Button
             className="w-full h-12 rounded-xl font-semibold"
-            onClick={() => handleCheckout('monthly')}
-            disabled={loading === 'monthly'}
+            onClick={() => handleCheckout('yearly')}
+            disabled={loading === 'yearly'}
           >
-            {loading === 'monthly' ? 'Wird geladen...' : 'Monatlich abonnieren'}
+            {loading === 'yearly' ? 'Wird geladen...' : 'Jährlich abonnieren'}
           </Button>
         </div>
 
-        {/* Yearly */}
+        {/* Monthly */}
         <div
-          className="rounded-2xl p-5 space-y-4 card-amber-border relative"
+          className="rounded-2xl p-5 space-y-4 card-amber-border"
           style={{ backgroundColor: '#131313' }}
         >
-          <div className="absolute -top-3 right-4 bg-primary text-primary-foreground text-[10px] font-bold px-2.5 py-1 rounded-full">
-            –33% sparen
-          </div>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-semibold text-foreground">Jährlich</p>
-              <p className="text-2xl font-bold text-foreground">{YEARLY_PRICE} <span className="text-sm font-normal text-muted-foreground">€/Jahr</span></p>
-              <p className="text-xs text-muted-foreground">{YEARLY_MONTHLY} € pro Monat</p>
+              <p className="text-sm font-semibold text-foreground">Monatlich</p>
+              <p className="text-2xl font-bold text-foreground">4,99 <span className="text-sm font-normal text-muted-foreground">€/Monat</span></p>
             </div>
           </div>
           <Button
             variant="outline"
             className="w-full h-12 rounded-xl font-semibold card-amber-border"
-            onClick={() => handleCheckout('yearly')}
-            disabled={loading === 'yearly'}
+            onClick={() => handleCheckout('monthly')}
+            disabled={loading === 'monthly'}
           >
-            {loading === 'yearly' ? 'Wird geladen...' : 'Jährlich abonnieren'}
+            {loading === 'monthly' ? 'Wird geladen...' : 'Monatlich abonnieren'}
           </Button>
         </div>
 
