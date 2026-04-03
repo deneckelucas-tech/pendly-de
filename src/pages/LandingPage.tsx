@@ -4,6 +4,9 @@ import pendlyLogo from "@/assets/logo.png";
 
 export default function LandingPage() {
   const revealRefs = useRef<(HTMLElement | null)[]>([]);
+  const statsRef = useRef<HTMLDivElement | null>(null);
+  const [statsVisible, setStatsVisible] = useState(false);
+  const [counters, setCounters] = useState({ pct: 0, min: 0, fails: 0, sec: 0 });
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -20,6 +23,34 @@ export default function LandingPage() {
     revealRefs.current.forEach((el) => el && observer.observe(el));
     return () => observer.disconnect();
   }, []);
+
+  useEffect(() => {
+    if (!statsRef.current) return;
+    const obs = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { setStatsVisible(true); obs.disconnect(); }
+    }, { threshold: 0.3 });
+    obs.observe(statsRef.current);
+    return () => obs.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!statsVisible) return;
+    const targets = { pct: 34, min: 8, fails: 147, sec: 0 };
+    const duration = 1500;
+    const start = performance.now();
+    const animate = (now: number) => {
+      const t = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - t, 3);
+      setCounters({
+        pct: Math.round(targets.pct * ease),
+        min: Math.round(targets.min * ease),
+        fails: Math.round(targets.fails * ease),
+        sec: 0,
+      });
+      if (t < 1) requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  }, [statsVisible]);
 
   const reveal = (i: number) => (el: HTMLElement | null) => {
     if (el) revealRefs.current[i] = el;
