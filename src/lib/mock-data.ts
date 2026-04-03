@@ -25,7 +25,7 @@ const MOCK_ROUTES: CommuteRoute[] = [
         notificationsEnabled: true,
         legs: [
           { originId: '8002830', originName: 'Hildesheim Ost', destinationId: '8000152', destinationName: 'Hannover Hbf', plannedDeparture: '07:39', plannedArrival: '08:10', lineName: 'RE10', productName: 'erixx' },
-          { originId: '8000152', originName: 'Hannover Hbf', destinationId: '8004158', destinationName: 'Altwarmbüchen Opelstraße', plannedDeparture: '08:18', plannedArrival: '08:32', lineName: 'S3', productName: 'S-Bahn' },
+          { originId: '8000152', originName: 'Hannover Hbf', destinationId: '8004158', destinationName: 'Altwarmbüchen Opelstraße', plannedDeparture: '08:06', plannedArrival: '08:20', lineName: 'S4', productName: 'S-Bahn' },
         ],
       },
     ],
