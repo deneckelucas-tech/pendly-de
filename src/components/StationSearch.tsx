@@ -16,6 +16,7 @@ export function StationSearch({ label, placeholder = 'Bahnhof suchen...', value,
   const [query, setQuery] = useState(value?.name || '');
   const [results, setResults] = useState<Station[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
   const [open, setOpen] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   const containerRef = useRef<HTMLDivElement>(null);
