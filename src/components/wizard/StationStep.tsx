@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { searchStations } from '@/lib/transport-api';
-import { ArrowLeft, X } from 'lucide-react';
+import { ArrowLeft, X, Train } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Station } from '@/lib/types';
 
@@ -109,17 +109,21 @@ export function StationStep({ title, subtitle, onSelect, onBack, onCancel }: Sta
         )}
 
         {results.length > 0 && (
-          <div className="space-y-0.5">
+          <div className="divide-y" style={{ borderColor: '#1A1A1A' }}>
             {results.map((station) => {
               const hint = getLocationHint(station);
               return (
                 <button
                   key={station.id}
                   onClick={() => onSelect(station)}
-                  className="w-full text-left px-4 py-3.5 rounded-2xl hover:bg-card transition-colors"
+                  className="w-full text-left px-4 py-3.5 flex items-center gap-3 hover:bg-card transition-colors group"
+                  style={{ borderColor: '#1A1A1A' }}
                 >
-                  <p className="text-base font-semibold text-foreground">{station.name.split(',')[0]}</p>
-                  {hint && <p className="text-xs text-muted-foreground mt-0.5">{hint}</p>}
+                  <Train className="h-4 w-4 text-primary shrink-0" />
+                  <div className="flex-1 min-w-0 border-l-2 border-transparent group-active:border-primary pl-3 transition-colors">
+                    <p className="text-base font-semibold text-foreground">{station.name.split(',')[0]}</p>
+                    {hint && <p className="text-xs text-muted-foreground mt-0.5">{hint}</p>}
+                  </div>
                 </button>
               );
             })}
