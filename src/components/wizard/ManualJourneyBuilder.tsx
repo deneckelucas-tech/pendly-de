@@ -324,7 +324,10 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, onSave, 
         )}
 
         {!loading && searched && filteredDepartures.length === 0 && departures.length > 0 && (
-          <p className="text-sm text-muted-foreground text-center py-8">Kein Treffer für "{filterText}"</p>
+          <div className="text-center py-8">
+            <p className="text-sm text-muted-foreground mb-2">Keine Abfahrten Richtung {currentDirection.name.split(',')[0]}</p>
+            <p className="text-xs text-muted-foreground">Ändere die Richtung oben oder nutze den Filter</p>
+          </div>
         )}
 
         {!loading && filteredDepartures.map((dep, i) => {
