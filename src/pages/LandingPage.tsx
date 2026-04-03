@@ -446,7 +446,7 @@ export default function LandingPage() {
         {/* NAV */}
         <nav className="bf-nav">
           <div className="bf-logo">
-            BAHN<span>FREI</span>
+            <img src="/lovable-uploads/5C4500CB-B0E1-418B-84A5-E1972203A123.png" alt="Pendly Logo" />
           </div>
           <button className="bf-nav-cta">Kostenlos testen</button>
         </nav>
