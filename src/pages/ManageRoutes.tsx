@@ -29,7 +29,7 @@ export default function ManageRoutes() {
           </Button>
           <h1 className="font-bold text-lg">Meine Routen</h1>
         </div>
-        <Button size="sm" onClick={() => navigate('/onboarding')} className="gap-1 font-semibold rounded-xl">
+        <Button size="sm" onClick={() => navigate('/route-setup')} className="gap-1 font-semibold rounded-xl">
           <Plus className="h-4 w-4" /> Neue Route
         </Button>
       </div>
@@ -42,7 +42,7 @@ export default function ManageRoutes() {
         </div>
       ) : (
         <EmptyState icon="route" title="Noch keine Routen" description="Füge deine erste Pendelroute hinzu.">
-          <Button onClick={() => navigate('/onboarding')} className="font-semibold rounded-xl">
+          <Button onClick={() => navigate('/route-setup')} className="font-semibold rounded-xl">
             Route hinzufügen
           </Button>
         </EmptyState>

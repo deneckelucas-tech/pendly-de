@@ -8,6 +8,7 @@ import Landing from "./pages/Landing";
 import LandingPage from "./pages/LandingPage";
 import Auth from "./pages/Auth";
 import Onboarding from "./pages/Onboarding";
+import RouteWizard from "./pages/RouteWizard";
 import Dashboard from "./pages/Dashboard";
 import RouteDetail from "./pages/RouteDetail";
 import ManageRoutes from "./pages/ManageRoutes";
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/" element={<LandingPage />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/route-setup" element={<RouteWizard />} />
           <Route element={<AppLayout />}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/route/:id" element={<RouteDetail />} />
