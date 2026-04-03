@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { searchStations } from '@/lib/transport-api';
 import { Loader2, X, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Station } from '@/lib/types';
