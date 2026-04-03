@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowLeft, Train, Tram as TramIcon, Bus as BusIcon, Check } from 'lucide-react';
+import { ArrowLeft, Train, TramFront, Bus as BusIcon, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
