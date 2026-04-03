@@ -58,8 +58,12 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, onSave, 
   }, []);
 
   const selectStation = (station: Station) => {
-    setCurrentOrigin(station);
-    setShowStationSearch(false);
+    if (editingField === 'direction') {
+      setCurrentDirection(station);
+    } else {
+      setCurrentOrigin(station);
+    }
+    setEditingField(null);
     setStationQuery('');
     setStationResults([]);
     setDepartures([]);
