@@ -162,3 +162,51 @@ export function formatDelay(seconds: number | null | undefined): string | null {
   const minutes = Math.round(seconds / 60);
   return `+${minutes} Min.`;
 }
+
+export interface Departure {
+  tripId: string;
+  direction: string;
+  line: { id: string; name: string; productName: string; mode: string };
+  when: string;
+  plannedWhen: string;
+  delay: number | null;
+  platform: string | null;
+  destination?: { id: string; name: string };
+}
+
+/** Fetch departures from a station */
+export async function getDepartures(
+  stationId: string,
+  options?: { when?: string; duration?: number; results?: number }
+): Promise<Departure[]> {
+  const params = new URLSearchParams({
+    duration: String(options?.duration || 120),
+    results: String(options?.results || 20),
+    language: 'de',
+  });
+  if (options?.when) params.set('when', options.when);
+
+  try {
+    const res = await fetchWithRetry(`${BASE_URL}/stops/${stationId}/departures?${params}`);
+    if (!res.ok) throw new Error(`API error: ${res.status}`);
+    const data = await res.json();
+    return (data.departures || []).map((d: any): Departure => ({
+      tripId: d.tripId || '',
+      direction: d.direction || '',
+      line: {
+        id: d.line?.id || '',
+        name: d.line?.name || '',
+        productName: d.line?.productName || '',
+        mode: d.line?.mode || '',
+      },
+      when: d.when || d.plannedWhen || '',
+      plannedWhen: d.plannedWhen || '',
+      delay: d.delay,
+      platform: d.platform,
+      destination: d.destination ? { id: d.destination.id, name: d.destination.name } : undefined,
+    }));
+  } catch (err) {
+    console.error('Departures fetch failed:', err);
+    return [];
+  }
+}
