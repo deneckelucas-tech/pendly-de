@@ -547,7 +547,7 @@ export default function LandingPage() {
         <div className="lp-divider" />
 
         {/* STATS */}
-        <section className="lp-stats lp-reveal" ref={(el) => { reveal(1)(el); statsRef.current = el; }}>
+        <section className="lp-stats lp-reveal" ref={(el) => { reveal(1)(el); (statsRef as any).current = el; }}>
           <div className="lp-section-label">Die Realität</div>
           <div className="lp-section-title" style={{ marginBottom: 32 }}>Zahlen lügen nicht.</div>
           <div className="lp-stats-grid">
