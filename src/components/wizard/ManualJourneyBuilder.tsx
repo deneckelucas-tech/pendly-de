@@ -138,7 +138,16 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, onSave, 
         </button>
       </div>
 
-      <h1 className="font-display text-3xl tracking-tight text-foreground mb-1">ROUTE ZUSAMMENSTELLEN</h1>
+      <h1 className="font-display text-3xl tracking-tight text-foreground mb-2">ROUTE ZUSAMMENSTELLEN</h1>
+
+      {/* Route header: Start → Ziel */}
+      <div className="flex items-center gap-2 mb-1 px-1">
+        <div className="h-2.5 w-2.5 rounded-full bg-primary shrink-0" />
+        <span className="text-xs font-semibold text-foreground truncate">{initialOrigin.name.split(',')[0]}</span>
+        <div className="flex-1 h-px bg-primary/30 mx-1" />
+        <span className="text-xs font-semibold text-foreground truncate">{finalDestination.name.split(',')[0]}</span>
+        <div className="h-2.5 w-2.5 rounded-full bg-primary shrink-0" />
+      </div>
       <p className="text-sm text-muted-foreground mb-6">Baue deine Verbindung Schritt für Schritt</p>
 
       {/* Added legs */}
