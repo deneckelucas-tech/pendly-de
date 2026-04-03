@@ -47,7 +47,7 @@ export async function searchStations(query: string): Promise<Station[]> {
   });
 
   try {
-    const res = await fetch(`${BASE_URL}/locations?${params}`);
+    const res = await fetchWithRetry(`${BASE_URL}/locations?${params}`);
     if (!res.ok) throw new Error(`API error: ${res.status}`);
     const data = await res.json();
 
