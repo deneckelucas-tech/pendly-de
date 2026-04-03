@@ -1,14 +1,9 @@
 import { useState, useCallback, useEffect } from 'react';
-import { ArrowLeft, Trash2, MapPin, ArrowRight, Search, Train } from 'lucide-react';
+import { ArrowLeft, Trash2, MapPin, ArrowRight, Search, Train, Repeat } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { searchStations, getDepartures, formatTime, type Departure } from '@/lib/transport-api';
+import { searchStations, searchJourneys, formatTime } from '@/lib/transport-api';
 import { getLineBadgeStyle } from '@/lib/line-colors';
 import type { Station, Journey, JourneyLeg } from '@/lib/types';
-
-interface ManualLeg {
-  origin: Station;
-  departure: Departure;
-}
 
 interface ManualJourneyBuilderProps {
   initialOrigin: Station;
@@ -18,11 +13,11 @@ interface ManualJourneyBuilderProps {
 }
 
 export function ManualJourneyBuilder({ initialOrigin, finalDestination, onSave, onBack }: ManualJourneyBuilderProps) {
-  const [legs, setLegs] = useState<ManualLeg[]>([]);
+  const [savedLegs, setSavedLegs] = useState<Journey[]>([]);
   const [currentOrigin, setCurrentOrigin] = useState<Station>(initialOrigin);
   const [currentDirection, setCurrentDirection] = useState<Station>(finalDestination);
   const [departureTime, setDepartureTime] = useState('07:00');
-  const [departures, setDepartures] = useState<Departure[]>([]);
+  const [journeyResults, setJourneyResults] = useState<Journey[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [filterText, setFilterText] = useState('');
@@ -32,21 +27,30 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, onSave, 
   const [stationLoading, setStationLoading] = useState(false);
 
   useEffect(() => {
-    searchDepartures();
+    searchConnections();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const searchDepartures = useCallback(async () => {
+  const searchConnections = useCallback(async () => {
     setLoading(true);
     setSearched(true);
-    const now = new Date();
-    const [h, m] = departureTime.split(':').map(Number);
-    const when = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m);
-    if (when < now) when.setDate(when.getDate() + 1);
-    const results = await getDepartures(currentOrigin.id, { when: when.toISOString(), duration: 120, results: 30 });
-    setDepartures(results);
-    setLoading(false);
-  }, [currentOrigin.id, departureTime]);
+    try {
+      const now = new Date();
+      const [h, m] = departureTime.split(':').map(Number);
+      const when = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m);
+      if (when < now) when.setDate(when.getDate() + 1);
+
+      const results = await searchJourneys(currentOrigin.id, currentDirection.id, {
+        departure: when.toISOString(),
+        results: 10,
+      });
+      setJourneyResults(results);
+    } catch {
+      setJourneyResults([]);
+    } finally {
+      setLoading(false);
+    }
+  }, [currentOrigin.id, currentDirection.id, departureTime]);
 
   const handleStationSearch = useCallback(async (q: string) => {
     setStationQuery(q);
@@ -66,78 +70,32 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, onSave, 
     setEditingField(null);
     setStationQuery('');
     setStationResults([]);
-    setDepartures([]);
+    setJourneyResults([]);
     setSearched(false);
   };
 
-  const addLeg = (dep: Departure) => {
-    const leg: ManualLeg = { origin: currentOrigin, departure: dep };
-    const newLegs = [...legs, leg];
-    setLegs(newLegs);
-    if (dep.destination) {
-      setCurrentOrigin({ id: dep.destination.id, name: dep.destination.name, type: 'station', products: {} });
-    }
-    setDepartures([]);
-    setSearched(false);
-    setFilterText('');
-    // After adding a leg, auto-open station search so user can change intermediate stop
-    setEditingField('origin');
-    if (dep.when) {
-      const arr = new Date(dep.when);
-      arr.setMinutes(arr.getMinutes() + 30);
-      setDepartureTime(`${String(arr.getHours()).padStart(2, '0')}:${String(arr.getMinutes()).padStart(2, '0')}`);
-    }
+  const selectJourney = (journey: Journey) => {
+    onSave(journey);
   };
 
-  const removeLeg = (index: number) => {
-    const newLegs = legs.slice(0, index);
-    setLegs(newLegs);
-    if (newLegs.length > 0) {
-      const lastDep = newLegs[newLegs.length - 1].departure;
-      if (lastDep.destination) {
-        setCurrentOrigin({ id: lastDep.destination.id, name: lastDep.destination.name, type: 'station', products: {} });
-      }
-    } else {
-      setCurrentOrigin(initialOrigin);
-    }
-    setDepartures([]);
-    setSearched(false);
-    setFilterText('');
+  const getDuration = (journey: Journey): string => {
+    if (journey.legs.length === 0) return '';
+    const dep = new Date(journey.legs[0].departure);
+    const arr = new Date(journey.legs[journey.legs.length - 1].arrival);
+    const mins = Math.round((arr.getTime() - dep.getTime()) / 60000);
+    if (mins < 60) return `${mins} Min.`;
+    return `${Math.floor(mins / 60)}h ${mins % 60}m`;
   };
 
-  const buildJourney = (): Journey => {
-    const journeyLegs: JourneyLeg[] = legs.map(leg => ({
-      origin: { id: leg.origin.id, name: leg.origin.name, type: 'station', products: leg.origin.products || {} },
-      destination: leg.departure.destination
-        ? { id: leg.departure.destination.id, name: leg.departure.destination.name, type: 'station', products: {} }
-        : { id: '', name: leg.departure.direction, type: 'station', products: {} },
-      departure: leg.departure.when,
-      arrival: '',
-      plannedDeparture: leg.departure.plannedWhen,
-      plannedArrival: '',
-      departureDelay: leg.departure.delay,
-      arrivalDelay: null,
-      departurePlatform: leg.departure.platform,
-      line: { id: leg.departure.line.id, name: leg.departure.line.name, productName: leg.departure.line.productName, mode: leg.departure.line.mode },
-      direction: leg.departure.direction,
-      cancelled: false,
-    }));
-    return { id: `manual-${Date.now()}`, legs: journeyLegs };
-  };
-
-  const filteredDepartures = departures.filter(dep => {
-    // Filter by direction station name if set (fuzzy match on direction string)
-    const dirName = currentDirection.name.split(',')[0].toLowerCase();
-    if (dirName && !dep.direction.toLowerCase().includes(dirName)) {
-      // Also check if the line passes through the direction (partial match)
-      const lineDir = dep.direction.toLowerCase();
-      const dirParts = dirName.split(/[\s-]+/);
-      const dirMatch = dirParts.some(part => part.length > 2 && lineDir.includes(part));
-      if (!dirMatch) return false;
-    }
+  const filteredJourneys = journeyResults.filter(j => {
     if (!filterText) return true;
     const q = filterText.toLowerCase();
-    return dep.direction.toLowerCase().includes(q) || dep.line.name.toLowerCase().includes(q) || dep.line.productName.toLowerCase().includes(q);
+    return j.legs.some(l =>
+      l.line?.name?.toLowerCase().includes(q) ||
+      l.line?.productName?.toLowerCase().includes(q) ||
+      l.origin.name.toLowerCase().includes(q) ||
+      l.destination.name.toLowerCase().includes(q)
+    );
   });
 
   return (
@@ -164,217 +122,199 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, onSave, 
         <span className="text-xs font-semibold text-foreground truncate">{finalDestination.name.split(',')[0]}</span>
         <div className="h-2.5 w-2.5 rounded-full bg-primary shrink-0" />
       </div>
-      <p className="text-sm text-muted-foreground mb-6">Baue deine Verbindung Schritt für Schritt</p>
+      <p className="text-sm text-muted-foreground mb-6">Wähle eine Verbindung von Ab nach Richtung</p>
 
-      {/* Added legs */}
-      {legs.length > 0 && (
-        <div className="space-y-2 mb-6">
-          <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium">Deine Verbindung</p>
-          {legs.map((leg, i) => {
-            const style = getLineBadgeStyle(leg.departure.line.productName, leg.departure.line.name);
-            return (
-              <div key={i} className="flex items-center gap-3 p-3.5 rounded-[20px]" style={{ backgroundColor: '#111111', border: '1px solid #1F1F1F' }}>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className="font-display text-xl text-foreground">{formatTime(leg.departure.when)}</span>
-                    <span
-                      className="font-bold text-xs"
-                      style={{ backgroundColor: style.bg, color: style.text, borderRadius: 6, padding: '6px 10px', fontSize: 12, fontWeight: 700 }}
-                    >
-                      {leg.departure.line.name}
-                    </span>
-                  </div>
-                  <p className="text-xs text-muted-foreground truncate mt-0.5">
-                    {leg.origin.name.split(',')[0]} → {leg.departure.direction}
-                  </p>
-                </div>
-                <button onClick={() => removeLeg(i)} className="p-2 rounded-full hover:bg-secondary/50 transition-colors">
-                  <Trash2 className="h-4 w-4 text-muted-foreground" />
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Current search */}
-      <div className="space-y-3 mb-4">
-        <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium">
-          {legs.length === 0 ? 'Erste Verbindung wählen' : 'Nächsten Umstieg wählen'}
-        </p>
-
-        {/* Two-field station picker: Ab + Richtung */}
-        <div className="rounded-[20px] p-3 space-y-0" style={{ backgroundColor: '#111111', border: '1px solid #1F1F1F' }}>
-          {/* Ab (origin) */}
-          <div className="flex items-center justify-between py-2">
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-              <div className="h-2.5 w-2.5 rounded-full bg-primary shrink-0" />
-              <div className="min-w-0">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Ab</p>
-                <p className="text-sm font-semibold text-foreground truncate">{currentOrigin.name.split(',')[0]}</p>
-              </div>
+      {/* Two-field station picker: Ab + Richtung */}
+      <div className="rounded-[20px] p-3 space-y-0 mb-4" style={{ backgroundColor: '#111111', border: '1px solid #1F1F1F' }}>
+        {/* Ab (origin) */}
+        <div className="flex items-center justify-between py-2">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <div className="h-2.5 w-2.5 rounded-full bg-primary shrink-0" />
+            <div className="min-w-0">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Ab</p>
+              <p className="text-sm font-semibold text-foreground truncate">{currentOrigin.name.split(',')[0]}</p>
             </div>
-            <button
-              onClick={() => { setEditingField(editingField === 'origin' ? null : 'origin'); setStationQuery(''); setStationResults([]); }}
-              className="text-xs text-primary font-medium px-3 py-1.5 rounded-full hover:bg-primary/10 transition-colors shrink-0"
-            >
-              {editingField === 'origin' ? 'Schließen' : 'Ändern'}
-            </button>
           </div>
-
-          <div className="h-px" style={{ backgroundColor: '#1A1A1A' }} />
-
-          {/* Richtung (direction/destination) */}
-          <div className="flex items-center justify-between py-2">
-            <div className="flex items-center gap-2 flex-1 min-w-0">
-              <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
-              <div className="min-w-0">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Richtung</p>
-                <p className="text-sm font-semibold text-foreground truncate">{currentDirection.name.split(',')[0]}</p>
-              </div>
-            </div>
-            <button
-              onClick={() => { setEditingField(editingField === 'direction' ? null : 'direction'); setStationQuery(''); setStationResults([]); }}
-              className="text-xs text-primary font-medium px-3 py-1.5 rounded-full hover:bg-primary/10 transition-colors shrink-0"
-            >
-              {editingField === 'direction' ? 'Schließen' : 'Ändern'}
-            </button>
-          </div>
-
-          {/* Search overlay for whichever field is being edited */}
-          {editingField && (
-            <div className="space-y-2 pt-2" style={{ borderTop: '1px solid #1A1A1A' }}>
-              <input
-                type="text"
-                value={stationQuery}
-                onChange={e => handleStationSearch(e.target.value)}
-                placeholder={editingField === 'origin' ? 'Abfahrtsbahnhof suchen...' : 'Zielbahnhof / Richtung suchen...'}
-                autoFocus
-                className="w-full h-12 rounded-2xl px-4 text-sm text-foreground placeholder:text-muted-foreground outline-none border border-transparent focus:border-primary"
-                style={{ backgroundColor: '#1A1A1A' }}
-              />
-              {stationLoading && (
-                <div className="flex justify-center py-3">
-                  <div className="amber-spinner" style={{ width: 18, height: 18 }} />
-                </div>
-              )}
-              <div className="divide-y" style={{ borderColor: '#1A1A1A' }}>
-                {stationResults.map(s => (
-                  <button key={s.id} onClick={() => selectStation(s)} className="w-full text-left px-3 py-2.5 flex items-center gap-3 hover:bg-secondary/50 transition-colors">
-                    <Train className="h-4 w-4 text-primary shrink-0" />
-                    <div>
-                      <p className="text-sm font-medium text-foreground">{s.name.split(',')[0]}</p>
-                      {s.name.includes(',') && <p className="text-xs text-muted-foreground">{s.name.split(',').slice(1).join(',').trim()}</p>}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+          <button
+            onClick={() => { setEditingField(editingField === 'origin' ? null : 'origin'); setStationQuery(''); setStationResults([]); }}
+            className="text-xs text-primary font-medium px-3 py-1.5 rounded-full hover:bg-primary/10 transition-colors shrink-0"
+          >
+            {editingField === 'origin' ? 'Schließen' : 'Ändern'}
+          </button>
         </div>
 
-        <div className="flex gap-2">
-          <div className="flex-1">
-            <label className="text-xs text-muted-foreground mb-1 block">Ab wann?</label>
+        <div className="h-px" style={{ backgroundColor: '#1A1A1A' }} />
+
+        {/* Richtung (direction/destination) */}
+        <div className="flex items-center justify-between py-2">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <MapPin className="h-3.5 w-3.5 text-primary shrink-0" />
+            <div className="min-w-0">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Richtung</p>
+              <p className="text-sm font-semibold text-foreground truncate">{currentDirection.name.split(',')[0]}</p>
+            </div>
+          </div>
+          <button
+            onClick={() => { setEditingField(editingField === 'direction' ? null : 'direction'); setStationQuery(''); setStationResults([]); }}
+            className="text-xs text-primary font-medium px-3 py-1.5 rounded-full hover:bg-primary/10 transition-colors shrink-0"
+          >
+            {editingField === 'direction' ? 'Schließen' : 'Ändern'}
+          </button>
+        </div>
+
+        {/* Search overlay */}
+        {editingField && (
+          <div className="space-y-2 pt-2" style={{ borderTop: '1px solid #1A1A1A' }}>
             <input
-              type="time"
-              value={departureTime}
-              onChange={e => setDepartureTime(e.target.value)}
-              className="w-full h-12 rounded-2xl px-4 text-sm text-foreground outline-none border border-transparent focus:border-primary transition-all"
+              type="text"
+              value={stationQuery}
+              onChange={e => handleStationSearch(e.target.value)}
+              placeholder={editingField === 'origin' ? 'Abfahrtsbahnhof suchen...' : 'Zielbahnhof suchen...'}
+              autoFocus
+              className="w-full h-12 rounded-2xl px-4 text-sm text-foreground placeholder:text-muted-foreground outline-none border border-transparent focus:border-primary"
               style={{ backgroundColor: '#1A1A1A' }}
             />
+            {stationLoading && (
+              <div className="flex justify-center py-3">
+                <div className="amber-spinner" style={{ width: 18, height: 18 }} />
+              </div>
+            )}
+            <div className="divide-y" style={{ borderColor: '#1A1A1A' }}>
+              {stationResults.map(s => (
+                <button key={s.id} onClick={() => selectStation(s)} className="w-full text-left px-3 py-2.5 flex items-center gap-3 hover:bg-secondary/50 transition-colors">
+                  <Train className="h-4 w-4 text-primary shrink-0" />
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{s.name.split(',')[0]}</p>
+                    {s.name.includes(',') && <p className="text-xs text-muted-foreground">{s.name.split(',').slice(1).join(',').trim()}</p>}
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="flex items-end">
-            <button
-              onClick={searchDepartures}
-              disabled={loading}
-              className="h-12 px-5 rounded-full bg-primary text-primary-foreground font-bold text-sm flex items-center gap-2 disabled:opacity-50"
-            >
-              {loading ? <div className="amber-spinner" style={{ width: 16, height: 16, borderColor: 'rgba(0,0,0,0.2)', borderTopColor: '#000' }} /> : <Search className="h-4 w-4" />}
-              Suchen
-            </button>
-          </div>
+        )}
+      </div>
+
+      {/* Time + Search button */}
+      <div className="flex gap-2 mb-4">
+        <div className="flex-1">
+          <label className="text-xs text-muted-foreground mb-1 block">Ab wann?</label>
+          <input
+            type="time"
+            value={departureTime}
+            onChange={e => setDepartureTime(e.target.value)}
+            className="w-full h-12 rounded-2xl px-4 text-sm text-foreground outline-none border border-transparent focus:border-primary transition-all"
+            style={{ backgroundColor: '#1A1A1A' }}
+          />
+        </div>
+        <div className="flex items-end">
+          <button
+            onClick={searchConnections}
+            disabled={loading}
+            className="h-12 px-5 rounded-full bg-primary text-primary-foreground font-bold text-sm flex items-center gap-2 disabled:opacity-50"
+          >
+            {loading ? <div className="amber-spinner" style={{ width: 16, height: 16, borderColor: 'rgba(0,0,0,0.2)', borderTopColor: '#000' }} /> : <Search className="h-4 w-4" />}
+            Suchen
+          </button>
         </div>
       </div>
 
       {/* Filter */}
-      {departures.length > 0 && (
+      {journeyResults.length > 0 && (
         <div className="mb-3">
           <input
             type="text"
             value={filterText}
             onChange={e => setFilterText(e.target.value)}
-            placeholder="Filtern: Richtung oder Linie..."
+            placeholder="Filtern: Linie oder Bahnhof..."
             className="w-full h-11 rounded-2xl px-4 text-xs text-foreground placeholder:text-muted-foreground outline-none border border-transparent focus:border-primary"
             style={{ backgroundColor: '#1A1A1A' }}
           />
         </div>
       )}
 
-      {/* Departure results */}
-      <div className="flex-1 overflow-y-auto space-y-1 pb-24">
+      {/* Journey results */}
+      <div className="flex-1 overflow-y-auto space-y-2.5 pb-24">
         {loading && (
           <div className="flex items-center justify-center py-12">
             <div className="amber-spinner" />
           </div>
         )}
 
-        {!loading && searched && departures.length === 0 && (
-          <p className="text-sm text-muted-foreground text-center py-8">Keine Abfahrten gefunden</p>
-        )}
-
-        {!loading && searched && filteredDepartures.length === 0 && departures.length > 0 && (
+        {!loading && searched && journeyResults.length === 0 && (
           <div className="text-center py-8">
-            <p className="text-sm text-muted-foreground mb-2">Keine Abfahrten Richtung {currentDirection.name.split(',')[0]}</p>
-            <p className="text-xs text-muted-foreground">Ändere die Richtung oben oder nutze den Filter</p>
+            <p className="text-sm text-muted-foreground mb-2">Keine Verbindungen gefunden</p>
+            <p className="text-xs text-muted-foreground">Ändere Ab oder Richtung und suche erneut</p>
           </div>
         )}
 
-        {!loading && filteredDepartures.map((dep, i) => {
-          const style = getLineBadgeStyle(dep.line.productName, dep.line.name);
+        {!loading && searched && filteredJourneys.length === 0 && journeyResults.length > 0 && (
+          <div className="text-center py-8">
+            <p className="text-sm text-muted-foreground">Kein Treffer für "{filterText}"</p>
+          </div>
+        )}
+
+        {!loading && filteredJourneys.map((journey, i) => {
+          const firstLeg = journey.legs[0];
+          const lastLeg = journey.legs[journey.legs.length - 1];
+          if (!firstLeg || !lastLeg) return null;
+          const transfers = journey.legs.length - 1;
+
           return (
             <button
-              key={`${dep.tripId}-${i}`}
-              onClick={() => addLeg(dep)}
-              className="w-full text-left px-4 py-3.5 rounded-2xl hover:bg-card transition-colors"
-              style={{ borderBottom: '1px solid #1A1A1A' }}
+              key={journey.id}
+              onClick={() => selectJourney(journey)}
+              className="w-full text-left p-4 rounded-[20px] hover:opacity-90 transition-all active:scale-[0.99]"
+              style={{ backgroundColor: '#111111', border: '1px solid #1F1F1F' }}
             >
-              <div className="flex items-center gap-3">
-                <span className="font-display text-xl text-foreground w-14">{formatTime(dep.when)}</span>
-                <span
-                  className="font-bold text-xs shrink-0"
-                  style={{ backgroundColor: style.bg, color: style.text, borderRadius: 6, padding: '6px 10px', fontSize: 12, fontWeight: 700 }}
-                >
-                  {dep.line.name}
-                </span>
+              {/* Times */}
+              <div className="flex items-center justify-between mb-1">
+                <div className="flex items-center gap-2">
+                  <span className="font-display text-2xl text-foreground">{formatTime(firstLeg.departure)}</span>
+                  <ArrowRight className="h-3.5 w-3.5 text-primary" />
+                  <span className="font-display text-2xl text-foreground">{formatTime(lastLeg.arrival)}</span>
+                </div>
+                <span className="text-xs text-muted-foreground">{getDuration(journey)}</span>
               </div>
-              <div className="flex items-center gap-1.5 mt-1 ml-14">
-                <span className="text-xs text-foreground font-medium">{currentOrigin.name.split(',')[0]}</span>
-                <ArrowRight className="h-3 w-3 text-primary" />
-                <span className="text-xs text-muted-foreground truncate">{dep.direction}</span>
+
+              {/* Route: origin → destination */}
+              <p className="text-xs text-muted-foreground mb-2">
+                {firstLeg.origin.name.split(',')[0]} → {lastLeg.destination.name.split(',')[0]}
+              </p>
+
+              {/* Line badges */}
+              <div className="flex items-center gap-1.5 flex-wrap mb-1.5">
+                {journey.legs.map((leg, li) => {
+                  const s = getLineBadgeStyle(leg.line?.productName || '', leg.line?.name || '');
+                  return (
+                    <span
+                      key={li}
+                      style={{
+                        backgroundColor: s.bg,
+                        color: s.text,
+                        borderRadius: 6,
+                        padding: '5px 8px',
+                        fontSize: 11,
+                        fontWeight: 700,
+                        lineHeight: 1,
+                      }}
+                    >
+                      {leg.line?.name || leg.line?.productName || '?'}
+                    </span>
+                  );
+                })}
               </div>
-              {dep.platform && <p className="text-[10px] text-muted-foreground mt-0.5 ml-14">Gleis {dep.platform}</p>}
+
+              {/* Transfers */}
+              {transfers > 0 && (
+                <div className="flex items-center gap-1">
+                  <Repeat className="h-3 w-3 text-muted-foreground" />
+                  <span className="text-xs text-muted-foreground">{transfers}x Umstieg</span>
+                </div>
+              )}
             </button>
           );
         })}
       </div>
-
-      {/* Save button */}
-      {legs.length > 0 && (
-        <div
-          className="fixed bottom-0 left-0 right-0 px-5 py-4"
-          style={{ backgroundColor: '#000000', borderTop: '1px solid #1A1A1A' }}
-        >
-          <div className="max-w-lg mx-auto">
-            <button
-              onClick={() => onSave(buildJourney())}
-              className="w-full h-14 rounded-full bg-primary text-primary-foreground font-bold text-sm"
-            >
-              Verbindung mit {legs.length} Abschnitt{legs.length !== 1 ? 'en' : ''} speichern
-            </button>
-          </div>
-        </div>
-      )}
     </motion.div>
   );
 }
