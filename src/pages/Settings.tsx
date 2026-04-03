@@ -1,10 +1,8 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Separator } from '@/components/ui/separator';
 import { WEEKDAY_LABELS, type Weekday } from '@/lib/types';
 import { ArrowLeft, LogOut, Moon, Sun, Bell, Clock, Globe, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -12,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 
 const ALL_WEEKDAYS: Weekday[] = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+const inputStyle = { backgroundColor: '#1A1A1A', border: '1px solid #2A2A2A' };
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -22,12 +21,7 @@ export default function Settings() {
   const [quietEnd, setQuietEnd] = useState('06:00');
   const [defaultDays, setDefaultDays] = useState<Weekday[]>(['mon', 'tue', 'wed', 'thu', 'fri']);
   const [notifications, setNotifications] = useState({
-    delays: true,
-    cancellations: true,
-    disruptions: true,
-    platformChanges: true,
-    alternatives: false,
-    dailySummary: true,
+    delays: true, cancellations: true, disruptions: true, platformChanges: true, alternatives: false, dailySummary: true,
   });
 
   const toggleDarkMode = (enabled: boolean) => {
@@ -53,8 +47,7 @@ export default function Settings() {
         <h1 className="font-bold text-lg">Einstellungen</h1>
       </div>
 
-      {/* Account */}
-      <Card className="mb-4">
+      <Card className="mb-4 card-amber-border">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm">Konto</CardTitle>
         </CardHeader>
@@ -66,19 +59,14 @@ export default function Settings() {
         </CardContent>
       </Card>
 
-      {/* Notifications */}
-      <Card className="mb-4">
+      <Card className="mb-4 card-amber-border">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm flex items-center gap-2"><Bell className="h-4 w-4" /> Benachrichtigungen</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           {Object.entries({
-            delays: 'Verspätungen',
-            cancellations: 'Ausfälle',
-            disruptions: 'Störungen',
-            platformChanges: 'Gleisänderungen',
-            alternatives: 'Alternative Routen',
-            dailySummary: 'Tägliche Zusammenfassung',
+            delays: 'Verspätungen', cancellations: 'Ausfälle', disruptions: 'Störungen',
+            platformChanges: 'Gleisänderungen', alternatives: 'Alternative Routen', dailySummary: 'Tägliche Zusammenfassung',
           }).map(([key, label]) => (
             <div key={key} className="flex items-center justify-between">
               <Label className="text-sm">{label}</Label>
@@ -88,22 +76,20 @@ export default function Settings() {
               />
             </div>
           ))}
-          <Separator />
-          <div className="space-y-2">
-            <Label className="text-xs text-muted-foreground flex items-center gap-1">
+          <div style={{ borderTop: '1px solid #1A1A1A', paddingTop: '12px' }}>
+            <Label className="text-xs text-muted-foreground flex items-center gap-1 mb-2">
               <Clock className="h-3 w-3" /> Ruhezeiten
             </Label>
             <div className="flex gap-2 items-center">
-              <Input type="time" value={quietStart} onChange={e => setQuietStart(e.target.value)} className="w-24 text-sm" />
+              <input type="time" value={quietStart} onChange={e => setQuietStart(e.target.value)} className="w-24 h-9 rounded-xl px-2 text-sm text-foreground outline-none focus:border-primary" style={inputStyle} />
               <span className="text-muted-foreground text-sm">bis</span>
-              <Input type="time" value={quietEnd} onChange={e => setQuietEnd(e.target.value)} className="w-24 text-sm" />
+              <input type="time" value={quietEnd} onChange={e => setQuietEnd(e.target.value)} className="w-24 h-9 rounded-xl px-2 text-sm text-foreground outline-none focus:border-primary" style={inputStyle} />
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Preferences */}
-      <Card className="mb-4">
+      <Card className="mb-4 card-amber-border">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm">Einstellungen</CardTitle>
         </CardHeader>
@@ -116,28 +102,18 @@ export default function Settings() {
             <Switch checked={darkMode} onCheckedChange={toggleDarkMode} />
           </div>
           <div className="flex items-center justify-between">
-            <Label className="text-sm flex items-center gap-2">
-              <Clock className="h-4 w-4" /> Zeitformat
-            </Label>
+            <Label className="text-sm flex items-center gap-2"><Clock className="h-4 w-4" /> Zeitformat</Label>
             <div className="flex gap-1">
               {(['24h', '12h'] as const).map(f => (
-                <button
-                  key={f}
-                  onClick={() => setTimeFormat(f)}
-                  className={cn(
-                    'px-3 py-1 rounded-md text-xs font-medium transition-colors',
-                    timeFormat === f ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'
-                  )}
-                >
-                  {f}
-                </button>
+                <button key={f} onClick={() => setTimeFormat(f)} className={cn(
+                  'px-3 py-1 rounded-xl text-xs font-medium transition-colors',
+                  timeFormat === f ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'
+                )}>{f}</button>
               ))}
             </div>
           </div>
           <div className="flex items-center justify-between">
-            <Label className="text-sm flex items-center gap-2">
-              <Globe className="h-4 w-4" /> Sprache
-            </Label>
+            <Label className="text-sm flex items-center gap-2"><Globe className="h-4 w-4" /> Sprache</Label>
             <span className="text-sm text-muted-foreground">Deutsch</span>
           </div>
           <div className="space-y-2">
@@ -146,24 +122,17 @@ export default function Settings() {
             </Label>
             <div className="flex gap-1.5">
               {ALL_WEEKDAYS.map(day => (
-                <button
-                  key={day}
-                  onClick={() => toggleDay(day)}
-                  className={cn(
-                    'h-8 w-8 rounded-lg text-[10px] font-semibold transition-colors',
-                    defaultDays.includes(day) ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'
-                  )}
-                >
-                  {WEEKDAY_LABELS[day]}
-                </button>
+                <button key={day} onClick={() => toggleDay(day)} className={cn(
+                  'h-8 w-8 rounded-xl text-[10px] font-semibold transition-colors',
+                  defaultDays.includes(day) ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'
+                )}>{WEEKDAY_LABELS[day]}</button>
               ))}
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Logout */}
-      <Button variant="outline" className="w-full gap-2 text-destructive border-destructive/30 hover:bg-destructive/5" onClick={handleLogout}>
+      <Button variant="outline" className="w-full gap-2 text-destructive card-amber-border hover:bg-destructive/5 rounded-xl" onClick={handleLogout}>
         <LogOut className="h-4 w-4" /> Abmelden
       </Button>
     </div>

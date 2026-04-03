@@ -3,18 +3,18 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { getMockRoutes, generateMockAlerts } from '@/lib/mock-data';
 import type { Alert } from '@/lib/types';
-import { Bell, BellOff, Check, ArrowLeft } from 'lucide-react';
+import { Bell, Check, ArrowLeft, AlertTriangle, XCircle, ArrowRightLeft, RefreshCw, FileText, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { EmptyState } from '@/components/EmptyState';
 
-const ALERT_ICONS: Record<string, string> = {
-  delay: '⏱',
-  cancellation: '❌',
-  disruption: '⚠️',
-  platform_change: '🔀',
-  alternative_route: '🔄',
-  daily_summary: '📋',
+const ALERT_ICONS: Record<string, React.ElementType> = {
+  delay: Clock,
+  cancellation: XCircle,
+  disruption: AlertTriangle,
+  platform_change: ArrowRightLeft,
+  alternative_route: RefreshCw,
+  daily_summary: FileText,
 };
 
 export default function Notifications() {
@@ -58,34 +58,37 @@ export default function Notifications() {
 
       {alerts.length > 0 ? (
         <div className="space-y-2">
-          {alerts.map(alert => (
-            <Card
-              key={alert.id}
-              className={cn('transition-all cursor-pointer', !alert.is_read && 'border-primary/30 bg-primary/[0.02]')}
-              onClick={() => markRead(alert.id)}
-            >
-              <CardContent className="p-3">
-                <div className="flex items-start gap-3">
-                  <span className="text-lg shrink-0">{ALERT_ICONS[alert.type] || '🔔'}</span>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <p className={cn('text-sm', !alert.is_read ? 'font-semibold' : 'font-medium')}>{alert.title}</p>
-                        <p className="text-[10px] text-primary/70 font-medium">{alert.route_name}</p>
+          {alerts.map(alert => {
+            const IconComp = ALERT_ICONS[alert.type] || Bell;
+            return (
+              <Card
+                key={alert.id}
+                className={cn('transition-all cursor-pointer card-amber-border', !alert.is_read && 'border-primary/30 bg-primary/[0.02]')}
+                onClick={() => markRead(alert.id)}
+              >
+                <CardContent className="p-3">
+                  <div className="flex items-start gap-3">
+                    <IconComp className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <p className={cn('text-sm', !alert.is_read ? 'font-semibold' : 'font-medium')}>{alert.title}</p>
+                          <p className="text-[10px] text-primary/70 font-medium">{alert.route_name}</p>
+                        </div>
+                        {!alert.is_read && <div className="h-2 w-2 rounded-full bg-primary shrink-0 mt-1.5" />}
                       </div>
-                      {!alert.is_read && <div className="h-2 w-2 rounded-full bg-primary shrink-0 mt-1.5" />}
+                      <p className="text-xs text-muted-foreground mt-1">{alert.message}</p>
+                      <p className="text-[10px] text-muted-foreground mt-2">
+                        {new Date(alert.created_at).toLocaleString('de-DE', {
+                          day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
+                        })}
+                      </p>
                     </div>
-                    <p className="text-xs text-muted-foreground mt-1">{alert.message}</p>
-                    <p className="text-[10px] text-muted-foreground mt-2">
-                      {new Date(alert.created_at).toLocaleString('de-DE', {
-                        day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
-                      })}
-                    </p>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       ) : (
         <EmptyState

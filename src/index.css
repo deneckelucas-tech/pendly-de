@@ -6,41 +6,45 @@
 
 @layer base {
   :root {
-    --background: 222 30% 11%;
+    --background: 0 0% 4%;
     --foreground: 210 40% 96%;
 
-    --card: 222 30% 17%;
+    --card: 0 0% 7.5%;
     --card-foreground: 210 40% 96%;
 
-    --popover: 222 30% 17%;
+    --popover: 0 0% 7.5%;
     --popover-foreground: 210 40% 96%;
 
     --primary: 38 92% 50%;
-    --primary-foreground: 222 30% 11%;
+    --primary-foreground: 0 0% 0%;
 
-    --secondary: 222 30% 22%;
-    --secondary-foreground: 210 40% 90%;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 215 16% 57%;
 
-    --muted: 222 30% 14%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 0 0% 8%;
+    --muted-foreground: 220 9% 46%;
 
     --accent: 38 92% 50%;
-    --accent-foreground: 222 30% 11%;
+    --accent-foreground: 0 0% 0%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 222 30% 22%;
-    --input: 222 30% 22%;
+    --border: 0 0% 10%;
+    --input: 0 0% 10%;
     --ring: 38 92% 50%;
 
     --radius: 1rem;
+
+    /* Amber glow border for cards */
+    --card-border: rgba(245, 158, 11, 0.08);
+    --card-glow: 0 0 24px rgba(245, 158, 11, 0.06);
 
     /* Status colors */
     --status-ontime: 152 60% 42%;
     --status-ontime-foreground: 0 0% 100%;
     --status-minor-delay: 38 92% 50%;
-    --status-minor-delay-foreground: 222 30% 11%;
+    --status-minor-delay-foreground: 0 0% 0%;
     --status-major-delay: 0 72% 51%;
     --status-major-delay-foreground: 0 0% 100%;
     --status-cancelled: 0 72% 51%;
@@ -49,17 +53,22 @@
     --status-disruption-foreground: 0 0% 100%;
     --status-platform: 200 80% 50%;
     --status-platform-foreground: 0 0% 100%;
-    --status-nodata: 215 16% 47%;
+    --status-nodata: 220 9% 46%;
     --status-nodata-foreground: 0 0% 100%;
 
-    --sidebar-background: 222 30% 11%;
+    --sidebar-background: 0 0% 4%;
     --sidebar-foreground: 210 40% 96%;
     --sidebar-primary: 38 92% 50%;
-    --sidebar-primary-foreground: 222 30% 11%;
-    --sidebar-accent: 222 30% 17%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 0 0% 7.5%;
     --sidebar-accent-foreground: 210 40% 96%;
-    --sidebar-border: 222 30% 22%;
+    --sidebar-border: 0 0% 10%;
     --sidebar-ring: 38 92% 50%;
+
+    /* Nav colors */
+    --nav-bg: 0 0% 6%;
+    --nav-border: 0 0% 10%;
+    --nav-inactive: 220 9% 34%;
   }
 }
 
@@ -75,11 +84,15 @@
 }
 
 @layer utilities {
-  .gradient-hero {
-    background: linear-gradient(135deg, hsl(222, 30%, 17%) 0%, hsl(222, 30%, 14%) 100%);
+  .card-amber-border {
+    border: 1px solid var(--card-border);
   }
-  .gradient-hero-subtle {
-    background: linear-gradient(135deg, hsl(222, 30%, 14%) 0%, hsl(222, 30%, 11%) 100%);
+  .card-amber-glow {
+    border: 1px solid var(--card-border);
+    box-shadow: var(--card-glow);
+  }
+  .progress-glow {
+    box-shadow: 0 0 8px rgba(245, 158, 11, 0.4);
   }
 }
 
@@ -90,4 +103,10 @@
 
 .animate-pulse-dot {
   animation: pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
