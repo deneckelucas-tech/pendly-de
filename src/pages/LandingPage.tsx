@@ -575,7 +575,7 @@ export default function LandingPage() {
               {
                 n: "1",
                 title: "Route einrichten",
-                desc: "Gib deine Start- und Zielhaltestelle ein. Bahnfrei findet deine Verbindungen automatisch.",
+                desc: "Gib deine Start- und Zielhaltestelle ein. Pendly findet deine Verbindungen automatisch.",
               },
               {
                 n: "2",
