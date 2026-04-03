@@ -547,29 +547,32 @@ export default function LandingPage() {
         <div className="lp-divider" />
 
         {/* STATS */}
-        <section className="lp-stats lp-reveal" ref={reveal(1)}>
+        <section className="lp-stats lp-reveal" ref={(el) => { reveal(1)(el); statsRef.current = el; }}>
           <div className="lp-section-label">Die Realität</div>
           <div className="lp-section-title" style={{ marginBottom: 32 }}>Zahlen lügen nicht.</div>
           <div className="lp-stats-grid">
             <div className="lp-stat-card">
-              <div className="lp-stat-number">0%</div>
+              <div className="lp-stat-number">{counters.pct}%</div>
               <div className="lp-stat-desc"><strong>aller Fernzüge</strong> kamen 2023 verspätet an</div>
               <div className="lp-stat-source">Quelle: Deutsche Bahn AG</div>
             </div>
             <div className="lp-stat-card">
-              <div className="lp-stat-number">0 Min</div>
+              <div className="lp-stat-number">{counters.min} Min</div>
               <div className="lp-stat-desc"><strong>durchschnittliche Verspätung</strong> pro Tag</div>
               <div className="lp-stat-source">Quelle: Statista 2023</div>
             </div>
             <div className="lp-stat-card">
-              <div className="lp-stat-number">0</div>
+              <div className="lp-stat-number">{counters.fails}</div>
               <div className="lp-stat-desc"><strong>Zugausfälle</strong> täglich in Deutschland</div>
               <div className="lp-stat-source">Quelle: Bundesnetzagentur</div>
             </div>
             <div className="lp-stat-card">
-              <div className="lp-stat-number">0 s</div>
+              <div className="lp-stat-number">{counters.sec} s</div>
               <div className="lp-stat-desc"><strong>Reaktionszeit</strong> von Pendly bei Störungen</div>
               <div className="lp-stat-source">Echtzeit-Monitoring</div>
+            </div>
+          </div>
+        </section>
             </div>
           </div>
         </section>
