@@ -8,6 +8,7 @@ import Landing from "./pages/Landing";
 import LandingPage from "./pages/LandingPage";
 import Auth from "./pages/Auth";
 import Onboarding from "./pages/Onboarding";
+import RouteWizard from "./pages/RouteWizard";
 import Dashboard from "./pages/Dashboard";
 import RouteDetail from "./pages/RouteDetail";
 import ManageRoutes from "./pages/ManageRoutes";
