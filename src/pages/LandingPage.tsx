@@ -544,7 +544,7 @@ export default function LandingPage() {
               {
                 icon: "🔀",
                 title: "Automatische Alternativen",
-                desc: "Fällt dein Zug aus? Bahnfrei zeigt dir sofort die beste Alternative – inkl. ob du es noch rechtzeitig schaffst.",
+                desc: "Fällt dein Zug aus? Pendly zeigt dir sofort die beste Alternative – inkl. ob du es noch rechtzeitig schaffst.",
               },
               {
                 icon: "📊",
