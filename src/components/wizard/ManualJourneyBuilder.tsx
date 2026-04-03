@@ -27,11 +27,18 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, onSave, 
   const [stationLoading, setStationLoading] = useState(false);
 
   useEffect(() => {
-    searchConnections();
+    if (currentOrigin.id !== currentDirection.id) {
+      searchConnections();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const searchConnections = useCallback(async () => {
+    if (currentOrigin.id === currentDirection.id) {
+      setJourneyResults([]);
+      setSearched(true);
+      return;
+    }
     setLoading(true);
     setSearched(true);
     try {
