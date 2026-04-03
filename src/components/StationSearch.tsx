@@ -16,6 +16,7 @@ export function StationSearch({ label, placeholder = 'Bahnhof suchen...', value,
   const [query, setQuery] = useState(value?.name || '');
   const [results, setResults] = useState<Station[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
   const [open, setOpen] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -48,9 +49,11 @@ export function StationSearch({ label, placeholder = 'Bahnhof suchen...', value,
 
     debounceRef.current = setTimeout(async () => {
       setLoading(true);
+      setError(false);
       const stations = await searchStations(q);
       setResults(stations);
       setOpen(stations.length > 0);
+      if (stations.length === 0 && q.length >= 2) setError(true);
       setLoading(false);
     }, 300);
   };

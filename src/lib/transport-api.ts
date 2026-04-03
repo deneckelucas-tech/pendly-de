@@ -14,6 +14,26 @@ import type { Station, Journey, JourneyLeg, TransportType } from './types';
 
 const BASE_URL = 'https://v6.db.transport.rest';
 
+async function fetchWithRetry(url: string, retries = 2): Promise<Response> {
+  for (let i = 0; i <= retries; i++) {
+    try {
+      const res = await fetch(url);
+      if (res.status === 503 && i < retries) {
+        await new Promise(r => setTimeout(r, 1000 * (i + 1)));
+        continue;
+      }
+      return res;
+    } catch (err) {
+      if (i < retries) {
+        await new Promise(r => setTimeout(r, 1000 * (i + 1)));
+        continue;
+      }
+      throw err;
+    }
+  }
+  throw new Error('Max retries reached');
+}
+
 export async function searchStations(query: string): Promise<Station[]> {
   if (!query || query.length < 2) return [];
 
@@ -27,7 +47,7 @@ export async function searchStations(query: string): Promise<Station[]> {
   });
 
   try {
-    const res = await fetch(`${BASE_URL}/locations?${params}`);
+    const res = await fetchWithRetry(`${BASE_URL}/locations?${params}`);
     if (!res.ok) throw new Error(`API error: ${res.status}`);
     const data = await res.json();
 
@@ -79,7 +99,7 @@ export async function searchJourneys(
   }
 
   try {
-    const res = await fetch(`${BASE_URL}/journeys?${params}`);
+    const res = await fetchWithRetry(`${BASE_URL}/journeys?${params}`);
     if (!res.ok) throw new Error(`API error: ${res.status}`);
     const data = await res.json();
 
