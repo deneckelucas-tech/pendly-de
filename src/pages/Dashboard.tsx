@@ -182,15 +182,6 @@ export default function Dashboard() {
             <p className="text-sm text-muted-foreground">{nextLeg.destinationName}</p>
           </div>
 
-          <div>
-            <div className="flex justify-between text-[10px] mb-1.5" style={{ color: '#6B7280' }}>
-              <span>Jetzt</span>
-              <span>Abfahrt</span>
-            </div>
-            <div className="relative">
-              <Progress value={getDepartureProgress()} className="h-1.5 bg-secondary [&>div]:bg-primary [&>div]:progress-glow" />
-            </div>
-          </div>
         </motion.div>
       )}
 
