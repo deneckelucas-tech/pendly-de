@@ -1,9 +1,12 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import pendlyLogo from "@/assets/logo.png";
 
 export default function LandingPage() {
   const revealRefs = useRef<(HTMLElement | null)[]>([]);
+  const statsRef = useRef<HTMLDivElement | null>(null);
+  const [statsVisible, setStatsVisible] = useState(false);
+  const [counters, setCounters] = useState({ pct: 0, min: 0, fails: 0, sec: 0 });
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -20,6 +23,34 @@ export default function LandingPage() {
     revealRefs.current.forEach((el) => el && observer.observe(el));
     return () => observer.disconnect();
   }, []);
+
+  useEffect(() => {
+    if (!statsRef.current) return;
+    const obs = new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) { setStatsVisible(true); obs.disconnect(); }
+    }, { threshold: 0.3 });
+    obs.observe(statsRef.current);
+    return () => obs.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!statsVisible) return;
+    const targets = { pct: 34, min: 8, fails: 147, sec: 0 };
+    const duration = 1500;
+    const start = performance.now();
+    const animate = (now: number) => {
+      const t = Math.min((now - start) / duration, 1);
+      const ease = 1 - Math.pow(1 - t, 3);
+      setCounters({
+        pct: Math.round(targets.pct * ease),
+        min: Math.round(targets.min * ease),
+        fails: Math.round(targets.fails * ease),
+        sec: 0,
+      });
+      if (t < 1) requestAnimationFrame(animate);
+    };
+    requestAnimationFrame(animate);
+  }, [statsVisible]);
 
   const reveal = (i: number) => (el: HTMLElement | null) => {
     if (el) revealRefs.current[i] = el;
@@ -81,7 +112,7 @@ export default function LandingPage() {
           border-bottom:1px solid var(--divider);
         }
         .lp-logo{display:flex;align-items:center;gap:10px}
-        .lp-logo img{height:38px;width:auto}
+        .lp-logo img{height:46px;width:auto}
         .lp-logo-text{
           font-family:'Bebas Neue',sans-serif;
           font-size:28px;letter-spacing:2px;color:var(--text);
@@ -158,7 +189,7 @@ export default function LandingPage() {
         }
         .lp-btn-main:hover::after{transform:translateX(100%)}
         .lp-btn-main:hover{transform:translateY(-2px);box-shadow:0 0 56px rgba(245,158,11,0.45)}
-        .lp-trial-note{font-size:13px;color:var(--muted)}
+        .lp-trial-note{font-size:13px;color:var(--green)}
         .lp-trial-note span{color:var(--green);font-weight:500}
 
         /* MOCK CARD */
@@ -420,7 +451,7 @@ export default function LandingPage() {
         <nav className="lp-nav">
           <div className="lp-logo">
             <img src={pendlyLogo} alt="Pendly Logo" />
-            <span className="lp-logo-text">Pendly</span>
+            <span className="lp-logo-text">Pend<span style={{color:'var(--amber)'}}>l</span><span style={{color:'var(--amber)'}}>y</span></span>
           </div>
           <a href="/auth" className="lp-nav-cta">Kostenlos testen</a>
         </nav>
@@ -516,27 +547,27 @@ export default function LandingPage() {
         <div className="lp-divider" />
 
         {/* STATS */}
-        <section className="lp-stats lp-reveal" ref={reveal(1)}>
+        <section className="lp-stats lp-reveal" ref={(el) => { reveal(1)(el); (statsRef as any).current = el; }}>
           <div className="lp-section-label">Die Realität</div>
           <div className="lp-section-title" style={{ marginBottom: 32 }}>Zahlen lügen nicht.</div>
           <div className="lp-stats-grid">
             <div className="lp-stat-card">
-              <div className="lp-stat-number">0%</div>
+              <div className="lp-stat-number">{counters.pct}%</div>
               <div className="lp-stat-desc"><strong>aller Fernzüge</strong> kamen 2023 verspätet an</div>
               <div className="lp-stat-source">Quelle: Deutsche Bahn AG</div>
             </div>
             <div className="lp-stat-card">
-              <div className="lp-stat-number">0 Min</div>
+              <div className="lp-stat-number">{counters.min} Min</div>
               <div className="lp-stat-desc"><strong>durchschnittliche Verspätung</strong> pro Tag</div>
               <div className="lp-stat-source">Quelle: Statista 2023</div>
             </div>
             <div className="lp-stat-card">
-              <div className="lp-stat-number">0</div>
+              <div className="lp-stat-number">{counters.fails}</div>
               <div className="lp-stat-desc"><strong>Zugausfälle</strong> täglich in Deutschland</div>
               <div className="lp-stat-source">Quelle: Bundesnetzagentur</div>
             </div>
             <div className="lp-stat-card">
-              <div className="lp-stat-number">0 s</div>
+              <div className="lp-stat-number">{counters.sec} s</div>
               <div className="lp-stat-desc"><strong>Reaktionszeit</strong> von Pendly bei Störungen</div>
               <div className="lp-stat-source">Echtzeit-Monitoring</div>
             </div>
