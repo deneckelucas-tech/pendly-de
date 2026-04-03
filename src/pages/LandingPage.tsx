@@ -420,7 +420,7 @@ export default function LandingPage() {
         <nav className="lp-nav">
           <div className="lp-logo">
             <img src={pendlyLogo} alt="Pendly Logo" />
-            <span className="lp-logo-text">Pendly</span>
+            <span className="lp-logo-text">Pend<span style={{color:'var(--amber)'}}>l</span><span style={{color:'var(--amber)'}}>y</span></span>
           </div>
           <a href="/auth" className="lp-nav-cta">Kostenlos testen</a>
         </nav>
