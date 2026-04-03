@@ -1,123 +1,133 @@
-import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Train, Bell, Shield, Zap, Clock, MapPin } from 'lucide-react';
-
-const features = [
-  { icon: Bell, title: 'Sofortige Benachrichtigungen', desc: 'Verspätungen, Ausfälle und Störungen in Echtzeit.' },
-  { icon: Clock, title: 'Dein Zeitplan', desc: 'Speichere deine täglichen Pendlerrouten und Abfahrtszeiten.' },
-  { icon: MapPin, title: 'Gleisänderungen', desc: 'Erfahre sofort, wenn sich dein Gleis ändert.' },
-  { icon: Zap, title: 'Schnell & einfach', desc: 'Alle wichtigen Infos auf einen Blick – ohne Umwege.' },
-  { icon: Shield, title: 'Zuverlässig', desc: 'Vorbereitet für Deutsche Bahn und regionale Verkehrsverbünde.' },
-  { icon: Train, title: 'Alle Verkehrsmittel', desc: 'S-Bahn, U-Bahn, RE, RB, ICE, Bus und Tram.' },
-];
+import { Radio, Train, Zap } from 'lucide-react';
 
 export default function Landing() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Hero */}
-      <section className="gradient-hero px-6 pt-14 pb-16 text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <div className="flex items-center justify-center gap-2 mb-6">
-            <div className="h-10 w-10 bg-primary-foreground/20 rounded-xl flex items-center justify-center">
-              <Train className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <span className="text-primary-foreground font-bold text-xl">PendlerAlert</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-primary-foreground mb-4 leading-tight max-w-md mx-auto">
-            Dein Pendelalarm für Deutschland
-          </h1>
-          <p className="text-primary-foreground/85 text-sm sm:text-base max-w-sm mx-auto mb-8 leading-relaxed">
-            Speichere deine tägliche Pendelstrecke und werde bei Verspätungen, Ausfällen oder Störungen sofort benachrichtigt.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <Button
-              size="lg"
-              onClick={() => navigate('/auth')}
-              className="bg-primary-foreground text-primary hover:bg-primary-foreground/90 font-semibold"
-            >
-              Kostenlos starten
-            </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              onClick={() => navigate('/auth?mode=login')}
-              className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
-            >
-              Anmelden
-            </Button>
-          </div>
-        </motion.div>
-      </section>
+    <div className="min-h-screen bg-background flex flex-col px-5 pt-6 pb-8">
+      {/* Hero Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="relative overflow-hidden rounded-2xl border border-border p-6 flex flex-col justify-between"
+        style={{ minHeight: '42vh' }}
+      >
+        {/* Animated gradient background */}
+        <div
+          className="absolute inset-0 -z-0"
+          style={{
+            background: 'linear-gradient(135deg, #1A2540 0%, #0F1729 40%, #1A2540 70%, #0F1729 100%)',
+            backgroundSize: '400% 400%',
+            animation: 'gradientShift 12s ease infinite',
+          }}
+        />
 
-      {/* Preview Cards */}
-      <section className="px-6 -mt-8">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="bg-card rounded-2xl shadow-lg border p-4 max-w-sm mx-auto"
-        >
-          <div className="text-xs text-muted-foreground mb-2 font-medium">Beispiel-Route</div>
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <div className="font-semibold text-sm">Berlin Hbf → Friedrichstraße</div>
-              <div className="text-xs text-muted-foreground">S-Bahn · 07:45</div>
-            </div>
-            <span className="text-xs font-semibold bg-status-ontime text-status-ontime-foreground px-2 py-0.5 rounded-full">
+        <div className="relative z-10 flex flex-col justify-between h-full">
+          <p className="text-xs font-medium text-muted-foreground">Nächste Abfahrt</p>
+
+          <div className="flex-1 flex flex-col items-center justify-center py-6">
+            <span className="text-[64px] leading-none font-extrabold text-foreground tracking-tight">
+              07:12
+            </span>
+            <p className="text-sm font-medium text-foreground/80 mt-3">
+              RE 5 · Hamburg Hbf → Hannover Hbf
+            </p>
+          </div>
+
+          <div className="flex justify-end">
+            <span
+              className="text-xs font-semibold bg-status-ontime/15 text-status-ontime px-3 py-1.5 rounded-lg"
+              style={{ boxShadow: '0 0 12px hsl(152 60% 42% / 0.25)' }}
+            >
               Pünktlich
             </span>
           </div>
-          <div className="border-t pt-3 flex items-center justify-between">
-            <div>
-              <div className="font-semibold text-sm">Hannover → Hildesheim</div>
-              <div className="text-xs text-muted-foreground">RE · 10:00</div>
-            </div>
-            <span className="text-xs font-semibold bg-status-minor-delay text-status-minor-delay-foreground px-2 py-0.5 rounded-full">
-              +8 Min.
-            </span>
-          </div>
-        </motion.div>
-      </section>
-
-      {/* Features */}
-      <section className="px-6 py-12">
-        <h2 className="text-lg font-bold text-center mb-8">Alles für deinen Pendelalltag</h2>
-        <div className="grid grid-cols-2 gap-4 max-w-sm mx-auto">
-          {features.map(({ icon: Icon, title, desc }, i) => (
-            <motion.div
-              key={title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.3 + i * 0.08 }}
-              className="bg-card border rounded-xl p-4"
-            >
-              <div className="h-9 w-9 rounded-lg gradient-hero-subtle flex items-center justify-center mb-3">
-                <Icon className="h-4.5 w-4.5 text-primary" />
-              </div>
-              <h3 className="font-semibold text-xs mb-1">{title}</h3>
-              <p className="text-muted-foreground text-[11px] leading-relaxed">{desc}</p>
-            </motion.div>
-          ))}
         </div>
-      </section>
+      </motion.div>
+
+      {/* Progress bar */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3 }}
+        className="mt-3 mb-8"
+      >
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="text-[10px] text-muted-foreground font-medium">Abfahrt in 8 Min.</span>
+        </div>
+        <div className="h-1 w-full bg-secondary rounded-full overflow-hidden">
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: '72%' }}
+            transition={{ duration: 1.2, delay: 0.5, ease: 'easeOut' }}
+            className="h-full bg-primary rounded-full"
+          />
+        </div>
+      </motion.div>
+
+      {/* Headline */}
+      <motion.div
+        initial={{ opacity: 0, y: 15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.25, duration: 0.5 }}
+        className="mb-8"
+      >
+        <h1 className="text-2xl font-bold text-foreground leading-tight mb-2">
+          Nie wieder die Bahn verpassen.
+        </h1>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          Bahnfrei hält dich informiert – bevor es zu spät ist.
+        </p>
+      </motion.div>
 
       {/* CTA */}
-      <section className="px-6 pb-16 text-center">
-        <div className="gradient-hero-subtle rounded-2xl p-8 max-w-sm mx-auto">
-          <h2 className="font-bold text-lg mb-2">Jetzt starten</h2>
-          <p className="text-muted-foreground text-sm mb-6">Kostenlos registrieren und deine erste Route einrichten.</p>
-          <Button size="lg" onClick={() => navigate('/auth')} className="font-semibold w-full">
-            Route einrichten
-          </Button>
-        </div>
-      </section>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4, duration: 0.5 }}
+        className="mb-6"
+      >
+        <button
+          onClick={() => navigate('/auth')}
+          className="w-full h-14 bg-primary text-primary-foreground font-bold text-base rounded-2xl hover:bg-primary/90 transition-colors"
+        >
+          Kostenlos starten
+        </button>
+        <p className="text-center text-xs text-muted-foreground mt-3">
+          Keine Kreditkarte. Keine Werbung.
+        </p>
+      </motion.div>
+
+      {/* Spacer */}
+      <div className="flex-1" />
+
+      {/* Trust Strip */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.6 }}
+        className="flex items-center justify-center gap-1.5 text-muted-foreground"
+      >
+        <Radio className="h-3.5 w-3.5" />
+        <span className="text-[11px]">Echtzeit-Daten</span>
+        <span className="text-[11px]">·</span>
+        <Train className="h-3.5 w-3.5" />
+        <span className="text-[11px]">Alle Linien</span>
+        <span className="text-[11px]">·</span>
+        <Zap className="h-3.5 w-3.5" />
+        <span className="text-[11px]">Sofort-Alerts</span>
+      </motion.div>
+
+      <style>{`
+        @keyframes gradientShift {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+      `}</style>
     </div>
   );
 }
