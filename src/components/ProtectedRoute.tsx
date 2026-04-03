@@ -1,9 +1,18 @@
-import { Navigate, Outlet } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Navigate, Outlet, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import Paywall from '@/pages/Paywall';
 
 export default function ProtectedRoute() {
-  const { user, loading, subscription } = useAuth();
+  const { user, loading, subscription, checkSubscription } = useAuth();
+  const [searchParams] = useSearchParams();
+
+  // Re-check subscription after successful checkout
+  useEffect(() => {
+    if (searchParams.get('checkout') === 'success') {
+      checkSubscription();
+    }
+  }, [searchParams, checkSubscription]);
 
   if (loading || subscription.status === 'loading') {
     return (
