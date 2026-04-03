@@ -3,8 +3,8 @@ import { ArrowLeft, Plus, Trash2, Loader2, Clock, MapPin, ArrowRight } from 'luc
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { StationSearch } from '@/components/StationSearch';
-import { getDepartures, formatTime } from '@/lib/transport-api';
-import type { Station, Journey, JourneyLeg, Departure } from '@/lib/types';
+import { getDepartures, formatTime, type Departure } from '@/lib/transport-api';
+import type { Station, Journey, JourneyLeg } from '@/lib/types';
 
 interface ManualLeg {
   origin: Station;
