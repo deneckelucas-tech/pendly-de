@@ -126,6 +126,15 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, onSave, 
   };
 
   const filteredDepartures = departures.filter(dep => {
+    // Filter by direction station name if set (fuzzy match on direction string)
+    const dirName = currentDirection.name.split(',')[0].toLowerCase();
+    if (dirName && !dep.direction.toLowerCase().includes(dirName)) {
+      // Also check if the line passes through the direction (partial match)
+      const lineDir = dep.direction.toLowerCase();
+      const dirParts = dirName.split(/[\s-]+/);
+      const dirMatch = dirParts.some(part => part.length > 2 && lineDir.includes(part));
+      if (!dirMatch) return false;
+    }
     if (!filterText) return true;
     const q = filterText.toLowerCase();
     return dep.direction.toLowerCase().includes(q) || dep.line.name.toLowerCase().includes(q) || dep.line.productName.toLowerCase().includes(q);
