@@ -721,9 +721,9 @@ export default function LandingPage() {
         <footer className="bf-footer">
           <p>
             © 2025 Pendly ·{" "}
-            <a href="#">Datenschutz</a> ·{" "}
-            <a href="#">Impressum</a> ·{" "}
-            <a href="#">AGB</a>
+            <a href="/legal#impressum">Impressum</a> ·{" "}
+            <a href="/legal#datenschutz">Datenschutz</a> ·{" "}
+            <a href="/legal#agb">AGB</a>
           </p>
         </footer>
       </div>

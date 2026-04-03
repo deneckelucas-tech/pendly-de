@@ -16,6 +16,7 @@ import ManageRoutes from "./pages/ManageRoutes";
 import Notifications from "./pages/Notifications";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import Legal from "./pages/Legal";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/auth" element={<Auth />} />
+            <Route path="/legal" element={<Legal />} />
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/route-setup" element={<RouteWizard />} />
             <Route element={<ProtectedRoute />}>
