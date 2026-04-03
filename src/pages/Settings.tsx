@@ -4,16 +4,19 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { WEEKDAY_LABELS, type Weekday } from '@/lib/types';
-import { ArrowLeft, LogOut, Moon, Sun, Bell, Clock, Globe, Calendar } from 'lucide-react';
+import { ArrowLeft, LogOut, Moon, Sun, Bell, Clock, Globe, Calendar, CreditCard, Crown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 const ALL_WEEKDAYS: Weekday[] = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 const inputStyle = { backgroundColor: '#1A1A1A', border: '1px solid #2A2A2A' };
 
 export default function Settings() {
   const navigate = useNavigate();
+  const { user, subscription, signOut } = useAuth();
+  const [portalLoading, setPortalLoading] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [timeFormat, setTimeFormat] = useState<'24h' | '12h'>('24h');
   const [language, setLanguage] = useState('de');
@@ -34,8 +37,21 @@ export default function Settings() {
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await signOut();
     navigate('/');
+  };
+
+  const handleManageSubscription = async () => {
+    setPortalLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('customer-portal');
+      if (error) throw error;
+      if (data?.url) window.open(data.url, '_blank');
+    } catch (err) {
+      console.error('Portal error:', err);
+    } finally {
+      setPortalLoading(false);
+    }
   };
 
   return (
@@ -54,8 +70,49 @@ export default function Settings() {
         <CardContent className="space-y-3">
           <div className="space-y-1">
             <Label className="text-xs text-muted-foreground">E-Mail</Label>
-            <p className="text-sm">demo@pendleralert.de</p>
+            <p className="text-sm">{user?.email ?? '–'}</p>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card className="mb-4 card-amber-border">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm flex items-center gap-2"><Crown className="h-4 w-4 text-primary" /> Abo</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-foreground">
+                {subscription.status === 'active' ? 'Pendly Pro' : subscription.status === 'trialing' ? 'Testphase' : 'Kein Abo'}
+              </p>
+              {subscription.status === 'trialing' && (
+                <p className="text-xs text-muted-foreground">Noch {subscription.trialDaysRemaining} Tage kostenlos</p>
+              )}
+              {subscription.status === 'active' && subscription.subscriptionEnd && (
+                <p className="text-xs text-muted-foreground">Verlängert am {new Date(subscription.subscriptionEnd).toLocaleDateString('de-DE')}</p>
+              )}
+            </div>
+            <span className={cn(
+              'text-[10px] font-semibold px-2 py-0.5 rounded-full',
+              subscription.status === 'active' ? 'bg-green-500/15 text-green-400' :
+              subscription.status === 'trialing' ? 'bg-primary/15 text-primary' :
+              'bg-destructive/15 text-destructive'
+            )}>
+              {subscription.status === 'active' ? 'Aktiv' : subscription.status === 'trialing' ? 'Trial' : 'Abgelaufen'}
+            </span>
+          </div>
+          {subscription.status === 'active' && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full rounded-xl card-amber-border gap-2"
+              onClick={handleManageSubscription}
+              disabled={portalLoading}
+            >
+              <CreditCard className="h-4 w-4" />
+              {portalLoading ? 'Wird geladen...' : 'Abo verwalten'}
+            </Button>
+          )}
         </CardContent>
       </Card>
 
