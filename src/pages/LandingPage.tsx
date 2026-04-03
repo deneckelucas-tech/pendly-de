@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import pendlyLogo from "@/assets/logo.png";
 
 export default function LandingPage() {
   const revealRefs = useRef<(HTMLElement | null)[]>([]);
