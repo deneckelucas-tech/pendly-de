@@ -22,8 +22,10 @@ export function DebugPanel() {
   const [loading, setLoading] = useState(false);
   const [expandedEntry, setExpandedEntry] = useState<string | null>(null);
 
-  // Only render in dev
-  if (import.meta.env.PROD) return null;
+  const isProd = import.meta.env.PROD;
+
+  const fetchAll = useCallback(async () => {
+    if (isProd) return;
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
