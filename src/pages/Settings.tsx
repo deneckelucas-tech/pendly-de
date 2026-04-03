@@ -15,6 +15,8 @@ const inputStyle = { backgroundColor: '#1A1A1A', border: '1px solid #2A2A2A' };
 
 export default function Settings() {
   const navigate = useNavigate();
+  const { user, subscription, signOut } = useAuth();
+  const [portalLoading, setPortalLoading] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [timeFormat, setTimeFormat] = useState<'24h' | '12h'>('24h');
   const [language, setLanguage] = useState('de');
