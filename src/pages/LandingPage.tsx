@@ -158,7 +158,7 @@ export default function LandingPage() {
         }
         .lp-btn-main:hover::after{transform:translateX(100%)}
         .lp-btn-main:hover{transform:translateY(-2px);box-shadow:0 0 56px rgba(245,158,11,0.45)}
-        .lp-trial-note{font-size:13px;color:var(--muted)}
+        .lp-trial-note{font-size:13px;color:var(--green)}
         .lp-trial-note span{color:var(--green);font-weight:500}
 
         /* MOCK CARD */
