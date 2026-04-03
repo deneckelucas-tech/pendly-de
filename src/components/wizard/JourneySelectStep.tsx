@@ -28,7 +28,11 @@ export function JourneySelectStep({ origin, destination, transportTypes, onNext,
     try {
       const products: Partial<Record<TransportType, boolean>> = {};
       for (const t of ALL_TRANSPORT) products[t] = transportTypes.includes(t);
-      const results = await searchJourneys(origin.id, destination.id, { results: 8, products });
+      let results = await searchJourneys(origin.id, destination.id, { results: 8, products });
+      // If no results with filters, retry without product filters
+      if (results.length === 0) {
+        results = await searchJourneys(origin.id, destination.id, { results: 8 });
+      }
       setJourneys(results);
     } catch {
       setError(true);
