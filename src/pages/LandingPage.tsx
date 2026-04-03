@@ -477,7 +477,7 @@ export default function LandingPage() {
           <div className="lp-hero-cta-wrap">
             <a href="/auth" className="lp-btn-main">Jetzt kostenlos herunterladen</a>
             <span className="lp-trial-note">
-              7 Tage gratis · Dann 4,99 €/Monat · Jederzeit kündbar
+              <span style={{color:'var(--green)',fontWeight:500}}>7 Tage gratis</span> · Dann 4,99 €/Monat · Jederzeit kündbar
             </span>
           </div>
 
