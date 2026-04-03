@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -50,13 +49,20 @@ export default function Auth() {
     }
   };
 
+  const inputClass = "w-full h-10 rounded-xl px-3 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-colors";
+  const inputStyle = {
+    backgroundColor: '#1A1A1A',
+    border: '1px solid #2A2A2A',
+  };
+  const inputFocusClass = "focus:border-primary";
+
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-background">
-      <Card className="w-full max-w-sm">
+      <Card className="w-full max-w-sm card-amber-border">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <div className="h-9 w-9 gradient-hero rounded-xl flex items-center justify-center">
-              <Train className="h-5 w-5 text-primary-foreground" />
+            <div className="h-9 w-9 bg-card card-amber-border rounded-xl flex items-center justify-center">
+              <Train className="h-5 w-5 text-primary" />
             </div>
           </div>
           <CardTitle className="text-xl">{isLogin ? 'Anmelden' : 'Konto erstellen'}</CardTitle>
@@ -68,18 +74,20 @@ export default function Auth() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">E-Mail</Label>
-              <Input
+              <input
                 id="email"
                 type="email"
                 placeholder="max@beispiel.de"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required
+                className={`${inputClass} ${inputFocusClass}`}
+                style={inputStyle}
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Passwort</Label>
-              <Input
+              <input
                 id="password"
                 type="password"
                 placeholder="••••••••"
@@ -87,9 +95,11 @@ export default function Auth() {
                 onChange={e => setPassword(e.target.value)}
                 required
                 minLength={6}
+                className={`${inputClass} ${inputFocusClass}`}
+                style={inputStyle}
               />
             </div>
-            <Button type="submit" className="w-full font-semibold" disabled={loading}>
+            <Button type="submit" className="w-full font-semibold h-12 rounded-xl" disabled={loading}>
               {loading ? '...' : isLogin ? 'Anmelden' : 'Registrieren'}
             </Button>
           </form>

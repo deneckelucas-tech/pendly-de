@@ -12,21 +12,21 @@ export default function Landing() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="relative overflow-hidden rounded-2xl border border-border p-6 flex flex-col justify-between"
+        className="relative overflow-hidden rounded-2xl card-amber-glow p-6 flex flex-col justify-between"
         style={{ minHeight: '42vh' }}
       >
         {/* Animated gradient background */}
         <div
           className="absolute inset-0 -z-0"
           style={{
-            background: 'linear-gradient(135deg, #1A2540 0%, #0F1729 40%, #1A2540 70%, #0F1729 100%)',
+            background: 'linear-gradient(135deg, #131313 0%, #0A0A0A 40%, #131313 70%, #0A0A0A 100%)',
             backgroundSize: '400% 400%',
             animation: 'gradientShift 12s ease infinite',
           }}
         />
 
         <div className="relative z-10 flex flex-col justify-between h-full">
-          <p className="text-xs font-medium text-muted-foreground">Nächste Abfahrt</p>
+          <p className="text-[11px] font-medium uppercase tracking-[0.1em]" style={{ color: '#6B7280' }}>Nächste Abfahrt</p>
 
           <div className="flex-1 flex flex-col items-center justify-center py-6">
             <span className="text-[64px] leading-none font-extrabold text-foreground tracking-tight">
@@ -56,14 +56,14 @@ export default function Landing() {
         className="mt-3 mb-8"
       >
         <div className="flex items-center justify-between mb-1.5">
-          <span className="text-[10px] text-muted-foreground font-medium">Abfahrt in 8 Min.</span>
+          <span className="text-[10px] font-medium" style={{ color: '#6B7280' }}>Abfahrt in 8 Min.</span>
         </div>
         <div className="h-1 w-full bg-secondary rounded-full overflow-hidden">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: '72%' }}
             transition={{ duration: 1.2, delay: 0.5, ease: 'easeOut' }}
-            className="h-full bg-primary rounded-full"
+            className="h-full bg-primary rounded-full progress-glow"
           />
         </div>
       </motion.div>
@@ -78,7 +78,7 @@ export default function Landing() {
         <h1 className="text-2xl font-bold text-foreground leading-tight mb-2">
           Nie wieder die Bahn verpassen.
         </h1>
-        <p className="text-sm text-muted-foreground leading-relaxed">
+        <p className="text-sm leading-relaxed" style={{ color: '#6B7280' }}>
           Bahnfrei hält dich informiert – bevor es zu spät ist.
         </p>
       </motion.div>
@@ -96,12 +96,11 @@ export default function Landing() {
         >
           Kostenlos starten
         </button>
-        <p className="text-center text-xs text-muted-foreground mt-3">
+        <p className="text-center text-xs mt-3" style={{ color: '#6B7280' }}>
           Keine Kreditkarte. Keine Werbung.
         </p>
       </motion.div>
 
-      {/* Spacer */}
       <div className="flex-1" />
 
       {/* Trust Strip */}
@@ -109,7 +108,8 @@ export default function Landing() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.6 }}
-        className="flex items-center justify-center gap-1.5 text-muted-foreground"
+        className="flex items-center justify-center gap-1.5"
+        style={{ color: '#6B7280' }}
       >
         <Radio className="h-3.5 w-3.5" />
         <span className="text-[11px]">Echtzeit-Daten</span>
@@ -120,14 +120,6 @@ export default function Landing() {
         <Zap className="h-3.5 w-3.5" />
         <span className="text-[11px]">Sofort-Alerts</span>
       </motion.div>
-
-      <style>{`
-        @keyframes gradientShift {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-      `}</style>
     </div>
   );
 }

@@ -52,13 +52,13 @@ export default function RouteDetail() {
             {route.name}
           </h1>
         </div>
-        <Button variant="outline" size="icon" onClick={handleRefresh} disabled={refreshing}>
+        <Button variant="outline" size="icon" onClick={handleRefresh} disabled={refreshing} className="card-amber-border">
           <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
         </Button>
       </div>
 
       {status && (
-        <Card className="mb-4">
+        <Card className="mb-4 card-amber-border">
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-sm font-medium">Aktueller Status</span>
@@ -75,8 +75,7 @@ export default function RouteDetail() {
         </Card>
       )}
 
-      {/* Route Info */}
-      <Card className="mb-4">
+      <Card className="mb-4 card-amber-border">
         <CardContent className="p-4 space-y-3">
           <div className="flex items-start gap-3">
             <MapPin className="h-4 w-4 text-primary mt-0.5 shrink-0" />
@@ -106,15 +105,14 @@ export default function RouteDetail() {
         </CardContent>
       </Card>
 
-      {/* Saved Connections */}
       {route.connections.length > 0 && (
-        <Card className="mb-4">
+        <Card className="mb-4 card-amber-border">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm">Gespeicherte Verbindungen</CardTitle>
           </CardHeader>
           <CardContent className="p-4 pt-0">
             {route.connections.map(conn => (
-              <div key={conn.id} className="space-y-2 py-2 border-b last:border-0">
+              <div key={conn.id} className="space-y-2 py-2" style={{ borderBottom: '1px solid #1A1A1A' }}>
                 {conn.legs.map((leg, i) => (
                   <div key={i} className="flex items-center gap-2 text-xs">
                     <Clock className="h-3 w-3 text-muted-foreground shrink-0" />
@@ -133,15 +131,14 @@ export default function RouteDetail() {
         </Card>
       )}
 
-      {/* Disruption History */}
-      <Card className="mb-4">
+      <Card className="mb-4 card-amber-border">
         <CardHeader className="pb-2">
           <CardTitle className="text-sm">Letzte Statusmeldungen</CardTitle>
         </CardHeader>
         <CardContent className="p-4 pt-0">
           <div className="space-y-3">
             {history.map((h, i) => (
-              <div key={i} className="flex items-start justify-between gap-2 py-2 border-b last:border-0">
+              <div key={i} className="flex items-start justify-between gap-2 py-2" style={{ borderBottom: '1px solid #1A1A1A' }}>
                 <div className="flex-1 min-w-0">
                   <StatusBadge status={h.status} delayMinutes={h.delay_minutes} size="sm" />
                   {h.message && <p className="text-xs text-muted-foreground mt-1">{h.message}</p>}
@@ -155,10 +152,9 @@ export default function RouteDetail() {
         </CardContent>
       </Card>
 
-      {/* Placeholder */}
-      <Card>
+      <Card className="card-amber-border">
         <CardContent className="p-4 text-center">
-          <div className="gradient-hero-subtle rounded-lg p-4">
+          <div className="bg-secondary rounded-lg p-4">
             <Train className="h-6 w-6 text-primary mx-auto mb-2" />
             <p className="text-xs font-medium mb-1">Live-Daten via transport.rest</p>
             <p className="text-[10px] text-muted-foreground">

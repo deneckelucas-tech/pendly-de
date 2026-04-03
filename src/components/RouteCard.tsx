@@ -1,7 +1,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { StatusBadge } from '@/components/StatusBadge';
 import { TRANSPORT_LABELS, type CommuteRoute, type RouteStatusData } from '@/lib/types';
-import { Star, BellOff, MapPin, Clock, ChevronRight, ArrowDown } from 'lucide-react';
+import { Star, BellOff, MapPin, Clock, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 
@@ -18,7 +18,7 @@ export function RouteCard({ route, status }: RouteCardProps) {
   return (
     <Card
       className={cn(
-        'cursor-pointer transition-all hover:shadow-md active:scale-[0.99]',
+        'cursor-pointer transition-all hover:shadow-md active:scale-[0.99] card-amber-border',
         route.is_paused && 'opacity-60'
       )}
       onClick={() => navigate(`/route/${route.id}`)}
@@ -37,8 +37,6 @@ export function RouteCard({ route, status }: RouteCardProps) {
               <span>→</span>
               <span className="truncate">{route.destination.name}</span>
             </div>
-
-            {/* Show connection legs */}
             {firstConnection && (
               <div className="space-y-1 mb-2">
                 {firstConnection.legs.map((leg, i) => (
@@ -53,7 +51,6 @@ export function RouteCard({ route, status }: RouteCardProps) {
                 ))}
               </div>
             )}
-
             <div className="flex gap-1">
               {weekdays.map(day => {
                 const labels: Record<string, string> = { mon: 'Mo', tue: 'Di', wed: 'Mi', thu: 'Do', fri: 'Fr', sat: 'Sa', sun: 'So' };
@@ -71,7 +68,7 @@ export function RouteCard({ route, status }: RouteCardProps) {
           </div>
         </div>
         {status?.message && (
-          <p className="text-xs text-muted-foreground mt-2 pt-2 border-t">{status.message}</p>
+          <p className="text-xs text-muted-foreground mt-2 pt-2" style={{ borderTop: '1px solid #1A1A1A' }}>{status.message}</p>
         )}
       </CardContent>
     </Card>
