@@ -47,6 +47,33 @@ export type Database = {
         }
         Relationships: []
       }
+      transport_cache: {
+        Row: {
+          cache_key: string
+          created_at: string
+          endpoint: string
+          expires_at: string
+          id: string
+          response_data: Json
+        }
+        Insert: {
+          cache_key: string
+          created_at?: string
+          endpoint: string
+          expires_at: string
+          id?: string
+          response_data: Json
+        }
+        Update: {
+          cache_key?: string
+          created_at?: string
+          endpoint?: string
+          expires_at?: string
+          id?: string
+          response_data?: Json
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
