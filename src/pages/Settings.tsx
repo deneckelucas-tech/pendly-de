@@ -1,6 +1,4 @@
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { WEEKDAY_LABELS, type Weekday } from '@/lib/types';
@@ -11,7 +9,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
 const ALL_WEEKDAYS: Weekday[] = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
-const inputStyle = { backgroundColor: '#1A1A1A', border: '1px solid #2A2A2A' };
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -55,72 +52,64 @@ export default function Settings() {
   };
 
   return (
-    <div className="px-4 pt-4 pb-6">
+    <div className="px-5 pt-5 pb-6">
       <div className="flex items-center gap-3 mb-6">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')}>
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-        <h1 className="font-bold text-lg">Einstellungen</h1>
+        <button onClick={() => navigate('/dashboard')} className="p-2 -ml-2 rounded-full hover:bg-secondary/50 transition-colors">
+          <ArrowLeft className="h-5 w-5 text-muted-foreground" />
+        </button>
+        <h1 className="font-display text-2xl text-foreground">EINSTELLUNGEN</h1>
       </div>
 
-      <Card className="mb-4 card-amber-border">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm">Konto</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="space-y-1">
-            <Label className="text-xs text-muted-foreground">E-Mail</Label>
-            <p className="text-sm">{user?.email ?? '–'}</p>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Account */}
+      <div className="bg-card rounded-[20px] card-amber-border p-5 mb-4">
+        <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium mb-3">Konto</p>
+        <div>
+          <Label className="text-xs text-muted-foreground">E-Mail</Label>
+          <p className="text-sm text-foreground">{user?.email ?? '--'}</p>
+        </div>
+      </div>
 
-      <Card className="mb-4 card-amber-border">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm flex items-center gap-2"><Crown className="h-4 w-4 text-primary" /> Abo</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-foreground">
-                {subscription.status === 'active' ? 'Pendly Pro' : subscription.status === 'trialing' ? 'Testphase' : 'Kein Abo'}
-              </p>
-              {subscription.status === 'trialing' && (
-                <p className="text-xs text-muted-foreground">Noch {subscription.trialDaysRemaining} Tage kostenlos</p>
-              )}
-              {subscription.status === 'active' && subscription.subscriptionEnd && (
-                <p className="text-xs text-muted-foreground">Verlängert am {new Date(subscription.subscriptionEnd).toLocaleDateString('de-DE')}</p>
-              )}
-            </div>
-            <span className={cn(
-              'text-[10px] font-semibold px-2 py-0.5 rounded-full',
-              subscription.status === 'active' ? 'bg-green-500/15 text-green-400' :
-              subscription.status === 'trialing' ? 'bg-primary/15 text-primary' :
-              'bg-destructive/15 text-destructive'
-            )}>
-              {subscription.status === 'active' ? 'Aktiv' : subscription.status === 'trialing' ? 'Trial' : 'Abgelaufen'}
-            </span>
+      {/* Subscription */}
+      <div className="bg-card rounded-[20px] card-amber-border p-5 mb-4">
+        <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium mb-3 flex items-center gap-2">
+          <Crown className="h-4 w-4 text-primary" /> Abo
+        </p>
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <p className="text-sm font-medium text-foreground">
+              {subscription.status === 'active' ? 'Pendly Pro' : subscription.status === 'trialing' ? 'Testphase' : 'Kein Abo'}
+            </p>
+            {subscription.status === 'trialing' && (
+              <p className="text-xs text-muted-foreground">Noch {subscription.trialDaysRemaining} Tage kostenlos</p>
+            )}
           </div>
-          {subscription.status === 'active' && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full rounded-xl card-amber-border gap-2"
-              onClick={handleManageSubscription}
-              disabled={portalLoading}
-            >
-              <CreditCard className="h-4 w-4" />
-              {portalLoading ? 'Wird geladen...' : 'Abo verwalten'}
-            </Button>
-          )}
-        </CardContent>
-      </Card>
+          <span className={cn(
+            'text-[10px] font-semibold px-2.5 py-1 rounded-full',
+            subscription.status === 'active' ? 'bg-status-ontime/15 text-status-ontime' :
+            subscription.status === 'trialing' ? 'bg-primary/15 text-primary' :
+            'bg-destructive/15 text-destructive'
+          )}>
+            {subscription.status === 'active' ? 'Aktiv' : subscription.status === 'trialing' ? 'Trial' : 'Abgelaufen'}
+          </span>
+        </div>
+        {subscription.status === 'active' && (
+          <button
+            onClick={handleManageSubscription}
+            disabled={portalLoading}
+            className="w-full h-12 rounded-full bg-secondary text-foreground font-semibold text-sm flex items-center justify-center gap-2"
+          >
+            <CreditCard className="h-4 w-4" />
+            {portalLoading ? 'Wird geladen...' : 'Abo verwalten'}
+          </button>
+        )}
+      </div>
 
-      <Card className="mb-4 card-amber-border">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm flex items-center gap-2"><Bell className="h-4 w-4" /> Benachrichtigungen</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
+      {/* Notifications */}
+      <div className="bg-card rounded-[20px] card-amber-border p-5 mb-4">
+        <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium mb-3 flex items-center gap-2">
+          <Bell className="h-4 w-4" /> Benachrichtigungen
+        </p>
+        <div className="space-y-3">
           {Object.entries({
             delays: 'Verspätungen', cancellations: 'Ausfälle', disruptions: 'Störungen',
             platformChanges: 'Gleisänderungen', alternatives: 'Alternative Routen', dailySummary: 'Tägliche Zusammenfassung',
@@ -133,24 +122,28 @@ export default function Settings() {
               />
             </div>
           ))}
-          <div style={{ borderTop: '1px solid #1A1A1A', paddingTop: '12px' }}>
+          <div className="h-px bg-border" />
+          <div>
             <Label className="text-xs text-muted-foreground flex items-center gap-1 mb-2">
               <Clock className="h-3 w-3" /> Ruhezeiten
             </Label>
             <div className="flex gap-2 items-center">
-              <input type="time" value={quietStart} onChange={e => setQuietStart(e.target.value)} className="w-24 h-9 rounded-xl px-2 text-sm text-foreground outline-none focus:border-primary" style={inputStyle} />
+              <input type="time" value={quietStart} onChange={e => setQuietStart(e.target.value)}
+                className="w-24 h-11 rounded-2xl px-3 text-sm text-foreground outline-none border border-transparent focus:border-primary"
+                style={{ backgroundColor: '#1A1A1A' }} />
               <span className="text-muted-foreground text-sm">bis</span>
-              <input type="time" value={quietEnd} onChange={e => setQuietEnd(e.target.value)} className="w-24 h-9 rounded-xl px-2 text-sm text-foreground outline-none focus:border-primary" style={inputStyle} />
+              <input type="time" value={quietEnd} onChange={e => setQuietEnd(e.target.value)}
+                className="w-24 h-11 rounded-2xl px-3 text-sm text-foreground outline-none border border-transparent focus:border-primary"
+                style={{ backgroundColor: '#1A1A1A' }} />
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      <Card className="mb-4 card-amber-border">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm">Einstellungen</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      {/* General Settings */}
+      <div className="bg-card rounded-[20px] card-amber-border p-5 mb-4">
+        <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium mb-3">Allgemein</p>
+        <div className="space-y-4">
           <div className="flex items-center justify-between">
             <Label className="text-sm flex items-center gap-2">
               {darkMode ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
@@ -163,8 +156,8 @@ export default function Settings() {
             <div className="flex gap-1">
               {(['24h', '12h'] as const).map(f => (
                 <button key={f} onClick={() => setTimeFormat(f)} className={cn(
-                  'px-3 py-1 rounded-xl text-xs font-medium transition-colors',
-                  timeFormat === f ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'
+                  'px-3 py-1.5 rounded-full text-xs font-medium transition-colors',
+                  timeFormat === f ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground'
                 )}>{f}</button>
               ))}
             </div>
@@ -180,18 +173,21 @@ export default function Settings() {
             <div className="flex gap-1.5">
               {ALL_WEEKDAYS.map(day => (
                 <button key={day} onClick={() => toggleDay(day)} className={cn(
-                  'h-8 w-8 rounded-xl text-[10px] font-semibold transition-colors',
-                  defaultDays.includes(day) ? 'bg-primary text-primary-foreground' : 'bg-secondary text-secondary-foreground'
+                  'h-9 w-9 rounded-full text-[10px] font-semibold transition-colors',
+                  defaultDays.includes(day) ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground'
                 )}>{WEEKDAY_LABELS[day]}</button>
               ))}
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      <Button variant="outline" className="w-full gap-2 text-destructive card-amber-border hover:bg-destructive/5 rounded-xl" onClick={handleLogout}>
+      <button
+        onClick={handleLogout}
+        className="w-full h-14 rounded-full border border-destructive/30 text-destructive font-semibold text-sm flex items-center justify-center gap-2 hover:bg-destructive/5 transition-colors"
+      >
         <LogOut className="h-4 w-4" /> Abmelden
-      </Button>
+      </button>
     </div>
   );
 }

@@ -6,7 +6,6 @@ import { Bell, ChevronRight, AlertTriangle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { DebugPanel } from '@/components/DebugPanel';
 import { TrialBanner } from '@/components/TrialBanner';
@@ -38,12 +37,6 @@ function getStatusDotColor(status: string) {
   return 'bg-muted-foreground';
 }
 
-function getDepartureProgress(): number {
-  const now = new Date();
-  const minutes = now.getMinutes();
-  return Math.min(100, Math.max(5, (minutes / 60) * 100));
-}
-
 export default function Dashboard() {
   const navigate = useNavigate();
   const [routes, setRoutes] = useState<CommuteRoute[]>([]);
@@ -62,14 +55,12 @@ export default function Dashboard() {
     setLastUpdated(new Date());
   }, []);
 
-  // Initial load + 30s polling
   useEffect(() => {
     loadData();
     const interval = setInterval(loadData, 30_000);
     return () => clearInterval(interval);
   }, [loadData]);
 
-  // Tick the "seconds ago" counter every second
   useEffect(() => {
     const tick = setInterval(() => {
       if (lastUpdated) {
@@ -103,7 +94,7 @@ export default function Dashboard() {
   const unreadCount = alerts.filter(a => !a.is_read).length;
 
   return (
-    <div className="px-4 pt-5 pb-4 min-h-screen">
+    <div className="px-5 pt-5 pb-4 min-h-screen">
       <DebugPanel />
       <TrialBanner />
       {/* Header */}
@@ -128,7 +119,7 @@ export default function Dashboard() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/notifications')}
-            className="relative p-2 rounded-xl card-amber-border bg-card hover:bg-secondary transition-colors"
+            className="relative p-2 rounded-2xl card-amber-border bg-card hover:bg-secondary transition-colors"
           >
             <Bell className="h-4.5 w-4.5 text-muted-foreground" />
             {unreadCount > 0 && (
@@ -151,13 +142,13 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
-          className="card-amber-glow bg-card rounded-2xl p-5 mb-4"
+          className="card-amber-glow bg-card rounded-[20px] p-5 mb-4"
         >
           <div className="flex items-start justify-between mb-4">
             <div>
-              <p className="text-[11px] uppercase tracking-[0.1em] mb-1" style={{ color: '#6B7280' }}>Nächste Abfahrt</p>
+              <p className="text-[11px] uppercase tracking-[0.1em] mb-1 text-muted-foreground">Nächste Abfahrt</p>
               <div className="flex items-baseline gap-2.5">
-                <span className="text-4xl font-extrabold text-foreground tracking-tight">
+                <span className="font-display text-5xl text-foreground">
                   {nextLeg.plannedDeparture}
                 </span>
                 <span className="text-sm font-semibold text-muted-foreground">
@@ -167,7 +158,7 @@ export default function Dashboard() {
             </div>
             {nextStatus && (
               <span className={cn(
-                'text-[11px] font-semibold px-2.5 py-1 rounded-lg',
+                'text-[11px] font-semibold px-2.5 py-1 rounded-full',
                 getStatusColor(nextStatus.status)
               )}>
                 {getStatusLabel(nextStatus.status, nextStatus.delay_minutes)}
@@ -175,13 +166,12 @@ export default function Dashboard() {
             )}
           </div>
 
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-primary" />
             <p className="text-sm text-foreground font-medium">{nextLeg.originName}</p>
             <ChevronRight className="h-3 w-3 text-muted-foreground" />
             <p className="text-sm text-muted-foreground">{nextLeg.destinationName}</p>
           </div>
-
         </motion.div>
       )}
 
@@ -193,18 +183,18 @@ export default function Dashboard() {
           transition={{ delay: 0.1 }}
           className="mb-6"
         >
-          <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] mb-3" style={{ color: '#6B7280' }}>
+          <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] mb-3 text-muted-foreground">
             Kommende Verbindungen
           </h2>
-          <div className="flex gap-2.5 overflow-x-auto pb-1 -mx-4 px-4 scrollbar-hide">
+          <div className="flex gap-2.5 overflow-x-auto pb-1 -mx-5 px-5 scrollbar-hide">
             {upcomingDepartures.map((dep, i) => (
               <div
                 key={i}
-                className="flex-shrink-0 card-amber-border bg-card rounded-2xl px-4 py-3 min-w-[120px]"
+                className="flex-shrink-0 card-amber-border bg-card rounded-[20px] px-4 py-3 min-w-[120px]"
               >
                 <div className="flex items-center gap-2 mb-1.5">
                   <span className={cn('h-2 w-2 rounded-full animate-pulse-dot', getStatusDotColor(dep.status))} />
-                  <span className="text-lg font-bold text-foreground">{dep.time}</span>
+                  <span className="font-display text-2xl text-foreground">{dep.time}</span>
                 </div>
                 <p className="text-xs font-semibold text-muted-foreground">{dep.line}</p>
                 <p className="text-[10px] text-muted-foreground truncate mt-0.5">{dep.station}</p>
@@ -220,7 +210,7 @@ export default function Dashboard() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.15 }}
       >
-        <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] mb-3" style={{ color: '#6B7280' }}>
+        <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] mb-3 text-muted-foreground">
           Meine Routen
         </h2>
         <div className="space-y-2.5">
@@ -231,13 +221,13 @@ export default function Dashboard() {
               <div
                 key={route.id}
                 onClick={() => navigate(`/route/${route.id}`)}
-                className="card-amber-border bg-card rounded-2xl p-4 flex items-center gap-3 cursor-pointer hover:bg-secondary/50 transition-colors"
+                className="card-amber-border bg-card rounded-[20px] p-4 flex items-center gap-3 cursor-pointer hover:bg-secondary/50 transition-colors"
               >
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <p className="text-sm font-semibold text-foreground">{route.name}</p>
                     {firstLeg && (
-                      <span className="text-[10px] font-semibold bg-secondary text-muted-foreground px-2 py-0.5 rounded-md">
+                      <span className="text-[10px] font-semibold bg-secondary text-foreground px-2 py-0.5 rounded-lg">
                         {firstLeg.lineName}
                       </span>
                     )}

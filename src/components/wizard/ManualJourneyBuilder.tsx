@@ -1,6 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { ArrowLeft, Plus, Trash2, Loader2, Clock, MapPin, ArrowRight, Search, ChevronDown, ChevronUp } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { ArrowLeft, Plus, Trash2, MapPin, ArrowRight, Search, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { searchStations, getDepartures, formatTime, type Departure } from '@/lib/transport-api';
 import type { Station, Journey, JourneyLeg } from '@/lib/types';
@@ -30,7 +29,6 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, onSave, 
   const [stationResults, setStationResults] = useState<Station[]>([]);
   const [stationLoading, setStationLoading] = useState(false);
 
-  // Auto-search departures on mount
   useEffect(() => {
     searchDepartures();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -70,21 +68,16 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, onSave, 
     const leg: ManualLeg = { origin: currentOrigin, departure: dep };
     const newLegs = [...legs, leg];
     setLegs(newLegs);
-
     if (dep.destination) {
       setCurrentOrigin({ id: dep.destination.id, name: dep.destination.name, type: 'station', products: {} });
     }
     setDepartures([]);
     setSearched(false);
     setFilterText('');
-
-    // Auto-advance time by estimated travel + transfer
     if (dep.when) {
       const arr = new Date(dep.when);
       arr.setMinutes(arr.getMinutes() + 30);
-      const hh = String(arr.getHours()).padStart(2, '0');
-      const mm = String(arr.getMinutes()).padStart(2, '0');
-      setDepartureTime(`${hh}:${mm}`);
+      setDepartureTime(`${String(arr.getHours()).padStart(2, '0')}:${String(arr.getMinutes()).padStart(2, '0')}`);
     }
   };
 
@@ -117,62 +110,53 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, onSave, 
       departureDelay: leg.departure.delay,
       arrivalDelay: null,
       departurePlatform: leg.departure.platform,
-      line: {
-        id: leg.departure.line.id,
-        name: leg.departure.line.name,
-        productName: leg.departure.line.productName,
-        mode: leg.departure.line.mode,
-      },
+      line: { id: leg.departure.line.id, name: leg.departure.line.name, productName: leg.departure.line.productName, mode: leg.departure.line.mode },
       direction: leg.departure.direction,
       cancelled: false,
     }));
     return { id: `manual-${Date.now()}`, legs: journeyLegs };
   };
 
-  // Filter departures by direction/line
   const filteredDepartures = departures.filter(dep => {
     if (!filterText) return true;
     const q = filterText.toLowerCase();
-    return dep.direction.toLowerCase().includes(q) || 
-           dep.line.name.toLowerCase().includes(q) ||
-           dep.line.productName.toLowerCase().includes(q);
+    return dep.direction.toLowerCase().includes(q) || dep.line.name.toLowerCase().includes(q) || dep.line.productName.toLowerCase().includes(q);
   });
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 40 }}
+      initial={{ opacity: 0, x: 60 }}
       animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -40 }}
-      transition={{ duration: 0.25, ease: 'easeOut' }}
-      className="flex flex-col min-h-[calc(100vh-4rem)]"
+      exit={{ opacity: 0, x: -60 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+      className="flex flex-col min-h-[calc(100vh-3rem)]"
     >
-      <div className="flex items-center gap-3 mb-4">
-        <button onClick={onBack} className="p-2 -ml-2 rounded-xl hover:bg-secondary transition-colors">
+      <div className="flex items-center gap-3 mb-6">
+        <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-secondary/50 transition-colors">
           <ArrowLeft className="h-5 w-5 text-muted-foreground" />
         </button>
-        <div>
-          <h1 className="text-xl font-bold text-foreground">Route zusammenstellen</h1>
-          <p className="text-sm text-muted-foreground">Baue deine Verbindung Schritt für Schritt</p>
-        </div>
       </div>
+
+      <h1 className="font-display text-3xl tracking-tight text-foreground mb-1">ROUTE ZUSAMMENSTELLEN</h1>
+      <p className="text-sm text-muted-foreground mb-6">Baue deine Verbindung Schritt für Schritt</p>
 
       {/* Added legs */}
       {legs.length > 0 && (
-        <div className="space-y-2 mb-4">
+        <div className="space-y-2 mb-6">
           <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium">Deine Verbindung</p>
           {legs.map((leg, i) => (
-            <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-card" style={{ border: '1px solid rgba(245,158,11,0.08)' }}>
+            <div key={i} className="flex items-center gap-3 p-3.5 rounded-[20px] bg-card card-amber-border">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 text-sm">
-                  <span className="font-bold text-foreground">{formatTime(leg.departure.when)}</span>
-                  <span className="text-xs font-semibold bg-secondary text-muted-foreground px-1.5 py-0.5 rounded">{leg.departure.line.name}</span>
+                  <span className="font-display text-xl text-foreground">{formatTime(leg.departure.when)}</span>
+                  <span className="text-[11px] font-semibold bg-secondary text-foreground px-2 py-0.5 rounded-lg">{leg.departure.line.name}</span>
                 </div>
                 <p className="text-xs text-muted-foreground truncate mt-0.5">
                   {leg.origin.name.split(',')[0]} → {leg.departure.direction}
                 </p>
               </div>
-              <button onClick={() => removeLeg(i)} className="p-1.5 rounded-lg hover:bg-secondary transition-colors">
-                <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
+              <button onClick={() => removeLeg(i)} className="p-2 rounded-full hover:bg-secondary/50 transition-colors">
+                <Trash2 className="h-4 w-4 text-muted-foreground" />
               </button>
             </div>
           ))}
@@ -185,40 +169,33 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, onSave, 
           {legs.length === 0 ? 'Erste Verbindung' : 'Umstieg hinzufügen'}
         </p>
 
-        {/* Origin station - clickable to change */}
         <button
           onClick={() => setShowStationSearch(!showStationSearch)}
-          className="w-full flex items-center gap-2 p-3 rounded-xl bg-card hover:bg-secondary/50 transition-colors"
-          style={{ border: '1px solid rgba(245,158,11,0.08)' }}
+          className="w-full flex items-center gap-2 p-3.5 rounded-[20px] bg-card card-amber-border hover:bg-secondary/50 transition-colors"
         >
           <MapPin className="h-4 w-4 text-primary shrink-0" />
           <span className="text-sm font-medium text-foreground truncate flex-1 text-left">{currentOrigin.name.split(',')[0]}</span>
           {showStationSearch ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
         </button>
 
-        {/* Station search overlay */}
         {showStationSearch && (
-          <div className="rounded-xl p-3 space-y-2" style={{ backgroundColor: '#1A1A1A', border: '1px solid #2A2A2A' }}>
+          <div className="rounded-[20px] p-3 space-y-2 bg-card card-amber-border">
             <input
               type="text"
               value={stationQuery}
               onChange={e => handleStationSearch(e.target.value)}
-              placeholder="Andere Haltestelle suchen…"
+              placeholder="Andere Haltestelle suchen..."
               autoFocus
-              className="w-full h-10 rounded-lg px-3 text-sm text-foreground placeholder:text-muted-foreground outline-none bg-background"
-              style={{ border: '1px solid #2A2A2A' }}
+              className="w-full h-12 rounded-2xl px-4 text-sm text-foreground placeholder:text-muted-foreground outline-none border border-transparent focus:border-primary"
+              style={{ backgroundColor: '#1A1A1A' }}
             />
             {stationLoading && (
               <div className="flex justify-center py-3">
-                <Loader2 className="h-4 w-4 text-primary animate-spin" />
+                <div className="amber-spinner" style={{ width: 18, height: 18 }} />
               </div>
             )}
             {stationResults.map(s => (
-              <button
-                key={s.id}
-                onClick={() => selectStation(s)}
-                className="w-full text-left px-3 py-2 rounded-lg hover:bg-secondary/50 transition-colors"
-              >
+              <button key={s.id} onClick={() => selectStation(s)} className="w-full text-left px-3 py-2.5 rounded-2xl hover:bg-secondary/50 transition-colors">
                 <p className="text-sm font-medium text-foreground">{s.name.split(',')[0]}</p>
                 {s.name.includes(',') && <p className="text-xs text-muted-foreground">{s.name.split(',').slice(1).join(',').trim()}</p>}
               </button>
@@ -233,38 +210,42 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, onSave, 
               type="time"
               value={departureTime}
               onChange={e => setDepartureTime(e.target.value)}
-              className="w-full h-10 rounded-xl px-3 text-sm text-foreground outline-none focus:border-primary transition-colors"
-              style={{ backgroundColor: '#1A1A1A', border: '1px solid #2A2A2A' }}
+              className="w-full h-12 rounded-2xl px-4 text-sm text-foreground outline-none border border-transparent focus:border-primary transition-all"
+              style={{ backgroundColor: '#1A1A1A' }}
             />
           </div>
           <div className="flex items-end">
-            <Button onClick={searchDepartures} disabled={loading} className="h-10 rounded-xl font-semibold gap-1.5">
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+            <button
+              onClick={searchDepartures}
+              disabled={loading}
+              className="h-12 px-5 rounded-full bg-primary text-primary-foreground font-bold text-sm flex items-center gap-2 disabled:opacity-50"
+            >
+              {loading ? <div className="amber-spinner" style={{ width: 16, height: 16, borderColor: 'rgba(0,0,0,0.2)', borderTopColor: '#000' }} /> : <Search className="h-4 w-4" />}
               Suchen
-            </Button>
+            </button>
           </div>
         </div>
       </div>
 
       {/* Filter */}
       {departures.length > 0 && (
-        <div className="mb-2">
+        <div className="mb-3">
           <input
             type="text"
             value={filterText}
             onChange={e => setFilterText(e.target.value)}
-            placeholder="Filtern: Richtung oder Linie…"
-            className="w-full h-9 rounded-lg px-3 text-xs text-foreground placeholder:text-muted-foreground outline-none"
-            style={{ backgroundColor: '#1A1A1A', border: '1px solid #2A2A2A' }}
+            placeholder="Filtern: Richtung oder Linie..."
+            className="w-full h-11 rounded-2xl px-4 text-xs text-foreground placeholder:text-muted-foreground outline-none border border-transparent focus:border-primary"
+            style={{ backgroundColor: '#1A1A1A' }}
           />
         </div>
       )}
 
       {/* Departure results */}
-      <div className="flex-1 overflow-y-auto space-y-1">
+      <div className="flex-1 overflow-y-auto space-y-1 pb-24">
         {loading && (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-5 w-5 text-primary animate-spin" />
+            <div className="amber-spinner" />
           </div>
         )}
 
@@ -273,35 +254,37 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, onSave, 
         )}
 
         {!loading && searched && filteredDepartures.length === 0 && departures.length > 0 && (
-          <p className="text-sm text-muted-foreground text-center py-8">Kein Treffer für „{filterText}"</p>
+          <p className="text-sm text-muted-foreground text-center py-8">Kein Treffer für "{filterText}"</p>
         )}
 
         {!loading && filteredDepartures.map((dep, i) => (
           <button
             key={`${dep.tripId}-${i}`}
             onClick={() => addLeg(dep)}
-            className="w-full text-left px-4 py-3 rounded-xl hover:bg-secondary/50 transition-colors"
+            className="w-full text-left px-4 py-3.5 rounded-2xl hover:bg-card transition-colors"
           >
             <div className="flex items-center gap-3">
-              <span className="text-sm font-bold text-foreground w-12">{formatTime(dep.when)}</span>
-              <span className="text-xs font-semibold bg-secondary text-muted-foreground px-1.5 py-0.5 rounded">{dep.line.name}</span>
+              <span className="font-display text-xl text-foreground w-14">{formatTime(dep.when)}</span>
+              <span className="text-[11px] font-semibold bg-secondary text-foreground px-2 py-0.5 rounded-lg">{dep.line.name}</span>
               <ArrowRight className="h-3 w-3 text-muted-foreground" />
               <span className="text-xs text-muted-foreground truncate flex-1">{dep.direction}</span>
             </div>
-            {dep.platform && <p className="text-[10px] text-muted-foreground mt-0.5 ml-12">Gleis {dep.platform}</p>}
+            {dep.platform && <p className="text-[10px] text-muted-foreground mt-0.5 ml-14">Gleis {dep.platform}</p>}
           </button>
         ))}
       </div>
 
       {/* Save button */}
       {legs.length > 0 && (
-        <div className="mt-4 pb-4">
-          <Button
-            onClick={() => onSave(buildJourney())}
-            className="w-full h-12 rounded-xl font-semibold text-sm"
-          >
-            Verbindung mit {legs.length} Abschnitt{legs.length !== 1 ? 'en' : ''} speichern
-          </Button>
+        <div className="fixed bottom-0 left-0 right-0 p-5 bg-gradient-to-t from-background via-background to-transparent">
+          <div className="max-w-lg mx-auto">
+            <button
+              onClick={() => onSave(buildJourney())}
+              className="w-full h-14 rounded-full bg-primary text-primary-foreground font-bold text-sm"
+            >
+              Verbindung mit {legs.length} Abschnitt{legs.length !== 1 ? 'en' : ''} speichern
+            </button>
+          </div>
         </div>
       )}
     </motion.div>
