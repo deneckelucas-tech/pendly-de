@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import pendlyLogo from "@/assets/logo.png";
 
 export default function LandingPage() {
   const revealRefs = useRef<(HTMLElement | null)[]>([]);
@@ -446,7 +447,7 @@ export default function LandingPage() {
         {/* NAV */}
         <nav className="bf-nav">
           <div className="bf-logo">
-            <img src="/lovable-uploads/5C4500CB-B0E1-418B-84A5-E1972203A123.png" alt="Pendly Logo" />
+            <img src={pendlyLogo} alt="Pendly Logo" />
           </div>
           <button className="bf-nav-cta">Kostenlos testen</button>
         </nav>
