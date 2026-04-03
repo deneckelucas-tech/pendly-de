@@ -520,7 +520,7 @@ export default function LandingPage() {
 
         {/* FEATURES */}
         <section className="bf-section bf-reveal" ref={reveal(0)}>
-          <div className="bf-section-label">Warum Bahnfrei</div>
+          <div className="bf-section-label">Warum Pendly</div>
           <h2 className="bf-section-title">
             Du erfährst es<br />
             als Erster.
