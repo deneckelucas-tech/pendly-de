@@ -138,7 +138,16 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, onSave, 
         </button>
       </div>
 
-      <h1 className="font-display text-3xl tracking-tight text-foreground mb-1">ROUTE ZUSAMMENSTELLEN</h1>
+      <h1 className="font-display text-3xl tracking-tight text-foreground mb-2">ROUTE ZUSAMMENSTELLEN</h1>
+
+      {/* Route header: Start → Ziel */}
+      <div className="flex items-center gap-2 mb-1 px-1">
+        <div className="h-2.5 w-2.5 rounded-full bg-primary shrink-0" />
+        <span className="text-xs font-semibold text-foreground truncate">{initialOrigin.name.split(',')[0]}</span>
+        <div className="flex-1 h-px bg-primary/30 mx-1" />
+        <span className="text-xs font-semibold text-foreground truncate">{finalDestination.name.split(',')[0]}</span>
+        <div className="h-2.5 w-2.5 rounded-full bg-primary shrink-0" />
+      </div>
       <p className="text-sm text-muted-foreground mb-6">Baue deine Verbindung Schritt für Schritt</p>
 
       {/* Added legs */}
@@ -175,8 +184,9 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, onSave, 
       {/* Current search */}
       <div className="space-y-3 mb-4">
         <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium">
-          {legs.length === 0 ? 'Erste Verbindung' : 'Umstieg hinzufügen'}
+          {legs.length === 0 ? 'Erste Verbindung wählen' : 'Nächsten Umstieg wählen'}
         </p>
+        <p className="text-xs text-muted-foreground">Ab: <span className="text-foreground font-medium">{currentOrigin.name.split(',')[0]}</span> → Richtung <span className="text-foreground font-medium">{finalDestination.name.split(',')[0]}</span></p>
 
         <button
           onClick={() => setShowStationSearch(!showStationSearch)}
@@ -279,6 +289,7 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, onSave, 
               key={`${dep.tripId}-${i}`}
               onClick={() => addLeg(dep)}
               className="w-full text-left px-4 py-3.5 rounded-2xl hover:bg-card transition-colors"
+              style={{ borderBottom: '1px solid #1A1A1A' }}
             >
               <div className="flex items-center gap-3">
                 <span className="font-display text-xl text-foreground w-14">{formatTime(dep.when)}</span>
@@ -288,8 +299,11 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, onSave, 
                 >
                   {dep.line.name}
                 </span>
-                <ArrowRight className="h-3 w-3 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground truncate flex-1">{dep.direction}</span>
+              </div>
+              <div className="flex items-center gap-1.5 mt-1 ml-14">
+                <span className="text-xs text-foreground font-medium">{currentOrigin.name.split(',')[0]}</span>
+                <ArrowRight className="h-3 w-3 text-primary" />
+                <span className="text-xs text-muted-foreground truncate">{dep.direction}</span>
               </div>
               {dep.platform && <p className="text-[10px] text-muted-foreground mt-0.5 ml-14">Gleis {dep.platform}</p>}
             </button>
