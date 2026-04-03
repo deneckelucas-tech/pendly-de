@@ -17,6 +17,7 @@ function getStatusLabel(status: string, delayMinutes?: number) {
   if (status === 'cancelled') return 'Ausfall';
   if (status === 'disruption') return 'Störung';
   if (status === 'platform_change') return 'Gleiswechsel';
+  if (status === 'no_data') return 'Fahrplan';
   return 'Keine Daten';
 }
 
