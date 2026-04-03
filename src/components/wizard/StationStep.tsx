@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { searchStations } from '@/lib/transport-api';
-import { Loader2, X, ArrowLeft } from 'lucide-react';
+import { ArrowLeft, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Station } from '@/lib/types';
 
@@ -33,7 +33,6 @@ export function StationStep({ title, subtitle, onSelect, onBack, onCancel }: Sta
     try {
       const stations = await searchStations(q);
       setResults(stations);
-      if (stations.length === 0) setError(false);
     } catch {
       setError(true);
       setResults([]);
@@ -55,43 +54,43 @@ export function StationStep({ title, subtitle, onSelect, onBack, onCancel }: Sta
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: 40 }}
+      initial={{ opacity: 0, x: 60 }}
       animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -40 }}
-      transition={{ duration: 0.25, ease: 'easeOut' }}
-      className="flex flex-col min-h-[calc(100vh-4rem)]"
+      exit={{ opacity: 0, x: -60 }}
+      transition={{ duration: 0.3, ease: 'easeOut' }}
+      className="flex flex-col min-h-[calc(100vh-3rem)]"
     >
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
+      {/* Nav */}
+      <div className="flex items-center gap-3 mb-8">
         {onBack ? (
-          <button onClick={onBack} className="p-2 -ml-2 rounded-xl hover:bg-secondary transition-colors">
+          <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-secondary/50 transition-colors">
             <ArrowLeft className="h-5 w-5 text-muted-foreground" />
           </button>
         ) : onCancel ? (
-          <button onClick={onCancel} className="p-2 -ml-2 rounded-xl hover:bg-secondary transition-colors">
+          <button onClick={onCancel} className="p-2 -ml-2 rounded-full hover:bg-secondary/50 transition-colors">
             <X className="h-5 w-5 text-muted-foreground" />
           </button>
         ) : null}
-        <div>
-          <h1 className="text-xl font-bold text-foreground">{title}</h1>
-          <p className="text-sm text-muted-foreground">{subtitle}</p>
-        </div>
       </div>
 
+      {/* Title */}
+      <h1 className="font-display text-4xl tracking-tight text-foreground mb-1">{title}</h1>
+      <p className="text-sm text-muted-foreground mb-8">{subtitle}</p>
+
       {/* Search Input */}
-      <div className="relative mb-4">
+      <div className="relative mb-6">
         <input
           ref={inputRef}
           type="text"
           value={query}
           onChange={e => handleChange(e.target.value)}
-          placeholder="Haltestelle suchen…"
-          className="w-full h-12 rounded-xl px-4 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary transition-colors"
-          style={{ backgroundColor: '#1A1A1A', border: '1px solid #2A2A2A' }}
+          placeholder="Haltestelle suchen..."
+          className="w-full h-14 rounded-2xl px-5 text-base text-foreground placeholder:text-muted-foreground outline-none transition-all border border-transparent focus:border-primary"
+          style={{ backgroundColor: '#1A1A1A' }}
         />
         {loading && (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2">
-            <Loader2 className="h-4 w-4 text-primary animate-spin" />
+          <div className="absolute right-4 top-1/2 -translate-y-1/2">
+            <div className="amber-spinner" style={{ width: 18, height: 18 }} />
           </div>
         )}
       </div>
@@ -110,17 +109,17 @@ export function StationStep({ title, subtitle, onSelect, onBack, onCancel }: Sta
         )}
 
         {results.length > 0 && (
-          <div className="space-y-1">
+          <div className="space-y-0.5">
             {results.map((station) => {
               const hint = getLocationHint(station);
               return (
                 <button
                   key={station.id}
                   onClick={() => onSelect(station)}
-                  className="w-full text-left px-4 py-3 rounded-xl hover:bg-secondary transition-colors"
+                  className="w-full text-left px-4 py-3.5 rounded-2xl hover:bg-card transition-colors"
                 >
-                  <p className="text-sm font-medium text-foreground">{station.name.split(',')[0]}</p>
-                  {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+                  <p className="text-base font-semibold text-foreground">{station.name.split(',')[0]}</p>
+                  {hint && <p className="text-xs text-muted-foreground mt-0.5">{hint}</p>}
                 </button>
               );
             })}
