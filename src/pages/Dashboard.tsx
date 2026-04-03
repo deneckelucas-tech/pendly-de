@@ -116,6 +116,11 @@ export default function Dashboard() {
             <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse-dot" />
             Live
           </span>
+          {lastUpdated && (
+            <span className="text-[10px] text-muted-foreground">
+              vor {secondsAgo < 2 ? 'jetzt' : `${secondsAgo} Sek.`}
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-3">
           <button
