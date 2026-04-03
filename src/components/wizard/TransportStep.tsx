@@ -15,9 +15,9 @@ const TRANSPORT_OPTIONS: TransportOption[] = [
   { type: 'nationalExpress', label: 'ICE/IC', icon: <Train className="h-5 w-5" /> },
   { type: 'regionalExpress', label: 'RE/RB', icon: <Train className="h-5 w-5" /> },
   { type: 'suburban', label: 'S-Bahn', icon: <Train className="h-5 w-5" /> },
-  { type: 'subway', label: 'U-Bahn', icon: <TramIcon className="h-5 w-5" /> },
+  { type: 'subway', label: 'U-Bahn', icon: <TramFront className="h-5 w-5" /> },
   { type: 'bus', label: 'Bus', icon: <BusIcon className="h-5 w-5" /> },
-  { type: 'tram', label: 'Tram', icon: <TramIcon className="h-5 w-5" /> },
+  { type: 'tram', label: 'Tram', icon: <TramFront className="h-5 w-5" /> },
 ];
 
 interface TransportStepProps {
