@@ -715,7 +715,7 @@ export default function LandingPage() {
         {/* FOOTER */}
         <footer className="bf-footer">
           <p>
-            © 2025 Bahnfrei ·{" "}
+            © 2025 Pendly ·{" "}
             <a href="#">Datenschutz</a> ·{" "}
             <a href="#">Impressum</a> ·{" "}
             <a href="#">AGB</a>
