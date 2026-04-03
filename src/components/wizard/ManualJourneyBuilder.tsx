@@ -20,12 +20,13 @@ interface ManualJourneyBuilderProps {
 export function ManualJourneyBuilder({ initialOrigin, finalDestination, onSave, onBack }: ManualJourneyBuilderProps) {
   const [legs, setLegs] = useState<ManualLeg[]>([]);
   const [currentOrigin, setCurrentOrigin] = useState<Station>(initialOrigin);
+  const [currentDirection, setCurrentDirection] = useState<Station>(finalDestination);
   const [departureTime, setDepartureTime] = useState('07:00');
   const [departures, setDepartures] = useState<Departure[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [filterText, setFilterText] = useState('');
-  const [showStationSearch, setShowStationSearch] = useState(false);
+  const [editingField, setEditingField] = useState<'origin' | 'direction' | null>(null);
   const [stationQuery, setStationQuery] = useState('');
   const [stationResults, setStationResults] = useState<Station[]>([]);
   const [stationLoading, setStationLoading] = useState(false);
