@@ -468,7 +468,7 @@ export default function LandingPage() {
           </h1>
 
           <p className="bf-hero-sub">
-            Bahnfrei warnt dich bevor dein Zug ausfällt – nicht danach.
+            Pendly warnt dich bevor dein Zug ausfällt – nicht danach.
           </p>
 
           <div className="bf-actions">
