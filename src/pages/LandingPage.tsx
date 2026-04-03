@@ -585,7 +585,7 @@ export default function LandingPage() {
               {
                 n: "3",
                 title: "Entspannt pendeln",
-                desc: "Bahnfrei überwacht alles. Du bekommst nur eine Nachricht, wenn wirklich etwas los ist.",
+                desc: "Pendly überwacht alles. Du bekommst nur eine Nachricht, wenn wirklich etwas los ist.",
               },
             ].map((s, i) => (
               <div className="bf-step" key={i}>
