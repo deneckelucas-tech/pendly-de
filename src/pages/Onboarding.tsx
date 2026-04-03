@@ -1,30 +1,13 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { StationSearch } from '@/components/StationSearch';
-import { JourneyCard } from '@/components/JourneyCard';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { searchJourneys } from '@/lib/transport-api';
-import {
-  WEEKDAY_LABELS, TRANSPORT_LABELS,
-  type Weekday, type TransportType, type NotificationType, type Station, type Journey,
-} from '@/lib/types';
-import { cn } from '@/lib/utils';
-import { Train, ArrowRight, Check, Loader2, Search } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-
-const ALL_WEEKDAYS: Weekday[] = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
-const ALL_TRANSPORT: TransportType[] = ['nationalExpress', 'national', 'regionalExpress', 'regional', 'suburban', 'bus', 'subway', 'tram'];
-const NOTIFICATION_OPTIONS: { value: NotificationType; label: string }[] = [
-  { value: 'email', label: 'E-Mail' },
-  { value: 'push', label: 'Push' },
-  { value: 'both', label: 'Beides' },
-];
-
-const inputStyle = { backgroundColor: '#1A1A1A', border: '1px solid #2A2A2A' };
 
 export default function Onboarding() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    navigate('/route-setup', { replace: true });
+  }, [navigate]);
+  return null;
+}
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [name, setName] = useState('');
