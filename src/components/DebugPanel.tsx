@@ -26,9 +26,6 @@ export function DebugPanel() {
 
   const fetchAll = useCallback(async () => {
     if (isProd) return;
-
-  const fetchAll = useCallback(async () => {
-    if (isProd) return;
     setLoading(true);
     const routes = getMockRoutes();
     const results: DebugEntry[] = [];
