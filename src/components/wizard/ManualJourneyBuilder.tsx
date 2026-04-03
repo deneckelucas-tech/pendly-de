@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react';
-import { ArrowLeft, Plus, Trash2, MapPin, ArrowRight, Search, ChevronDown, ChevronUp, Train } from 'lucide-react';
+import { ArrowLeft, Trash2, MapPin, ArrowRight, Search, Train } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { searchStations, getDepartures, formatTime, type Departure } from '@/lib/transport-api';
 import { getLineBadgeStyle } from '@/lib/line-colors';
@@ -75,6 +75,8 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, onSave, 
     setDepartures([]);
     setSearched(false);
     setFilterText('');
+    // After adding a leg, auto-open station search so user can change intermediate stop
+    setShowStationSearch(true);
     if (dep.when) {
       const arr = new Date(dep.when);
       arr.setMinutes(arr.getMinutes() + 30);
@@ -186,47 +188,61 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, onSave, 
         <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium">
           {legs.length === 0 ? 'Erste Verbindung wählen' : 'Nächsten Umstieg wählen'}
         </p>
-        <p className="text-xs text-muted-foreground">Ab: <span className="text-foreground font-medium">{currentOrigin.name.split(',')[0]}</span> → Richtung <span className="text-foreground font-medium">{finalDestination.name.split(',')[0]}</span></p>
+        <p className="text-xs text-muted-foreground mb-1">Ab: <span className="text-foreground font-medium">{currentOrigin.name.split(',')[0]}</span> → Richtung <span className="text-foreground font-medium">{finalDestination.name.split(',')[0]}</span></p>
 
-        <button
-          onClick={() => setShowStationSearch(!showStationSearch)}
-          className="w-full flex items-center gap-2 p-3.5 rounded-[20px] hover:opacity-80 transition-all"
-          style={{ backgroundColor: '#111111', border: '1px solid #1F1F1F' }}
-        >
-          <MapPin className="h-4 w-4 text-primary shrink-0" />
-          <span className="text-sm font-medium text-foreground truncate flex-1 text-left">{currentOrigin.name.split(',')[0]}</span>
-          {showStationSearch ? <ChevronUp className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />}
-        </button>
-
-        {showStationSearch && (
-          <div className="rounded-[20px] p-3 space-y-2" style={{ backgroundColor: '#111111', border: '1px solid #1F1F1F' }}>
-            <input
-              type="text"
-              value={stationQuery}
-              onChange={e => handleStationSearch(e.target.value)}
-              placeholder="Andere Haltestelle suchen..."
-              autoFocus
-              className="w-full h-12 rounded-2xl px-4 text-sm text-foreground placeholder:text-muted-foreground outline-none border border-transparent focus:border-primary"
-              style={{ backgroundColor: '#1A1A1A' }}
-            />
-            {stationLoading && (
-              <div className="flex justify-center py-3">
-                <div className="amber-spinner" style={{ width: 18, height: 18 }} />
+        {/* Umstiegsbahnhof: current origin with change option */}
+        <div className="rounded-[20px] p-3 space-y-2" style={{ backgroundColor: '#111111', border: '1px solid #1F1F1F' }}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-primary shrink-0" />
+              <div>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{legs.length === 0 ? 'Startbahnhof' : 'Umstieg an'}</p>
+                <p className="text-sm font-semibold text-foreground">{currentOrigin.name.split(',')[0]}</p>
               </div>
-            )}
-            <div className="divide-y" style={{ borderColor: '#1A1A1A' }}>
-              {stationResults.map(s => (
-                <button key={s.id} onClick={() => selectStation(s)} className="w-full text-left px-3 py-2.5 flex items-center gap-3 hover:bg-secondary/50 transition-colors">
-                  <Train className="h-4 w-4 text-primary shrink-0" />
-                  <div>
-                    <p className="text-sm font-medium text-foreground">{s.name.split(',')[0]}</p>
-                    {s.name.includes(',') && <p className="text-xs text-muted-foreground">{s.name.split(',').slice(1).join(',').trim()}</p>}
-                  </div>
-                </button>
-              ))}
             </div>
+            <button
+              onClick={() => { setShowStationSearch(!showStationSearch); setStationQuery(''); setStationResults([]); }}
+              className="text-xs text-primary font-medium px-3 py-1.5 rounded-full hover:bg-primary/10 transition-colors"
+            >
+              {showStationSearch ? 'Schließen' : 'Ändern'}
+            </button>
           </div>
-        )}
+
+          {showStationSearch && (
+            <div className="space-y-2 pt-2" style={{ borderTop: '1px solid #1A1A1A' }}>
+              <input
+                type="text"
+                value={stationQuery}
+                onChange={e => handleStationSearch(e.target.value)}
+                placeholder="Anderen Umstiegsbahnhof suchen..."
+                autoFocus
+                className="w-full h-12 rounded-2xl px-4 text-sm text-foreground placeholder:text-muted-foreground outline-none border border-transparent focus:border-primary"
+                style={{ backgroundColor: '#1A1A1A' }}
+              />
+              {stationLoading && (
+                <div className="flex justify-center py-3">
+                  <div className="amber-spinner" style={{ width: 18, height: 18 }} />
+                </div>
+              )}
+              <div className="divide-y" style={{ borderColor: '#1A1A1A' }}>
+                {stationResults.map(s => (
+                  <button key={s.id} onClick={() => selectStation(s)} className="w-full text-left px-3 py-2.5 flex items-center gap-3 hover:bg-secondary/50 transition-colors">
+                    <Train className="h-4 w-4 text-primary shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium text-foreground">{s.name.split(',')[0]}</p>
+                      {s.name.includes(',') && <p className="text-xs text-muted-foreground">{s.name.split(',').slice(1).join(',').trim()}</p>}
+                    </div>
+                  </button>
+                ))}
+              </div>
+              {!showStationSearch && legs.length > 0 && (
+                <p className="text-[10px] text-muted-foreground text-center py-1">
+                  Oder übernimm den vorgeschlagenen Bahnhof und suche direkt Abfahrten
+                </p>
+              )}
+            </div>
+          )}
+        </div>
 
         <div className="flex gap-2">
           <div className="flex-1">
