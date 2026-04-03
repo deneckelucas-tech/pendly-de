@@ -75,6 +75,8 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, onSave, 
     setDepartures([]);
     setSearched(false);
     setFilterText('');
+    // After adding a leg, auto-open station search so user can change intermediate stop
+    setShowStationSearch(true);
     if (dep.when) {
       const arr = new Date(dep.when);
       arr.setMinutes(arr.getMinutes() + 30);
