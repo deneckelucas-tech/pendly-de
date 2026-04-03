@@ -16,6 +16,7 @@ import ManageRoutes from "./pages/ManageRoutes";
 import Notifications from "./pages/Notifications";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import Legal from "./pages/Legal";
 
 const queryClient = new QueryClient();
 
