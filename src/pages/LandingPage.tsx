@@ -512,7 +512,7 @@ export default function LandingPage() {
           </div>
           <div className="bf-stat">
             <div className="bf-stat-num">0 s</div>
-            <div className="bf-stat-label">Reaktionszeit Bahnfrei</div>
+            <div className="bf-stat-label">Reaktionszeit Pendly</div>
           </div>
         </div>
 
