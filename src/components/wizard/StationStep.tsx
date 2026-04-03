@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { searchStations } from '@/lib/transport-api';
 import { Loader2, X, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { Station } from '@/lib/types';
@@ -30,15 +31,9 @@ export function StationStep({ title, subtitle, onSelect, onBack, onCancel }: Sta
     setError(false);
     setSearched(true);
     try {
-      const params = new URLSearchParams({ query: q, results: '6', stops: 'true', addresses: 'false', poi: 'false', fuzzy: 'true' });
-      const res = await fetch(`https://v6.db.transport.rest/locations?${params}`);
-      if (!res.ok) throw new Error();
-      const data = await res.json();
-      setResults(
-        data
-          .filter((l: any) => l.type === 'station' || l.type === 'stop')
-          .map((l: any): Station => ({ id: l.id, name: l.name, type: l.type, products: l.products || {} }))
-      );
+      const stations = await searchStations(q);
+      setResults(stations);
+      if (stations.length === 0) setError(false);
     } catch {
       setError(true);
       setResults([]);
