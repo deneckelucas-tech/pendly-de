@@ -84,8 +84,18 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, initialD
     setSearched(false);
   };
 
-  const selectJourney = (journey: Journey) => {
-    onSave(journey, Array.from(selectedDays));
+  const toggleJourney = (journey: Journey) => {
+    setSelectedJourneys(prev => {
+      const exists = prev.find(j => j.id === journey.id);
+      if (exists) return prev.filter(j => j.id !== journey.id);
+      return [...prev, journey];
+    });
+  };
+
+  const handleFinish = () => {
+    if (selectedJourneys.length > 0) {
+      onSave(selectedJourneys, Array.from(selectedDays));
+    }
   };
 
   const getDuration = (journey: Journey): string => {
