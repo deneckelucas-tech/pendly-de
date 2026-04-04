@@ -46,6 +46,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
     } catch (err) {
       console.error('Subscription check failed:', err);
+      // Fallback: assume trialing so user isn't stuck on loading
+      setSubscription(prev => prev.status === 'loading' ? {
+        subscribed: true,
+        status: 'trialing',
+        trialEnd: null,
+        trialDaysRemaining: 7,
+        subscriptionEnd: null,
+      } : prev);
     }
   }, []);
 
