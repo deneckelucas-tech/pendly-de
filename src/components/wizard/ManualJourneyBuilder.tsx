@@ -85,7 +85,7 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, initialD
   };
 
   const selectJourney = (journey: Journey) => {
-    onSave(journey);
+    onSave(journey, Array.from(selectedDays));
   };
 
   const getDuration = (journey: Journey): string => {
