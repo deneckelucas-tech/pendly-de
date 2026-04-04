@@ -94,7 +94,7 @@ export default function RouteWizard() {
                 origin={origin}
                 destination={destination}
                 transportTypes={[]}
-                onNext={(journeys) => { setSelectedJourneys(journeys); goTo(4); }}
+                onNext={(journeys, days) => { setSelectedJourneys(journeys); setCommuteDays(days); goTo(4); }}
                 onBack={() => goTo(2)}
                 onManual={() => goTo(99)}
               />
