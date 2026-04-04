@@ -5,17 +5,14 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Multiple HAFAS endpoints for fallback
-const ENDPOINTS = [
-  "https://v6.db.transport.rest",
-  "https://v6.vbb.transport.rest",
-];
+// DB transport.rest is the only nationwide endpoint
+const DB_ENDPOINT = "https://v6.db.transport.rest";
 
 // Cache TTL in seconds per endpoint type
 const CACHE_TTL: Record<string, number> = {
-  locations: 86400,   // 24h — stations rarely change
-  journeys: 300,      // 5 min — journeys change frequently
-  departures: 120,    // 2 min — departures are real-time
+  locations: 86400,
+  journeys: 300,
+  departures: 120,
 };
 
 function getCacheTTL(endpoint: string): number {
@@ -27,36 +24,46 @@ function generateCacheKey(endpoint: string, params: Record<string, string>): str
   return `${endpoint}:${sorted}`;
 }
 
-async function fetchWithTimeout(url: string, timeoutMs = 8000): Promise<Response> {
+async function fetchWithTimeout(url: string, timeoutMs: number): Promise<Response> {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const res = await fetch(url, { signal: controller.signal });
-    return res;
+    return await fetch(url, { signal: controller.signal });
   } finally {
     clearTimeout(id);
   }
 }
 
+async function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 async function fetchFromHAFAS(path: string, params: URLSearchParams): Promise<any> {
-  for (const base of ENDPOINTS) {
+  const url = `${DB_ENDPOINT}/${path}?${params}`;
+  const maxRetries = 3;
+
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      const url = `${base}/${path}?${params}`;
-      const res = await fetchWithTimeout(url, 8000);
+      console.log(`[TRANSPORT] Attempt ${attempt}: ${url}`);
+      const res = await fetchWithTimeout(url, 15000);
       if (res.ok) {
+        console.log(`[TRANSPORT] Success on attempt ${attempt}`);
         return await res.json();
       }
-      // If 503 or server error, try next endpoint
-      if (res.status >= 500) continue;
-      // Client error — don't retry on different endpoint
-      throw new Error(`API error: ${res.status}`);
+      const body = await res.text().catch(() => "");
+      console.log(`[TRANSPORT] HTTP ${res.status} on attempt ${attempt}: ${body.slice(0, 200)}`);
+      if (res.status >= 400 && res.status < 500) {
+        throw new Error(`API client error ${res.status}: ${body.slice(0, 200)}`);
+      }
+      // Server error — retry
     } catch (err: any) {
-      if (err.name === "AbortError") continue; // timeout, try next
-      if (err.message?.includes("API error")) throw err;
-      continue; // network error, try next
+      if (err.message?.startsWith("API client error")) throw err;
+      console.log(`[TRANSPORT] Attempt ${attempt} failed: ${err.message}`);
+      if (attempt === maxRetries) throw new Error(`HAFAS unavailable after ${maxRetries} attempts: ${err.message}`);
     }
+    await sleep(1000 * attempt); // backoff: 1s, 2s, 3s
   }
-  throw new Error("All HAFAS endpoints failed");
+  throw new Error("HAFAS unreachable");
 }
 
 Deno.serve(async (req) => {
