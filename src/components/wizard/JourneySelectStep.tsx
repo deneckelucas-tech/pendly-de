@@ -107,14 +107,14 @@ export function JourneySelectStep({ origin, destination, transportTypes, arrival
         <div className="h-2.5 w-2.5 rounded-full bg-primary shrink-0" />
       </div>
 
-      {/* Arrival time picker */}
+      {/* Departure time picker */}
       <div className="flex gap-2 mb-4">
         <div className="flex-1">
-          <label className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1 block">Wann musst du da sein?</label>
+          <label className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1 block">Ab wann fährst du?</label>
           <input
             type="time"
-            value={localArrivalTime}
-            onChange={e => setLocalArrivalTime(e.target.value)}
+            value={localDepartureTime}
+            onChange={e => setLocalDepartureTime(e.target.value)}
             className="w-full h-12 rounded-2xl px-4 text-sm text-foreground outline-none border border-transparent focus:border-primary transition-all"
             style={{ backgroundColor: '#1A1A1A' }}
           />
