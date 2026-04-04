@@ -8,14 +8,15 @@ const corsHeaders = {
 // Multiple HAFAS endpoints for fallback
 const ENDPOINTS = [
   "https://v6.db.transport.rest",
+  "https://v6.bvg.transport.rest",
   "https://v6.vbb.transport.rest",
 ];
 
 // Cache TTL in seconds per endpoint type
 const CACHE_TTL: Record<string, number> = {
-  locations: 86400,   // 24h — stations rarely change
-  journeys: 300,      // 5 min — journeys change frequently
-  departures: 120,    // 2 min — departures are real-time
+  locations: 86400,
+  journeys: 300,
+  departures: 120,
 };
 
 function getCacheTTL(endpoint: string): number {
@@ -27,7 +28,7 @@ function generateCacheKey(endpoint: string, params: Record<string, string>): str
   return `${endpoint}:${sorted}`;
 }
 
-async function fetchWithTimeout(url: string, timeoutMs = 8000): Promise<Response> {
+async function fetchWithTimeout(url: string, timeoutMs = 10000): Promise<Response> {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeoutMs);
   try {
@@ -39,24 +40,28 @@ async function fetchWithTimeout(url: string, timeoutMs = 8000): Promise<Response
 }
 
 async function fetchFromHAFAS(path: string, params: URLSearchParams): Promise<any> {
+  const errors: string[] = [];
   for (const base of ENDPOINTS) {
     try {
       const url = `${base}/${path}?${params}`;
-      const res = await fetchWithTimeout(url, 8000);
+      console.log(`[TRANSPORT] Trying: ${url}`);
+      const res = await fetchWithTimeout(url, 10000);
       if (res.ok) {
+        console.log(`[TRANSPORT] Success from ${base}`);
         return await res.json();
       }
-      // If 503 or server error, try next endpoint
-      if (res.status >= 500) continue;
-      // Client error — don't retry on different endpoint
-      throw new Error(`API error: ${res.status}`);
+      const body = await res.text().catch(() => "");
+      errors.push(`${base}: HTTP ${res.status} - ${body.slice(0, 200)}`);
+      console.log(`[TRANSPORT] ${base} returned ${res.status}, trying next...`);
+      continue; // Try next endpoint for ANY non-ok response
     } catch (err: any) {
-      if (err.name === "AbortError") continue; // timeout, try next
-      if (err.message?.includes("API error")) throw err;
-      continue; // network error, try next
+      errors.push(`${base}: ${err.message}`);
+      console.log(`[TRANSPORT] ${base} error: ${err.message}, trying next...`);
+      continue;
     }
   }
-  throw new Error("All HAFAS endpoints failed");
+  console.error(`[TRANSPORT] All endpoints failed:`, errors);
+  throw new Error(`All HAFAS endpoints failed: ${errors.join(" | ")}`);
 }
 
 Deno.serve(async (req) => {
