@@ -12,7 +12,7 @@ interface JourneySelectStepProps {
   destination: Station;
   transportTypes: TransportType[];
   arrivalTime?: string;
-  onNext: (journeys: Journey[]) => void;
+  onNext: (journeys: Journey[], weekdays: Weekday[]) => void;
   onBack: () => void;
   onManual: () => void;
 }
