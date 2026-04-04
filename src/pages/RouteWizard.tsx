@@ -106,7 +106,8 @@ export default function RouteWizard() {
               <ManualJourneyBuilder
                 initialOrigin={origin}
                 finalDestination={destination}
-                onSave={(journey) => { setSelectedJourneys([journey]); goTo(4); }}
+                initialDays={commuteDays}
+                onSave={(journey, days) => { setSelectedJourneys([journey]); setCommuteDays(days); goTo(4); }}
                 onBack={() => goTo(3)}
               />
             </motion.div>
