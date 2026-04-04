@@ -17,6 +17,7 @@ export default function RouteWizard() {
   const [selectedJourneys, setSelectedJourneys] = useState<Journey[]>([]);
   const [hasReturn, setHasReturn] = useState<boolean | null>(null);
   const [returnJourneys, setReturnJourneys] = useState<Journey[]>([]);
+  const [commuteDays, setCommuteDays] = useState<Weekday[]>(['mon', 'tue', 'wed', 'thu', 'fri']);
 
   const handleCancel = () => navigate(-1);
 
