@@ -23,6 +23,7 @@ export function JourneySelectStep({ origin, destination, transportTypes, arrival
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [localDepartureTime, setLocalDepartureTime] = useState('07:00');
+  const [selectedDays, setSelectedDays] = useState<Set<Weekday>>(new Set(['mon', 'tue', 'wed', 'thu', 'fri']));
   const [hasSearched, setHasSearched] = useState(false);
 
   const fetchJourneys = useCallback(async () => {
