@@ -312,9 +312,12 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, initialD
           return (
             <button
               key={journey.id}
-              onClick={() => selectJourney(journey)}
-              className="w-full text-left p-4 rounded-[20px] hover:opacity-90 transition-all active:scale-[0.99]"
-              style={{ backgroundColor: '#111111', border: '1px solid #1F1F1F' }}
+              onClick={() => toggleJourney(journey)}
+              className="w-full text-left p-4 rounded-[20px] hover:opacity-90 transition-all active:scale-[0.99] relative"
+              style={{
+                backgroundColor: selectedJourneys.find(j => j.id === journey.id) ? 'rgba(245,158,11,0.1)' : '#111111',
+                border: selectedJourneys.find(j => j.id === journey.id) ? '1px solid rgba(245,158,11,0.5)' : '1px solid #1F1F1F',
+              }}
             >
               {/* Times */}
               <div className="flex items-center justify-between mb-1">
