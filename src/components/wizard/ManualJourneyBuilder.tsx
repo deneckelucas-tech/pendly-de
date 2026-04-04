@@ -368,6 +368,19 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, initialD
           );
         })}
       </div>
+
+      {/* Bottom bar */}
+      {selectedJourneys.length > 0 && (
+        <div className="fixed bottom-0 left-0 right-0 px-5 py-4 flex items-center justify-between" style={{ backgroundColor: '#000', borderTop: '1px solid #1A1A1A' }}>
+          <span className="text-sm text-muted-foreground">{selectedJourneys.length} Verbindung{selectedJourneys.length > 1 ? 'en' : ''} gewählt</span>
+          <button
+            onClick={handleFinish}
+            className="h-12 px-6 rounded-full bg-primary text-primary-foreground font-bold text-sm flex items-center gap-2"
+          >
+            Weiter <ArrowRight className="h-4 w-4" />
+          </button>
+        </div>
+      )}
     </motion.div>
   );
 }

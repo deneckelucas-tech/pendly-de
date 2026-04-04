@@ -26,17 +26,20 @@ export default function Auth() {
         if (error) throw error;
         navigate('/dashboard');
       } else {
-        const { error } = await supabase.auth.signUp({
+        const { data: signUpData, error } = await supabase.auth.signUp({
           email,
           password,
           options: { emailRedirectTo: window.location.origin },
         });
         if (error) throw error;
-        toast({
-          title: 'Konto erstellt!',
-          description: 'Bitte überprüfe deine E-Mail zur Bestätigung.',
-        });
-        navigate('/onboarding');
+        if (signUpData.session) {
+          navigate('/onboarding');
+        } else {
+          toast({
+            title: 'Konto erstellt!',
+            description: 'Bitte überprüfe deine E-Mail zur Bestätigung.',
+          });
+        }
       }
     } catch (error: any) {
       toast({

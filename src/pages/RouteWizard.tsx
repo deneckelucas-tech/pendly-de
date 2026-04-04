@@ -148,7 +148,7 @@ export default function RouteWizard() {
                 initialOrigin={destination}
                 finalDestination={origin}
                 initialDays={commuteDays}
-                onSave={(journey) => { setReturnJourneys([journey]); goTo(5); }}
+                onSave={(journeys) => { setReturnJourneys(journeys); goTo(5); }}
                 onBack={() => goTo(98)}
               />
             </motion.div>
