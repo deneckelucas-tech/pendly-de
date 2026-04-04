@@ -132,7 +132,37 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, initialD
         <span className="text-xs font-semibold text-foreground truncate">{finalDestination.name.split(',')[0]}</span>
         <div className="h-2.5 w-2.5 rounded-full bg-primary shrink-0" />
       </div>
-      <p className="text-sm text-muted-foreground mb-6">Wähle eine Verbindung von Ab nach Richtung</p>
+      <p className="text-sm text-muted-foreground mb-4">Wähle eine Verbindung von Ab nach Richtung</p>
+
+      {/* Weekday selection */}
+      <div className="mb-4">
+        <label className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2 block">Pendeltage</label>
+        <div className="flex gap-1.5">
+          {(['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'] as Weekday[]).map(day => {
+            const isActive = selectedDays.has(day);
+            return (
+              <button
+                key={day}
+                onClick={() => {
+                  setSelectedDays(prev => {
+                    const next = new Set(prev);
+                    next.has(day) ? next.delete(day) : next.add(day);
+                    return next;
+                  });
+                }}
+                className="flex-1 h-10 rounded-xl text-xs font-bold transition-all"
+                style={{
+                  backgroundColor: isActive ? 'hsl(var(--primary))' : '#1A1A1A',
+                  color: isActive ? '#000' : '#6B7280',
+                  border: isActive ? 'none' : '1px solid #1F1F1F',
+                }}
+              >
+                {WEEKDAY_LABELS[day]}
+              </button>
+            );
+          })}
+        </div>
+      </div>
 
       {/* Two-field station picker: Ab + Richtung */}
       <div className="rounded-[20px] p-3 space-y-0 mb-4" style={{ backgroundColor: '#111111', border: '1px solid #1F1F1F' }}>
