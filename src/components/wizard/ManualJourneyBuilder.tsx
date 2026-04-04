@@ -10,12 +10,12 @@ interface ManualJourneyBuilderProps {
   initialOrigin: Station;
   finalDestination: Station;
   initialDays?: Weekday[];
-  onSave: (journey: Journey, weekdays: Weekday[]) => void;
+  onSave: (journeys: Journey[], weekdays: Weekday[]) => void;
   onBack: () => void;
 }
 
 export function ManualJourneyBuilder({ initialOrigin, finalDestination, initialDays, onSave, onBack }: ManualJourneyBuilderProps) {
-  const [savedLegs, setSavedLegs] = useState<Journey[]>([]);
+  const [selectedJourneys, setSelectedJourneys] = useState<Journey[]>([]);
   const [currentOrigin, setCurrentOrigin] = useState<Station>(initialOrigin);
   const [currentDirection, setCurrentDirection] = useState<Station>(finalDestination);
   const [departureTime, setDepartureTime] = useState('07:00');
@@ -84,8 +84,18 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, initialD
     setSearched(false);
   };
 
-  const selectJourney = (journey: Journey) => {
-    onSave(journey, Array.from(selectedDays));
+  const toggleJourney = (journey: Journey) => {
+    setSelectedJourneys(prev => {
+      const exists = prev.find(j => j.id === journey.id);
+      if (exists) return prev.filter(j => j.id !== journey.id);
+      return [...prev, journey];
+    });
+  };
+
+  const handleFinish = () => {
+    if (selectedJourneys.length > 0) {
+      onSave(selectedJourneys, Array.from(selectedDays));
+    }
   };
 
   const getDuration = (journey: Journey): string => {
@@ -302,9 +312,12 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, initialD
           return (
             <button
               key={journey.id}
-              onClick={() => selectJourney(journey)}
-              className="w-full text-left p-4 rounded-[20px] hover:opacity-90 transition-all active:scale-[0.99]"
-              style={{ backgroundColor: '#111111', border: '1px solid #1F1F1F' }}
+              onClick={() => toggleJourney(journey)}
+              className="w-full text-left p-4 rounded-[20px] hover:opacity-90 transition-all active:scale-[0.99] relative"
+              style={{
+                backgroundColor: selectedJourneys.find(j => j.id === journey.id) ? 'rgba(245,158,11,0.1)' : '#111111',
+                border: selectedJourneys.find(j => j.id === journey.id) ? '1px solid rgba(245,158,11,0.5)' : '1px solid #1F1F1F',
+              }}
             >
               {/* Times */}
               <div className="flex items-center justify-between mb-1">
@@ -355,6 +368,19 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, initialD
           );
         })}
       </div>
+
+      {/* Bottom bar */}
+      {selectedJourneys.length > 0 && (
+        <div className="fixed bottom-0 left-0 right-0 px-5 py-4 flex items-center justify-between" style={{ backgroundColor: '#000', borderTop: '1px solid #1A1A1A' }}>
+          <span className="text-sm text-muted-foreground">{selectedJourneys.length} Verbindung{selectedJourneys.length > 1 ? 'en' : ''} gewählt</span>
+          <button
+            onClick={handleFinish}
+            className="h-12 px-6 rounded-full bg-primary text-primary-foreground font-bold text-sm flex items-center gap-2"
+          >
+            Weiter <ArrowRight className="h-4 w-4" />
+          </button>
+        </div>
+      )}
     </motion.div>
   );
 }
