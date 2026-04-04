@@ -31,7 +31,7 @@ export function JourneySelectStep({ origin, destination, transportTypes, arrival
     setError(false);
     setHasSearched(true);
     try {
-      const params: any = { results: 8 };
+      const params: any = { results: 15 };
       if (localDepartureTime) {
         const now = new Date();
         const [h, m] = localDepartureTime.split(':').map(Number);
@@ -48,7 +48,7 @@ export function JourneySelectStep({ origin, destination, transportTypes, arrival
 
       let results = await searchJourneys(origin.id, destination.id, params);
       if (results.length === 0) {
-        results = await searchJourneys(origin.id, destination.id, { results: 8 });
+        results = await searchJourneys(origin.id, destination.id, { results: 15 });
       }
       setJourneys(results);
     } catch {
