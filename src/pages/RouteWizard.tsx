@@ -147,6 +147,7 @@ export default function RouteWizard() {
               <ManualJourneyBuilder
                 initialOrigin={destination}
                 finalDestination={origin}
+                initialDays={commuteDays}
                 onSave={(journey) => { setReturnJourneys([journey]); goTo(5); }}
                 onBack={() => goTo(98)}
               />
