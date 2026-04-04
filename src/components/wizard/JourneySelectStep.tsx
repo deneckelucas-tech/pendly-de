@@ -21,7 +21,7 @@ export function JourneySelectStep({ origin, destination, transportTypes, arrival
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
-  const [localArrivalTime, setLocalArrivalTime] = useState(initialArrivalTime || '08:00');
+  const [localDepartureTime, setLocalDepartureTime] = useState('07:00');
   const [hasSearched, setHasSearched] = useState(false);
 
   const fetchJourneys = useCallback(async () => {
@@ -30,12 +30,12 @@ export function JourneySelectStep({ origin, destination, transportTypes, arrival
     setHasSearched(true);
     try {
       const params: any = { results: 8 };
-      if (localArrivalTime) {
+      if (localDepartureTime) {
         const now = new Date();
-        const [h, m] = localArrivalTime.split(':').map(Number);
-        const arr = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m);
-        if (arr < now) arr.setDate(arr.getDate() + 1);
-        params.arrival = arr.toISOString();
+        const [h, m] = localDepartureTime.split(':').map(Number);
+        const dep = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m);
+        if (dep < now) dep.setDate(dep.getDate() + 1);
+        params.departure = dep.toISOString();
       }
       if (transportTypes.length > 0) {
         const products: Partial<Record<TransportType, boolean>> = {};
