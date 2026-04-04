@@ -10,7 +10,7 @@ interface ManualJourneyBuilderProps {
   initialOrigin: Station;
   finalDestination: Station;
   initialDays?: Weekday[];
-  onSave: (journey: Journey, weekdays: Weekday[]) => void;
+  onSave: (journeys: Journey[], weekdays: Weekday[]) => void;
   onBack: () => void;
 }
 
