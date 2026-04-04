@@ -21,7 +21,7 @@ export function JourneySelectStep({ origin, destination, transportTypes, arrival
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
-  const [localArrivalTime, setLocalArrivalTime] = useState(initialArrivalTime || '08:00');
+  const [localDepartureTime, setLocalDepartureTime] = useState('07:00');
   const [hasSearched, setHasSearched] = useState(false);
 
   const fetchJourneys = useCallback(async () => {
@@ -30,12 +30,12 @@ export function JourneySelectStep({ origin, destination, transportTypes, arrival
     setHasSearched(true);
     try {
       const params: any = { results: 8 };
-      if (localArrivalTime) {
+      if (localDepartureTime) {
         const now = new Date();
-        const [h, m] = localArrivalTime.split(':').map(Number);
-        const arr = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m);
-        if (arr < now) arr.setDate(arr.getDate() + 1);
-        params.arrival = arr.toISOString();
+        const [h, m] = localDepartureTime.split(':').map(Number);
+        const dep = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m);
+        if (dep < now) dep.setDate(dep.getDate() + 1);
+        params.departure = dep.toISOString();
       }
       if (transportTypes.length > 0) {
         const products: Partial<Record<TransportType, boolean>> = {};
@@ -54,7 +54,7 @@ export function JourneySelectStep({ origin, destination, transportTypes, arrival
     } finally {
       setLoading(false);
     }
-  }, [origin.id, destination.id, transportTypes, localArrivalTime]);
+  }, [origin.id, destination.id, transportTypes, localDepartureTime]);
 
   const toggleJourney = (id: string) => {
     setSelected(prev => {
@@ -107,14 +107,14 @@ export function JourneySelectStep({ origin, destination, transportTypes, arrival
         <div className="h-2.5 w-2.5 rounded-full bg-primary shrink-0" />
       </div>
 
-      {/* Arrival time picker */}
+      {/* Departure time picker */}
       <div className="flex gap-2 mb-4">
         <div className="flex-1">
-          <label className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1 block">Wann musst du da sein?</label>
+          <label className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1 block">Ab wann fährst du?</label>
           <input
             type="time"
-            value={localArrivalTime}
-            onChange={e => setLocalArrivalTime(e.target.value)}
+            value={localDepartureTime}
+            onChange={e => setLocalDepartureTime(e.target.value)}
             className="w-full h-12 rounded-2xl px-4 text-sm text-foreground outline-none border border-transparent focus:border-primary transition-all"
             style={{ backgroundColor: '#1A1A1A' }}
           />
