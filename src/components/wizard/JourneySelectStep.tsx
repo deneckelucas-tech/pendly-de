@@ -4,7 +4,8 @@ import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { searchJourneys, formatTime, formatDelay } from '@/lib/transport-api';
 import { getLineBadgeStyle } from '@/lib/line-colors';
-import type { Station, TransportType, Journey } from '@/lib/types';
+import type { Station, TransportType, Journey, Weekday } from '@/lib/types';
+import { WEEKDAY_LABELS } from '@/lib/types';
 
 interface JourneySelectStepProps {
   origin: Station;
