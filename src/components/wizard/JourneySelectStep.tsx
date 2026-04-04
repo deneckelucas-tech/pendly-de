@@ -31,7 +31,7 @@ export function JourneySelectStep({ origin, destination, transportTypes, arrival
     setError(false);
     setHasSearched(true);
     try {
-      const params: any = { results: 8 };
+      const params: any = { results: 15 };
       if (localDepartureTime) {
         const now = new Date();
         const [h, m] = localDepartureTime.split(':').map(Number);
