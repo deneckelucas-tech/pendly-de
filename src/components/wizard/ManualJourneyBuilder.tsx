@@ -3,21 +3,24 @@ import { ArrowLeft, Trash2, MapPin, ArrowRight, Search, Train, Repeat } from 'lu
 import { motion } from 'framer-motion';
 import { searchStations, searchJourneys, formatTime } from '@/lib/transport-api';
 import { getLineBadgeStyle } from '@/lib/line-colors';
-import type { Station, Journey, JourneyLeg } from '@/lib/types';
+import type { Station, Journey, JourneyLeg, Weekday } from '@/lib/types';
+import { WEEKDAY_LABELS } from '@/lib/types';
 
 interface ManualJourneyBuilderProps {
   initialOrigin: Station;
   finalDestination: Station;
-  onSave: (journey: Journey) => void;
+  initialDays?: Weekday[];
+  onSave: (journey: Journey, weekdays: Weekday[]) => void;
   onBack: () => void;
 }
 
-export function ManualJourneyBuilder({ initialOrigin, finalDestination, onSave, onBack }: ManualJourneyBuilderProps) {
+export function ManualJourneyBuilder({ initialOrigin, finalDestination, initialDays, onSave, onBack }: ManualJourneyBuilderProps) {
   const [savedLegs, setSavedLegs] = useState<Journey[]>([]);
   const [currentOrigin, setCurrentOrigin] = useState<Station>(initialOrigin);
   const [currentDirection, setCurrentDirection] = useState<Station>(finalDestination);
   const [departureTime, setDepartureTime] = useState('07:00');
   const [journeyResults, setJourneyResults] = useState<Journey[]>([]);
+  const [selectedDays, setSelectedDays] = useState<Set<Weekday>>(new Set(initialDays || ['mon', 'tue', 'wed', 'thu', 'fri']));
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [filterText, setFilterText] = useState('');
