@@ -52,7 +52,7 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, initialD
 
       const results = await searchJourneys(currentOrigin.id, currentDirection.id, {
         departure: when.toISOString(),
-        results: 10,
+        results: 15,
       });
       setJourneyResults(results);
     } catch {
