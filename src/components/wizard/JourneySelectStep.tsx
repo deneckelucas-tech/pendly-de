@@ -322,7 +322,7 @@ export function JourneySelectStep({ origin, destination, transportTypes, arrival
               : 'Keine Auswahl'}
           </p>
           <button
-            onClick={() => onNext(selectedJourneys)}
+            onClick={() => onNext(selectedJourneys, Array.from(selectedDays))}
             disabled={selected.size === 0}
             className={cn(
               'h-12 px-6 rounded-full font-bold text-sm flex items-center gap-2 transition-all',
