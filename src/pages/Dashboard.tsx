@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getMockRoutes, generateMockAlerts, generateMockStatus } from '@/lib/mock-data';
-import type { CommuteRoute, RouteStatusData, Alert } from '@/lib/types';
+import type { CommuteRoute, RouteStatusData, Alert, SavedLeg } from '@/lib/types';
 import { useNavigate } from 'react-router-dom';
-import { Bell, ChevronRight, AlertTriangle } from 'lucide-react';
+import { Bell, ChevronRight, Plus, ArrowRightLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -35,6 +35,41 @@ function getStatusDotColor(status: string) {
   if (status === 'minor_delay') return 'bg-primary';
   if (status === 'major_delay' || status === 'cancelled') return 'bg-destructive';
   return 'bg-muted-foreground';
+}
+
+/** Parse "HH:mm" to minutes since midnight */
+function timeToMinutes(time: string): number {
+  const [h, m] = time.split(':').map(Number);
+  return h * 60 + m;
+}
+
+/** Get the earliest departure leg of a route */
+function getEarliestDeparture(route: CommuteRoute): SavedLeg | null {
+  let earliest: SavedLeg | null = null;
+  let earliestMin = Infinity;
+  for (const conn of route.connections) {
+    if (conn.legs.length > 0) {
+      const leg = conn.legs[0];
+      const min = timeToMinutes(leg.plannedDeparture);
+      if (min < earliestMin) {
+        earliestMin = min;
+        earliest = leg;
+      }
+    }
+  }
+  return earliest;
+}
+
+interface UpcomingDeparture {
+  time: string;
+  timeMinutes: number;
+  line: string;
+  originName: string;
+  destinationName: string;
+  routeName: string;
+  status: string;
+  routeId: string;
+  allLegs: SavedLeg[];
 }
 
 export default function Dashboard() {
@@ -71,25 +106,50 @@ export default function Dashboard() {
   }, [lastUpdated]);
 
   const todayKey = (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const)[new Date().getDay()];
-  const todayRoutes = routes.filter(r =>
-    r.connections.some(c => c.weekdays.includes(todayKey))
-  );
 
-  const nextDeparture = todayRoutes.length > 0 ? todayRoutes[0] : null;
-  const nextStatus = nextDeparture ? statuses[nextDeparture.id] : null;
-  const nextLeg = nextDeparture?.connections[0]?.legs[0];
+  // Build a flat list of all upcoming departures sorted by time, filtered to today
+  const allDepartures = useMemo<UpcomingDeparture[]>(() => {
+    const now = new Date();
+    const nowMinutes = now.getHours() * 60 + now.getMinutes();
 
-  const upcomingDepartures = todayRoutes.flatMap(route =>
-    route.connections.flatMap(conn =>
-      conn.legs.map(leg => ({
-        time: leg.plannedDeparture,
-        line: leg.lineName,
-        station: leg.originName,
-        status: statuses[route.id]?.status || 'no_data',
-        routeId: route.id,
-      }))
-    )
-  ).slice(1, 4);
+    const deps: UpcomingDeparture[] = [];
+
+    routes.forEach(route => {
+      route.connections.forEach(conn => {
+        if (!conn.weekdays.includes(todayKey)) return;
+        if (conn.legs.length === 0) return;
+
+        const firstLeg = conn.legs[0];
+        const depMinutes = timeToMinutes(firstLeg.plannedDeparture);
+
+        deps.push({
+          time: firstLeg.plannedDeparture,
+          timeMinutes: depMinutes,
+          line: firstLeg.lineName,
+          originName: firstLeg.originName,
+          destinationName: conn.legs[conn.legs.length - 1].destinationName,
+          routeName: route.name,
+          status: statuses[route.id]?.status || 'no_data',
+          routeId: route.id,
+          allLegs: conn.legs,
+        });
+      });
+    });
+
+    // Sort: future departures first (by time), then past departures
+    deps.sort((a, b) => {
+      const aFuture = a.timeMinutes >= nowMinutes;
+      const bFuture = b.timeMinutes >= nowMinutes;
+      if (aFuture && !bFuture) return -1;
+      if (!aFuture && bFuture) return 1;
+      return a.timeMinutes - b.timeMinutes;
+    });
+
+    return deps;
+  }, [routes, statuses, todayKey]);
+
+  const nextDep = allDepartures.length > 0 ? allDepartures[0] : null;
+  const upcomingDeps = allDepartures.slice(1, 4);
 
   const unreadCount = alerts.filter(a => !a.is_read).length;
 
@@ -137,46 +197,79 @@ export default function Dashboard() {
       </motion.header>
 
       {/* Next Departure Hero Card */}
-      {nextDeparture && nextLeg && (
+      {nextDep && (
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
-          className="card-amber-glow bg-card rounded-[20px] p-5 mb-4"
+          className="card-amber-glow bg-card rounded-[20px] p-5 mb-3"
         >
           <div className="flex items-start justify-between mb-4">
             <div>
-              <p className="text-[11px] uppercase tracking-[0.1em] mb-1 text-muted-foreground">Nächste Abfahrt</p>
+              <p className="text-[11px] uppercase tracking-[0.1em] mb-1 text-muted-foreground">
+                Nächste Abfahrt · {nextDep.routeName}
+              </p>
               <div className="flex items-baseline gap-2.5">
                 <span className="font-display text-5xl text-foreground">
-                  {nextLeg.plannedDeparture}
+                  {nextDep.time}
                 </span>
                 <span className="text-sm font-semibold text-muted-foreground">
-                  {nextLeg.lineName}
+                  {nextDep.line}
                 </span>
               </div>
             </div>
-            {nextStatus && (
-              <span className={cn(
-                'text-[11px] font-semibold px-2.5 py-1 rounded-full',
-                getStatusColor(nextStatus.status)
-              )}>
-                {getStatusLabel(nextStatus.status, nextStatus.delay_minutes)}
-              </span>
-            )}
+            <span className={cn(
+              'text-[11px] font-semibold px-2.5 py-1 rounded-full',
+              getStatusColor(nextDep.status)
+            )}>
+              {getStatusLabel(nextDep.status, statuses[nextDep.routeId]?.delay_minutes)}
+            </span>
           </div>
 
           <div className="flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-primary" />
-            <p className="text-sm text-foreground font-medium">{nextLeg.originName}</p>
+            <p className="text-sm text-foreground font-medium">{nextDep.originName}</p>
             <ChevronRight className="h-3 w-3 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">{nextLeg.destinationName}</p>
+            <p className="text-sm text-muted-foreground">{nextDep.destinationName}</p>
           </div>
+
+          {/* Multi-leg display */}
+          {nextDep.allLegs.length > 1 && (
+            <div className="mt-3 pt-3 space-y-1.5" style={{ borderTop: '1px solid hsl(var(--border))' }}>
+              {nextDep.allLegs.map((leg, i) => (
+                <div key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <span className="font-semibold text-foreground">{leg.plannedDeparture}</span>
+                  <span className="bg-secondary text-foreground px-1.5 py-0.5 rounded text-[10px] font-bold">
+                    {leg.lineName}
+                  </span>
+                  <span className="truncate">{leg.originName} → {leg.destinationName}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </motion.div>
       )}
 
+      {/* "Heute anders fahren" Button */}
+      <motion.button
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.08 }}
+        onClick={() => navigate('/route-setup')}
+        className="w-full card-amber-border bg-card rounded-[16px] px-4 py-3 mb-5 flex items-center gap-3 hover:bg-secondary/50 transition-colors"
+      >
+        <div className="h-8 w-8 rounded-full bg-primary/15 flex items-center justify-center">
+          <ArrowRightLeft className="h-4 w-4 text-primary" />
+        </div>
+        <div className="flex-1 text-left">
+          <p className="text-sm font-semibold text-foreground">Heute anders unterwegs?</p>
+          <p className="text-[11px] text-muted-foreground">Einmalige Route für heute hinzufügen</p>
+        </div>
+        <Plus className="h-4 w-4 text-muted-foreground" />
+      </motion.button>
+
       {/* Upcoming Departures Strip */}
-      {upcomingDepartures.length > 0 && (
+      {upcomingDeps.length > 0 && (
         <motion.section
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -187,17 +280,17 @@ export default function Dashboard() {
             Kommende Verbindungen
           </h2>
           <div className="flex gap-2.5 overflow-x-auto pb-1 -mx-5 px-5 scrollbar-hide">
-            {upcomingDepartures.map((dep, i) => (
+            {upcomingDeps.map((dep, i) => (
               <div
                 key={i}
-                className="flex-shrink-0 card-amber-border bg-card rounded-[20px] px-4 py-3 min-w-[120px]"
+                className="flex-shrink-0 card-amber-border bg-card rounded-[20px] px-4 py-3 min-w-[140px]"
               >
                 <div className="flex items-center gap-2 mb-1.5">
                   <span className={cn('h-2 w-2 rounded-full animate-pulse-dot', getStatusDotColor(dep.status))} />
                   <span className="font-display text-2xl text-foreground">{dep.time}</span>
                 </div>
                 <p className="text-xs font-semibold text-muted-foreground">{dep.line}</p>
-                <p className="text-[10px] text-muted-foreground truncate mt-0.5">{dep.station}</p>
+                <p className="text-[10px] text-muted-foreground truncate mt-0.5">{dep.routeName}</p>
               </div>
             ))}
           </div>
