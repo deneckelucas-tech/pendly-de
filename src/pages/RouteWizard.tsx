@@ -6,7 +6,7 @@ import { JourneySelectStep } from '@/components/wizard/JourneySelectStep';
 import { ReturnStep } from '@/components/wizard/ReturnStep';
 import { SummaryStep } from '@/components/wizard/SummaryStep';
 import { ManualJourneyBuilder } from '@/components/wizard/ManualJourneyBuilder';
-import type { Station, Journey } from '@/lib/types';
+import type { Station, Journey, Weekday } from '@/lib/types';
 
 export default function RouteWizard() {
   const navigate = useNavigate();
