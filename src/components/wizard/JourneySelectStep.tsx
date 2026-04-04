@@ -54,7 +54,7 @@ export function JourneySelectStep({ origin, destination, transportTypes, arrival
     } finally {
       setLoading(false);
     }
-  }, [origin.id, destination.id, transportTypes, localArrivalTime]);
+  }, [origin.id, destination.id, transportTypes, localDepartureTime]);
 
   const toggleJourney = (id: string) => {
     setSelected(prev => {
