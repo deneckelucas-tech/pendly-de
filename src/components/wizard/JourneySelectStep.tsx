@@ -302,10 +302,17 @@ export function JourneySelectStep({ origin, destination, transportTypes, arrival
         {!loading && (
           <button
             onClick={onManual}
-            className="flex items-center justify-center gap-2 py-4 text-xs text-muted-foreground hover:text-foreground transition-colors w-full"
+            className="w-full p-4 rounded-[20px] flex items-center gap-3 transition-all hover:opacity-90 active:scale-[0.99]"
+            style={{ backgroundColor: '#111111', border: '1px solid rgba(245,158,11,0.15)' }}
           >
-            <Wrench className="h-3.5 w-3.5" />
-            Route manuell zusammenstellen
+            <div className="h-10 w-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: 'rgba(245,158,11,0.1)' }}>
+              <Wrench className="h-5 w-5 text-primary" />
+            </div>
+            <div className="text-left flex-1">
+              <p className="text-sm font-semibold text-foreground">Route manuell bauen</p>
+              <p className="text-xs text-muted-foreground">Verbindungen einzeln zusammenstellen</p>
+            </div>
+            <ArrowRight className="h-4 w-4 text-muted-foreground" />
           </button>
         )}
       </div>
