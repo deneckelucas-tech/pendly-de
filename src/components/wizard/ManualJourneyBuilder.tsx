@@ -15,7 +15,7 @@ interface ManualJourneyBuilderProps {
 }
 
 export function ManualJourneyBuilder({ initialOrigin, finalDestination, initialDays, onSave, onBack }: ManualJourneyBuilderProps) {
-  const [savedLegs, setSavedLegs] = useState<Journey[]>([]);
+  const [selectedJourneys, setSelectedJourneys] = useState<Journey[]>([]);
   const [currentOrigin, setCurrentOrigin] = useState<Station>(initialOrigin);
   const [currentDirection, setCurrentDirection] = useState<Station>(finalDestination);
   const [departureTime, setDepartureTime] = useState('07:00');
