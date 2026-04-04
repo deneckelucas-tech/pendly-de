@@ -6,7 +6,7 @@ import { JourneySelectStep } from '@/components/wizard/JourneySelectStep';
 import { ReturnStep } from '@/components/wizard/ReturnStep';
 import { SummaryStep } from '@/components/wizard/SummaryStep';
 import { ManualJourneyBuilder } from '@/components/wizard/ManualJourneyBuilder';
-import type { Station, Journey } from '@/lib/types';
+import type { Station, Journey, Weekday } from '@/lib/types';
 
 export default function RouteWizard() {
   const navigate = useNavigate();
@@ -17,6 +17,7 @@ export default function RouteWizard() {
   const [selectedJourneys, setSelectedJourneys] = useState<Journey[]>([]);
   const [hasReturn, setHasReturn] = useState<boolean | null>(null);
   const [returnJourneys, setReturnJourneys] = useState<Journey[]>([]);
+  const [commuteDays, setCommuteDays] = useState<Weekday[]>(['mon', 'tue', 'wed', 'thu', 'fri']);
 
   const handleCancel = () => navigate(-1);
 
@@ -93,7 +94,7 @@ export default function RouteWizard() {
                 origin={origin}
                 destination={destination}
                 transportTypes={[]}
-                onNext={(journeys) => { setSelectedJourneys(journeys); goTo(4); }}
+                onNext={(journeys, days) => { setSelectedJourneys(journeys); setCommuteDays(days); goTo(4); }}
                 onBack={() => goTo(2)}
                 onManual={() => goTo(99)}
               />
