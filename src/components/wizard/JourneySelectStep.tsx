@@ -16,20 +16,23 @@ interface JourneySelectStepProps {
   onManual: () => void;
 }
 
-export function JourneySelectStep({ origin, destination, transportTypes, arrivalTime, onNext, onBack, onManual }: JourneySelectStepProps) {
+export function JourneySelectStep({ origin, destination, transportTypes, arrivalTime: initialArrivalTime, onNext, onBack, onManual }: JourneySelectStepProps) {
   const [journeys, setJourneys] = useState<Journey[]>([]);
   const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [localArrivalTime, setLocalArrivalTime] = useState(initialArrivalTime || '08:00');
+  const [hasSearched, setHasSearched] = useState(false);
 
   const fetchJourneys = useCallback(async () => {
     setLoading(true);
     setError(false);
+    setHasSearched(true);
     try {
       const params: any = { results: 8 };
-      if (arrivalTime) {
+      if (localArrivalTime) {
         const now = new Date();
-        const [h, m] = arrivalTime.split(':').map(Number);
+        const [h, m] = localArrivalTime.split(':').map(Number);
         const arr = new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m);
         if (arr < now) arr.setDate(arr.getDate() + 1);
         params.arrival = arr.toISOString();
@@ -51,9 +54,7 @@ export function JourneySelectStep({ origin, destination, transportTypes, arrival
     } finally {
       setLoading(false);
     }
-  }, [origin.id, destination.id, transportTypes, arrivalTime]);
-
-  useEffect(() => { fetchJourneys(); }, [fetchJourneys]);
+  }, [origin.id, destination.id, transportTypes, localArrivalTime]);
 
   const toggleJourney = (id: string) => {
     setSelected(prev => {
@@ -106,7 +107,31 @@ export function JourneySelectStep({ origin, destination, transportTypes, arrival
         <div className="h-2.5 w-2.5 rounded-full bg-primary shrink-0" />
       </div>
 
-      <p className="text-xs text-muted-foreground mb-5">Wähle alle Verbindungen die du regelmäßig nimmst</p>
+      {/* Arrival time picker */}
+      <div className="flex gap-2 mb-4">
+        <div className="flex-1">
+          <label className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1 block">Wann musst du da sein?</label>
+          <input
+            type="time"
+            value={localArrivalTime}
+            onChange={e => setLocalArrivalTime(e.target.value)}
+            className="w-full h-12 rounded-2xl px-4 text-sm text-foreground outline-none border border-transparent focus:border-primary transition-all"
+            style={{ backgroundColor: '#1A1A1A' }}
+          />
+        </div>
+        <div className="flex items-end">
+          <button
+            onClick={fetchJourneys}
+            disabled={loading}
+            className="h-12 px-5 rounded-full bg-primary text-primary-foreground font-bold text-sm flex items-center gap-2 disabled:opacity-50"
+          >
+            {loading ? <div className="amber-spinner" style={{ width: 16, height: 16, borderColor: 'rgba(0,0,0,0.2)', borderTopColor: '#000' }} /> : <RefreshCw className="h-4 w-4" />}
+            Suchen
+          </button>
+        </div>
+      </div>
+
+      <p className="text-xs text-muted-foreground mb-4">Wähle alle Verbindungen die du regelmäßig nimmst</p>
 
       <div className="flex-1 space-y-3 overflow-y-auto pb-28">
         {loading && (
