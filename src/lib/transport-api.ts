@@ -191,3 +191,53 @@ export async function getDepartures(
     return [];
   }
 }
+
+export interface Remark {
+  id: string;
+  type: string; // 'warning' | 'status' | 'hint'
+  summary: string;
+  text: string;
+  validFrom?: string;
+  validUntil?: string;
+  modified?: string;
+  company?: string;
+  categories?: string[];
+  affectedLines?: Array<{ id: string; name: string; productName: string }>;
+}
+
+/** Fetch remarks/disruptions for a geographic area or line */
+export async function getRemarks(options?: {
+  from?: string;
+  to?: string;
+  results?: number;
+}): Promise<Remark[]> {
+  const params: Record<string, string> = {
+    language: 'de',
+    results: String(options?.results || 100),
+  };
+  if (options?.from) params.from = options.from;
+  if (options?.to) params.to = options.to;
+
+  try {
+    const data = await proxyFetch('remarks', params);
+    return (data.remarks || []).map((r: any): Remark => ({
+      id: r.id || `remark-${Math.random()}`,
+      type: r.type || 'warning',
+      summary: r.summary || '',
+      text: r.text || r.summary || '',
+      validFrom: r.validFrom,
+      validUntil: r.validUntil,
+      modified: r.modified,
+      company: r.company,
+      categories: r.categories,
+      affectedLines: (r.affectedLines || []).map((l: any) => ({
+        id: l.id || '',
+        name: l.name || '',
+        productName: l.productName || '',
+      })),
+    }));
+  } catch (err) {
+    console.error('Remarks fetch failed:', err);
+    return [];
+  }
+}
