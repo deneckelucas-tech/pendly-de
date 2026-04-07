@@ -202,7 +202,8 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
-          className="card-amber-glow bg-card rounded-[20px] p-5 mb-3"
+          onClick={() => navigate('/today')}
+          className="card-amber-glow bg-card rounded-[20px] p-5 mb-3 cursor-pointer hover:bg-secondary/30 transition-colors">
         >
           <div className="flex items-start justify-between mb-4">
             <div>
