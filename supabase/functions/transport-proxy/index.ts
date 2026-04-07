@@ -13,6 +13,7 @@ const CACHE_TTL: Record<string, number> = {
   locations: 86400,
   journeys: 300,
   departures: 120,
+  remarks: 1800, // 30 min for remarks/disruptions
 };
 
 function getCacheTTL(endpoint: string): number {
