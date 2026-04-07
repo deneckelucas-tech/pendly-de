@@ -13,6 +13,7 @@ const CACHE_TTL: Record<string, number> = {
   locations: 86400,
   journeys: 300,
   departures: 120,
+  remarks: 1800, // 30 min for remarks/disruptions
 };
 
 function getCacheTTL(endpoint: string): number {
@@ -75,9 +76,9 @@ Deno.serve(async (req) => {
     const url = new URL(req.url);
     const endpoint = url.searchParams.get("endpoint");
     
-    if (!endpoint || !["locations", "journeys", "departures"].includes(endpoint)) {
+    if (!endpoint || !["locations", "journeys", "departures", "remarks"].includes(endpoint)) {
       return new Response(
-        JSON.stringify({ error: "Invalid endpoint. Use: locations, journeys, departures" }),
+        JSON.stringify({ error: "Invalid endpoint. Use: locations, journeys, departures, remarks" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -101,6 +102,8 @@ Deno.serve(async (req) => {
       apiPath = `stops/${stationId}/departures`;
     } else if (endpoint === "locations") {
       apiPath = "locations";
+    } else if (endpoint === "remarks") {
+      apiPath = "remarks";
     } else {
       apiPath = "journeys";
     }

@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { getMockRoutes, generateMockAlerts, generateMockStatus } from '@/lib/mock-data';
-import type { CommuteRoute, RouteStatusData, Alert, SavedLeg } from '@/lib/types';
+import { getRemarks, type Remark } from '@/lib/transport-api';
+import type { CommuteRoute, RouteStatusData, Alert, SavedLeg, Weekday } from '@/lib/types';
 import { useNavigate } from 'react-router-dom';
-import { Bell, ChevronRight, Plus, ArrowRightLeft } from 'lucide-react';
+import { Bell, ChevronRight, Plus, ArrowRightLeft, AlertTriangle, Info, Construction, Train as TrainIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -37,28 +38,12 @@ function getStatusDotColor(status: string) {
   return 'bg-muted-foreground';
 }
 
-/** Parse "HH:mm" to minutes since midnight */
 function timeToMinutes(time: string): number {
   const [h, m] = time.split(':').map(Number);
   return h * 60 + m;
 }
 
-/** Get the earliest departure leg of a route */
-function getEarliestDeparture(route: CommuteRoute): SavedLeg | null {
-  let earliest: SavedLeg | null = null;
-  let earliestMin = Infinity;
-  for (const conn of route.connections) {
-    if (conn.legs.length > 0) {
-      const leg = conn.legs[0];
-      const min = timeToMinutes(leg.plannedDeparture);
-      if (min < earliestMin) {
-        earliestMin = min;
-        earliest = leg;
-      }
-    }
-  }
-  return earliest;
-}
+const WEEKDAY_KEYS: Weekday[] = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
 
 interface UpcomingDeparture {
   time: string;
@@ -72,6 +57,40 @@ interface UpcomingDeparture {
   allLegs: SavedLeg[];
 }
 
+/** Filter remarks to those relevant to the user's saved lines */
+function filterRelevantRemarks(remarks: Remark[], routes: CommuteRoute[]): Remark[] {
+  // Collect all line names from saved routes
+  const savedLineNames = new Set<string>();
+  routes.forEach(r => {
+    r.connections.forEach(c => {
+      c.legs.forEach(l => {
+        savedLineNames.add(l.lineName.toLowerCase().trim());
+      });
+    });
+  });
+
+  return remarks.filter(remark => {
+    // If remark has affected lines, check if any match
+    if (remark.affectedLines && remark.affectedLines.length > 0) {
+      return remark.affectedLines.some(line =>
+        savedLineNames.has(line.name.toLowerCase().trim())
+      );
+    }
+    // Also check if the remark text mentions any of our lines
+    const text = (remark.text + ' ' + remark.summary).toLowerCase();
+    for (const lineName of savedLineNames) {
+      if (text.includes(lineName)) return true;
+    }
+    return false;
+  });
+}
+
+function getRemarkIcon(type: string) {
+  if (type === 'warning') return AlertTriangle;
+  if (type === 'status') return Info;
+  return Construction;
+}
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const [routes, setRoutes] = useState<CommuteRoute[]>([]);
@@ -79,6 +98,8 @@ export default function Dashboard() {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [secondsAgo, setSecondsAgo] = useState(0);
+  const [routeNews, setRouteNews] = useState<Remark[]>([]);
+  const [newsLoading, setNewsLoading] = useState(true);
 
   const loadData = useCallback(() => {
     const mockRoutes = getMockRoutes();
@@ -90,11 +111,35 @@ export default function Dashboard() {
     setLastUpdated(new Date());
   }, []);
 
+  // Fetch route news/remarks from HAFAS
+  const loadNews = useCallback(async (currentRoutes: CommuteRoute[]) => {
+    if (currentRoutes.length === 0) {
+      setNewsLoading(false);
+      return;
+    }
+    setNewsLoading(true);
+    try {
+      const allRemarks = await getRemarks({ results: 100 });
+      const relevant = filterRelevantRemarks(allRemarks, currentRoutes);
+      setRouteNews(relevant.slice(0, 10));
+    } catch {
+      setRouteNews([]);
+    }
+    setNewsLoading(false);
+  }, []);
+
   useEffect(() => {
     loadData();
     const interval = setInterval(loadData, 30_000);
     return () => clearInterval(interval);
   }, [loadData]);
+
+  // Load news once routes are available
+  useEffect(() => {
+    if (routes.length > 0) {
+      loadNews(routes);
+    }
+  }, [routes, loadNews]);
 
   useEffect(() => {
     const tick = setInterval(() => {
@@ -105,23 +150,19 @@ export default function Dashboard() {
     return () => clearInterval(tick);
   }, [lastUpdated]);
 
-  const todayKey = (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const)[new Date().getDay()];
+  const now = new Date();
+  const todayKey = WEEKDAY_KEYS[now.getDay()];
+  const nowMinutes = now.getHours() * 60 + now.getMinutes();
 
-  // Build a flat list of all upcoming departures sorted by time, filtered to today
-  const allDepartures = useMemo<UpcomingDeparture[]>(() => {
-    const now = new Date();
-    const nowMinutes = now.getHours() * 60 + now.getMinutes();
-
+  // Today's departures for the hero card
+  const todayDepartures = useMemo<UpcomingDeparture[]>(() => {
     const deps: UpcomingDeparture[] = [];
-
     routes.forEach(route => {
       route.connections.forEach(conn => {
         if (!conn.weekdays.includes(todayKey)) return;
         if (conn.legs.length === 0) return;
-
         const firstLeg = conn.legs[0];
         const depMinutes = timeToMinutes(firstLeg.plannedDeparture);
-
         deps.push({
           time: firstLeg.plannedDeparture,
           timeMinutes: depMinutes,
@@ -135,8 +176,6 @@ export default function Dashboard() {
         });
       });
     });
-
-    // Sort: future departures first (by time), then past departures
     deps.sort((a, b) => {
       const aFuture = a.timeMinutes >= nowMinutes;
       const bFuture = b.timeMinutes >= nowMinutes;
@@ -144,19 +183,48 @@ export default function Dashboard() {
       if (!aFuture && bFuture) return 1;
       return a.timeMinutes - b.timeMinutes;
     });
-
     return deps;
-  }, [routes, statuses, todayKey]);
+  }, [routes, statuses, todayKey, nowMinutes]);
 
-  const nextDep = allDepartures.length > 0 ? allDepartures[0] : null;
-  const upcomingDeps = allDepartures.slice(1, 4);
+  // Next day's departures
+  const tomorrowDate = new Date(now);
+  tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+  const tomorrowKey = WEEKDAY_KEYS[tomorrowDate.getDay()];
+  const tomorrowLabel = tomorrowDate.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' });
 
+  const tomorrowDepartures = useMemo<UpcomingDeparture[]>(() => {
+    const deps: UpcomingDeparture[] = [];
+    routes.forEach(route => {
+      route.connections.forEach(conn => {
+        if (!conn.weekdays.includes(tomorrowKey)) return;
+        if (conn.legs.length === 0) return;
+        const firstLeg = conn.legs[0];
+        const depMinutes = timeToMinutes(firstLeg.plannedDeparture);
+        deps.push({
+          time: firstLeg.plannedDeparture,
+          timeMinutes: depMinutes,
+          line: firstLeg.lineName,
+          originName: firstLeg.originName,
+          destinationName: conn.legs[conn.legs.length - 1].destinationName,
+          routeName: route.name,
+          status: 'no_data',
+          routeId: route.id,
+          allLegs: conn.legs,
+        });
+      });
+    });
+    deps.sort((a, b) => a.timeMinutes - b.timeMinutes);
+    return deps;
+  }, [routes, tomorrowKey]);
+
+  const nextDep = todayDepartures.length > 0 ? todayDepartures[0] : null;
   const unreadCount = alerts.filter(a => !a.is_read).length;
 
   return (
     <div className="px-5 pt-5 pb-4 min-h-screen">
       <DebugPanel />
       <TrialBanner />
+
       {/* Header */}
       <motion.header
         initial={{ opacity: 0, y: -10 }}
@@ -234,7 +302,6 @@ export default function Dashboard() {
             <p className="text-sm text-muted-foreground">{nextDep.destinationName}</p>
           </div>
 
-          {/* Multi-leg display */}
           {nextDep.allLegs.length > 1 && (
             <div className="mt-3 pt-3 space-y-1.5" style={{ borderTop: '1px solid hsl(var(--border))' }}>
               {nextDep.allLegs.map((leg, i) => (
@@ -269,34 +336,132 @@ export default function Dashboard() {
         <Plus className="h-4 w-4 text-muted-foreground" />
       </motion.button>
 
-      {/* Upcoming Departures Strip */}
-      {upcomingDeps.length > 0 && (
+      {/* Tomorrow's Connections */}
+      {tomorrowDepartures.length > 0 && (
         <motion.section
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
           className="mb-6"
         >
-          <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] mb-3 text-muted-foreground">
-            Kommende Verbindungen
+          <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] mb-1 text-muted-foreground">
+            Morgen · {tomorrowLabel}
           </h2>
-          <div className="flex gap-2.5 overflow-x-auto pb-1 -mx-5 px-5 scrollbar-hide">
-            {upcomingDeps.map((dep, i) => (
+          <p className="text-[10px] text-muted-foreground mb-3">
+            {tomorrowDepartures.length} Verbindung{tomorrowDepartures.length !== 1 ? 'en' : ''} geplant
+          </p>
+          <div className="space-y-2">
+            {tomorrowDepartures.map((dep, i) => (
               <div
                 key={i}
-                className="flex-shrink-0 card-amber-border bg-card rounded-[20px] px-4 py-3 min-w-[140px]"
+                className="card-amber-border bg-card rounded-[16px] px-4 py-3 flex items-center gap-3"
               >
-                <div className="flex items-center gap-2 mb-1.5">
-                  <span className={cn('h-2 w-2 rounded-full animate-pulse-dot', getStatusDotColor(dep.status))} />
-                  <span className="font-display text-2xl text-foreground">{dep.time}</span>
+                <div className="flex-shrink-0">
+                  <span className="font-display text-xl text-foreground">{dep.time}</span>
                 </div>
-                <p className="text-xs font-semibold text-muted-foreground">{dep.line}</p>
-                <p className="text-[10px] text-muted-foreground truncate mt-0.5">{dep.routeName}</p>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5 mb-0.5">
+                    <span className="bg-secondary text-foreground px-1.5 py-0.5 rounded text-[10px] font-bold">
+                      {dep.line}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground">{dep.routeName}</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground truncate">
+                    {dep.originName} → {dep.destinationName}
+                  </p>
+                </div>
+                {dep.allLegs.length > 1 && (
+                  <span className="text-[10px] text-muted-foreground bg-secondary px-1.5 py-0.5 rounded">
+                    {dep.allLegs.length}x
+                  </span>
+                )}
               </div>
             ))}
           </div>
         </motion.section>
       )}
+
+      {/* Neuigkeiten zu deinen Routen */}
+      <motion.section
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.12 }}
+        className="mb-6"
+      >
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] text-muted-foreground">
+            Neuigkeiten zu deinen Routen
+          </h2>
+          {routeNews.length > 0 && (
+            <span className="text-[10px] bg-primary/15 text-primary font-semibold px-2 py-0.5 rounded-full">
+              {routeNews.length} Meldung{routeNews.length !== 1 ? 'en' : ''}
+            </span>
+          )}
+        </div>
+
+        {newsLoading ? (
+          <div className="card-amber-border bg-card rounded-[16px] p-4 flex items-center justify-center">
+            <div className="amber-spinner" />
+            <span className="text-xs text-muted-foreground ml-3">Aktuelle Meldungen laden…</span>
+          </div>
+        ) : routeNews.length === 0 ? (
+          <div className="card-amber-border bg-card rounded-[16px] p-5 text-center">
+            <TrainIcon className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
+            <p className="text-sm font-medium text-foreground mb-1">Alles in Ordnung</p>
+            <p className="text-[11px] text-muted-foreground">
+              Aktuell gibt es keine Meldungen zu deinen Routen.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {routeNews.map((remark) => {
+              const IconComp = getRemarkIcon(remark.type);
+              const isWarning = remark.type === 'warning';
+
+              return (
+                <div
+                  key={remark.id}
+                  className={cn(
+                    'bg-card rounded-[16px] p-4',
+                    isWarning ? 'border border-destructive/20' : 'card-amber-border'
+                  )}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className={cn(
+                      'h-8 w-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5',
+                      isWarning ? 'bg-destructive/15' : 'bg-primary/15'
+                    )}>
+                      <IconComp className={cn('h-4 w-4', isWarning ? 'text-destructive' : 'text-primary')} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      {remark.summary && (
+                        <p className="text-sm font-semibold text-foreground mb-1">{remark.summary}</p>
+                      )}
+                      <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
+                        {remark.text}
+                      </p>
+                      {remark.affectedLines && remark.affectedLines.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {remark.affectedLines.map((line, i) => (
+                            <span key={i} className="text-[10px] font-bold bg-secondary text-foreground px-1.5 py-0.5 rounded">
+                              {line.name}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      {remark.validUntil && (
+                        <p className="text-[10px] text-muted-foreground mt-2">
+                          Gültig bis: {new Date(remark.validUntil).toLocaleDateString('de-DE', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </motion.section>
 
       {/* My Routes Section */}
       <motion.section
