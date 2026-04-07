@@ -2,6 +2,8 @@ import { useEffect } from 'react';
 import { Navigate, Outlet, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
+const isDev = import.meta.env.DEV;
+
 export default function ProtectedRoute() {
   const { user, loading, checkSubscription } = useAuth();
   const [searchParams] = useSearchParams();
@@ -11,6 +13,11 @@ export default function ProtectedRoute() {
       checkSubscription();
     }
   }, [searchParams, checkSubscription]);
+
+  // Dev mode: skip auth entirely
+  if (isDev) {
+    return <Outlet />;
+  }
 
   if (loading) {
     return (
