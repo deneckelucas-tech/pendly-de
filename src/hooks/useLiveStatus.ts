@@ -101,11 +101,6 @@ function deriveLegStatus(dep: Departure | null, leg: SavedLeg): LiveLegStatus {
     message = `${leg.lineName} fährt pünktlich`;
   }
 
-  // Check platform change
-  if (dep.platform && leg.leg) {
-    // We don't have original platform in SavedLeg, so just report current
-  }
-
   const actualTime = dep.when ? new Date(dep.when) : null;
   const actualDeparture = actualTime
     ? actualTime.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
