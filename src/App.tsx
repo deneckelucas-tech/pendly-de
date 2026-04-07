@@ -17,6 +17,7 @@ import Notifications from "./pages/Notifications";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import Legal from "./pages/Legal";
+import TodayView from "./pages/TodayView";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,7 @@ const App = () => (
             <Route element={<ProtectedRoute />}>
               <Route element={<AppLayout />}>
                 <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/today" element={<TodayView />} />
                 <Route path="/route/:id" element={<RouteDetail />} />
                 <Route path="/routes" element={<ManageRoutes />} />
                 <Route path="/notifications" element={<Notifications />} />
