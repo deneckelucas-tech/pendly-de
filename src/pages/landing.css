@@ -303,11 +303,29 @@
 
 .lp .hero-mockup-wrap {
   position: absolute;
-  bottom: 70px;
+  bottom: 50px;
   right: 16px;
   width: 160px;
   z-index: 10;
   animation: lp-float 4s ease-in-out infinite;
+}
+
+@media (max-height: 700px) {
+  .lp .hero-mockup-wrap {
+    bottom: 30px;
+    width: 140px;
+  }
+  .lp .hero-content {
+    padding-top: 16px;
+  }
+  .lp h1 {
+    font-size: clamp(32px, 9vw, 48px);
+    margin-bottom: 8px;
+  }
+  .lp .hero-sub {
+    margin-bottom: 16px;
+    font-size: 14px;
+  }
 }
 
 @keyframes lp-float {
