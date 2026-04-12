@@ -47,20 +47,20 @@ export default function RouteDetail() {
         <div className="flex-1 min-w-0">
           <h1 className="font-display text-2xl text-foreground truncate flex items-center gap-2">
             {route.is_favorite && <Star className="h-4 w-4 fill-primary text-primary" />}
-            {route.name.toUpperCase()}
+            {route.name}
           </h1>
         </div>
         <button
           onClick={handleRefresh}
           disabled={refreshing}
-          className="p-2 rounded-full card-amber-border bg-card hover:bg-secondary/50 transition-colors"
+          className="p-2 rounded-full card-amber-border bg-card hover:bg-secondary/50 transition-colors shadow-sm"
         >
           <RefreshCw className={`h-4 w-4 text-muted-foreground ${refreshing ? 'animate-spin' : ''}`} />
         </button>
       </div>
 
       {status && (
-        <div className="bg-card rounded-[20px] card-amber-border p-5 mb-4">
+        <div className="bg-card rounded-[20px] card-amber-border p-5 mb-4 shadow-sm">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium">Aktueller Status</span>
             <StatusBadge status={status.status} delayMinutes={status.delay_minutes} />
@@ -75,7 +75,7 @@ export default function RouteDetail() {
         </div>
       )}
 
-      <div className="bg-card rounded-[20px] card-amber-border p-5 mb-4 space-y-3">
+      <div className="bg-card rounded-[20px] card-amber-border p-5 mb-4 space-y-3 shadow-sm">
         <div className="flex items-start gap-3">
           <MapPin className="h-4 w-4 text-primary mt-0.5 shrink-0" />
           <div>
@@ -104,7 +104,7 @@ export default function RouteDetail() {
       </div>
 
       {route.connections.length > 0 && (
-        <div className="bg-card rounded-[20px] card-amber-border p-5 mb-4">
+        <div className="bg-card rounded-[20px] card-amber-border p-5 mb-4 shadow-sm">
           <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium mb-3">Gespeicherte Verbindungen</p>
           {route.connections.map(conn => (
             <div key={conn.id} className="space-y-2 py-2 border-b border-border last:border-0">
@@ -125,7 +125,7 @@ export default function RouteDetail() {
         </div>
       )}
 
-      <div className="bg-card rounded-[20px] card-amber-border p-5 mb-4">
+      <div className="bg-card rounded-[20px] card-amber-border p-5 mb-4 shadow-sm">
         <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium mb-3">Letzte Statusmeldungen</p>
         <div className="space-y-3">
           {history.map((h, i) => (
@@ -142,7 +142,7 @@ export default function RouteDetail() {
         </div>
       </div>
 
-      <div className="bg-card rounded-[20px] card-amber-border p-5">
+      <div className="bg-card rounded-[20px] card-amber-border p-5 shadow-sm">
         <div className="text-center">
           <Train className="h-6 w-6 text-primary mx-auto mb-2" />
           <p className="text-xs font-medium mb-1">Live-Daten via HAFAS</p>

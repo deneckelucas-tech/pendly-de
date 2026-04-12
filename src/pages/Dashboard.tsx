@@ -232,7 +232,9 @@ export default function Dashboard() {
         className="flex items-center justify-between mb-6"
       >
         <div className="flex items-center gap-2.5">
-          <img src="/logo.png" alt="Pendly" className="h-7 w-7 rounded-lg" />
+          <div className="h-7 w-7 bg-primary rounded-lg flex items-center justify-center shadow-sm">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/></svg>
+          </div>
           <h1 className="text-xl font-bold text-foreground tracking-tight">Pendly</h1>
           <span className="flex items-center gap-1.5 bg-primary/15 text-primary text-[10px] font-semibold px-2 py-0.5 rounded-full">
             <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse-dot" />
@@ -247,7 +249,7 @@ export default function Dashboard() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => navigate('/notifications')}
-            className="relative p-2 rounded-2xl card-amber-border bg-card hover:bg-secondary transition-colors"
+            className="relative p-2 rounded-2xl card-amber-border bg-card hover:bg-secondary transition-colors shadow-sm"
           >
             <Bell className="h-4.5 w-4.5 text-muted-foreground" />
             {unreadCount > 0 && (
@@ -271,7 +273,7 @@ export default function Dashboard() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
           onClick={() => navigate('/today')}
-          className="card-amber-glow bg-card rounded-[20px] p-5 mb-3 cursor-pointer hover:bg-secondary/30 transition-colors"
+          className="card-amber-glow bg-card rounded-[20px] p-5 mb-3 cursor-pointer hover:bg-secondary/30 transition-colors shadow-sm"
         >
           <div className="flex items-start justify-between mb-4">
             <div>
@@ -303,7 +305,7 @@ export default function Dashboard() {
           </div>
 
           {nextDep.allLegs.length > 1 && (
-            <div className="mt-3 pt-3 space-y-1.5" style={{ borderTop: '1px solid hsl(var(--border))' }}>
+            <div className="mt-3 pt-3 space-y-1.5 border-t border-border">
               {nextDep.allLegs.map((leg, i) => (
                 <div key={i} className="flex items-center gap-2 text-xs text-muted-foreground">
                   <span className="font-semibold text-foreground">{leg.plannedDeparture}</span>
@@ -324,7 +326,7 @@ export default function Dashboard() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.08 }}
         onClick={() => navigate('/route-setup')}
-        className="w-full card-amber-border bg-card rounded-[16px] px-4 py-3 mb-5 flex items-center gap-3 hover:bg-secondary/50 transition-colors"
+        className="w-full card-amber-border bg-card rounded-[16px] px-4 py-3 mb-5 flex items-center gap-3 hover:bg-secondary/50 transition-colors shadow-sm"
       >
         <div className="h-8 w-8 rounded-full bg-primary/15 flex items-center justify-center">
           <ArrowRightLeft className="h-4 w-4 text-primary" />

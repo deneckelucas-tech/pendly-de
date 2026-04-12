@@ -19,7 +19,7 @@ export function ReturnStep({ onSelect, onBack }: ReturnStepProps) {
         </button>
       </div>
 
-      <h1 className="font-display tracking-tight text-foreground mb-2" style={{ fontSize: 48, lineHeight: 1 }}>HAST DU EINEN RÜCKWEG?</h1>
+      <h1 className="font-display tracking-tight text-foreground mb-2" style={{ fontSize: 48, lineHeight: 1 }}>Hast du einen Rückweg?</h1>
       <p className="text-sm text-muted-foreground mb-10">Möchtest du auch deinen Rückweg überwachen?</p>
 
       <div className="space-y-3 mb-10">
@@ -27,12 +27,11 @@ export function ReturnStep({ onSelect, onBack }: ReturnStepProps) {
         <button
           onClick={() => setSelected(true)}
           className={cn(
-            'w-full flex items-center gap-4 p-5 rounded-[20px] transition-all text-left',
+            'w-full flex items-center gap-4 p-5 rounded-[20px] transition-all text-left shadow-sm border',
+            selected === true
+              ? 'bg-primary/5 border-primary'
+              : 'bg-card border-border'
           )}
-          style={{
-            backgroundColor: selected === true ? 'rgba(245,158,11,0.04)' : '#111111',
-            border: selected === true ? '1px solid #F59E0B' : '1px solid #1F1F1F',
-          }}
         >
           <div className={cn(
             'h-12 w-12 rounded-2xl flex items-center justify-center shrink-0',
@@ -50,12 +49,11 @@ export function ReturnStep({ onSelect, onBack }: ReturnStepProps) {
         <button
           onClick={() => setSelected(false)}
           className={cn(
-            'w-full flex items-center gap-4 p-5 rounded-[20px] transition-all text-left',
+            'w-full flex items-center gap-4 p-5 rounded-[20px] transition-all text-left shadow-sm border',
+            selected === false
+              ? 'bg-primary/5 border-primary'
+              : 'bg-card border-border'
           )}
-          style={{
-            backgroundColor: selected === false ? 'rgba(245,158,11,0.04)' : '#111111',
-            border: selected === false ? '1px solid #F59E0B' : '1px solid #1F1F1F',
-          }}
         >
           <div className={cn(
             'h-12 w-12 rounded-2xl flex items-center justify-center shrink-0',

@@ -107,7 +107,7 @@ export default function TodayView() {
             refetch();
           }}
           disabled={loading}
-          className="p-2 rounded-full card-amber-border bg-card hover:bg-secondary/50 transition-colors"
+          className="p-2 rounded-full card-amber-border bg-card hover:bg-secondary/50 transition-colors shadow-sm"
         >
           <RefreshCw className={cn('h-4 w-4 text-muted-foreground', loading && 'animate-spin')} />
         </button>
@@ -236,7 +236,7 @@ export default function TodayView() {
 
               {/* Last checked */}
               {live && live.legs.length > 0 && (
-                <p className="text-[10px] text-muted-foreground mt-3 pt-2" style={{ borderTop: '1px solid hsl(var(--border))' }}>
+                <p className="text-[10px] text-muted-foreground mt-3 pt-2 border-t border-border">
                   Zuletzt geprüft: {live.legs[0].lastChecked.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                 </p>
               )}

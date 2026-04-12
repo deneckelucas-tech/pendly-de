@@ -105,8 +105,8 @@ export function StationStep({ title, subtitle, onSelect, onBack, onCancel }: Sta
           value={query}
           onChange={e => handleChange(e.target.value)}
           placeholder="Haltestelle suchen..."
-          className="w-full rounded-2xl text-foreground placeholder:text-muted-foreground outline-none transition-all border border-transparent focus:border-primary"
-          style={{ backgroundColor: '#1A1A1A', height: 60, fontSize: 18, paddingLeft: 20, paddingRight: 48 }}
+          className="w-full rounded-2xl text-foreground placeholder:text-muted-foreground outline-none transition-all border border-border bg-card focus:border-primary shadow-sm"
+          style={{ height: 60, fontSize: 18, paddingLeft: 20, paddingRight: 48 }}
         />
         {loading && (
           <div className="absolute right-4 top-1/2 -translate-y-1/2">
@@ -124,8 +124,7 @@ export function StationStep({ title, subtitle, onSelect, onBack, onCancel }: Sta
               <button
                 key={s.id}
                 onClick={() => handleSelect(s)}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-medium text-foreground hover:opacity-80 transition-opacity"
-                style={{ backgroundColor: '#1A1A1A' }}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-medium text-foreground bg-card border border-border hover:border-primary transition-colors"
               >
                 <Clock className="h-3 w-3 text-muted-foreground" />
                 {s.name.split(',')[0]}
@@ -156,8 +155,8 @@ export function StationStep({ title, subtitle, onSelect, onBack, onCancel }: Sta
                 <button
                   key={station.id}
                   onClick={() => handleSelect(station)}
-                  className="w-full text-left px-3 py-3.5 flex items-center gap-3 transition-colors group active:bg-card"
-                  style={{ borderBottom: i < results.length - 1 ? '1px solid #1A1A1A' : 'none' }}
+                  className="w-full text-left px-3 py-3.5 flex items-center gap-3 transition-colors group active:bg-secondary"
+                  style={{ borderBottom: i < results.length - 1 ? '1px solid hsl(var(--border))' : 'none' }}
                 >
                   <MapPin className="h-4 w-4 text-primary shrink-0" />
                   <div className="flex-1 min-w-0 border-l-2 border-transparent group-active:border-primary pl-3 transition-colors">

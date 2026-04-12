@@ -98,7 +98,7 @@ export function JourneySelectStep({ origin, destination, transportTypes, arrival
         </button>
       </div>
 
-      <h1 className="font-display tracking-tight text-foreground mb-4" style={{ fontSize: 44, lineHeight: 1 }}>WÄHLE DEINE ZÜGE</h1>
+      <h1 className="font-display tracking-tight text-foreground mb-4" style={{ fontSize: 44, lineHeight: 1 }}>Wähle deine Züge</h1>
 
       {/* Journey map strip */}
       <div className="flex items-center gap-2 mb-5 px-1">
@@ -125,12 +125,12 @@ export function JourneySelectStep({ origin, destination, transportTypes, arrival
                     return next;
                   });
                 }}
-                className="flex-1 h-10 rounded-xl text-xs font-bold transition-all"
-                style={{
-                  backgroundColor: isActive ? 'hsl(var(--primary))' : '#1A1A1A',
-                  color: isActive ? '#000' : '#6B7280',
-                  border: isActive ? 'none' : '1px solid #1F1F1F',
-                }}
+                className={cn(
+                  'flex-1 h-10 rounded-xl text-xs font-bold transition-all border',
+                  isActive
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'bg-card text-muted-foreground border-border'
+                )}
               >
                 {WEEKDAY_LABELS[day]}
               </button>
@@ -147,8 +147,7 @@ export function JourneySelectStep({ origin, destination, transportTypes, arrival
             type="time"
             value={localDepartureTime}
             onChange={e => setLocalDepartureTime(e.target.value)}
-            className="w-full h-12 rounded-2xl px-4 text-sm text-foreground outline-none border border-transparent focus:border-primary transition-all"
-            style={{ backgroundColor: '#1A1A1A' }}
+            className="w-full h-12 rounded-2xl px-4 text-sm text-foreground outline-none border border-border bg-card focus:border-primary transition-all"
           />
         </div>
         <div className="flex items-end">
@@ -157,7 +156,7 @@ export function JourneySelectStep({ origin, destination, transportTypes, arrival
             disabled={loading}
             className="h-12 px-5 rounded-full bg-primary text-primary-foreground font-bold text-sm flex items-center gap-2 disabled:opacity-50"
           >
-            {loading ? <div className="amber-spinner" style={{ width: 16, height: 16, borderColor: 'rgba(0,0,0,0.2)', borderTopColor: '#000' }} /> : <RefreshCw className="h-4 w-4" />}
+            {loading ? <div className="amber-spinner" style={{ width: 16, height: 16, borderColor: 'rgba(255,255,255,0.3)', borderTopColor: '#fff' }} /> : <RefreshCw className="h-4 w-4" />}
             Suchen
           </button>
         </div>
@@ -205,13 +204,14 @@ export function JourneySelectStep({ origin, destination, transportTypes, arrival
               key={journey.id}
               onClick={() => toggleJourney(journey.id)}
               className={cn(
-                'w-full text-left p-4 rounded-[20px] transition-all relative',
-                'active:scale-[0.99]'
+                'w-full text-left p-4 rounded-[20px] transition-all relative shadow-sm',
+                'active:scale-[0.99]',
+                isSelected
+                  ? 'bg-primary/5 border-2 border-primary'
+                  : 'bg-card border border-border'
               )}
               style={{
-                backgroundColor: isSelected ? 'rgba(245,158,11,0.04)' : '#111111',
-                border: isSelected ? '1px solid #F59E0B' : '1px solid #1F1F1F',
-                borderLeft: `3px solid ${isSelected ? '#F59E0B' : primaryColor}`,
+                borderLeft: `3px solid ${isSelected ? 'hsl(226 75% 48%)' : primaryColor}`,
               }}
             >
               {/* Selected checkmark */}
@@ -302,10 +302,9 @@ export function JourneySelectStep({ origin, destination, transportTypes, arrival
         {!loading && (
           <button
             onClick={onManual}
-            className="w-full p-4 rounded-[20px] flex items-center gap-3 transition-all hover:opacity-90 active:scale-[0.99]"
-            style={{ backgroundColor: '#111111', border: '1px solid rgba(245,158,11,0.15)' }}
+            className="w-full p-4 rounded-[20px] flex items-center gap-3 transition-all hover:opacity-90 active:scale-[0.99] bg-card border border-primary/15 shadow-sm"
           >
-            <div className="h-10 w-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: 'rgba(245,158,11,0.1)' }}>
+            <div className="h-10 w-10 rounded-xl flex items-center justify-center bg-primary/10">
               <Wrench className="h-5 w-5 text-primary" />
             </div>
             <div className="text-left flex-1">
@@ -319,8 +318,8 @@ export function JourneySelectStep({ origin, destination, transportTypes, arrival
 
       {/* Bottom action bar */}
       <div
-        className="fixed bottom-0 left-0 right-0 px-5 py-4"
-        style={{ backgroundColor: '#000000', borderTop: '1px solid #1A1A1A', paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}
+        className="fixed bottom-0 left-0 right-0 px-5 py-4 bg-background border-t border-border"
+        style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}
       >
         <div className="max-w-lg mx-auto flex items-center justify-between">
           <p className="text-xs text-muted-foreground">
