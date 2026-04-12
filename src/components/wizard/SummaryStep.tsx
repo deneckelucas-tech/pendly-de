@@ -35,15 +35,11 @@ export function SummaryStep({ origin, destination, journeys, returnJourneys, has
       {/* Animated checkmark ring */}
       <div className="flex justify-center mb-8">
         <div className="relative h-24 w-24">
-          {/* Amber ring drawing animation */}
-          <motion.svg
-            viewBox="0 0 96 96"
-            className="absolute inset-0 h-24 w-24"
-          >
+          <motion.svg viewBox="0 0 96 96" className="absolute inset-0 h-24 w-24">
             <motion.circle
               cx="48" cy="48" r="44"
               fill="none"
-              stroke="#F59E0B"
+              stroke="hsl(226 75% 48%)"
               strokeWidth="3"
               strokeLinecap="round"
               initial={{ pathLength: 0 }}
@@ -52,18 +48,12 @@ export function SummaryStep({ origin, destination, journeys, returnJourneys, has
               style={{ transformOrigin: 'center' }}
             />
           </motion.svg>
-          {/* Checkmark inside */}
-          <motion.svg
-            viewBox="0 0 96 96"
-            className="absolute inset-0 h-24 w-24"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.6, duration: 0.3 }}
-          >
+          <motion.svg viewBox="0 0 96 96" className="absolute inset-0 h-24 w-24"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6, duration: 0.3 }}>
             <motion.polyline
               points="30,50 44,64 66,36"
               fill="none"
-              stroke="#F59E0B"
+              stroke="hsl(226 75% 48%)"
               strokeWidth="4"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -76,15 +66,10 @@ export function SummaryStep({ origin, destination, journeys, returnJourneys, has
       </div>
 
       {/* Title */}
-      <h1 className="font-display tracking-tight text-foreground text-center mb-6" style={{ fontSize: 56, lineHeight: 1 }}>ALLES BEREIT.</h1>
+      <h1 className="font-display tracking-tight text-foreground text-center mb-6" style={{ fontSize: 56, lineHeight: 1 }}>Alles bereit.</h1>
 
       {/* Stats */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-        className="flex gap-8 mb-8"
-      >
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="flex gap-8 mb-8">
         <div className="text-center">
           <p className="font-display text-primary" style={{ fontSize: 48, lineHeight: 1 }}>{totalConnections}</p>
           <p className="text-xs text-muted-foreground mt-1">Verbindungen</p>
@@ -96,14 +81,9 @@ export function SummaryStep({ origin, destination, journeys, returnJourneys, has
       </motion.div>
 
       {/* Journey summary cards */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.7 }}
-        className="w-full space-y-4 mb-10"
-      >
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }} className="w-full space-y-4 mb-10">
         {journeys.length > 0 && (
-          <div className="rounded-[20px] p-4" style={{ backgroundColor: '#111111', border: '1px solid #1F1F1F' }}>
+          <div className="rounded-[20px] p-4 bg-card border border-border shadow-sm">
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium mb-3">Hinweg</p>
             {journeys.map((j, i) => (
               <div key={i} className="flex items-center gap-2 py-1.5">
@@ -124,7 +104,7 @@ export function SummaryStep({ origin, destination, journeys, returnJourneys, has
         )}
 
         {returnJourneys.length > 0 && (
-          <div className="rounded-[20px] p-4" style={{ backgroundColor: '#111111', border: '1px solid #1F1F1F' }}>
+          <div className="rounded-[20px] p-4 bg-card border border-border shadow-sm">
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium mb-3">Rückweg</p>
             {returnJourneys.map((j, i) => (
               <div key={i} className="flex items-center gap-2 py-1.5">
@@ -146,12 +126,7 @@ export function SummaryStep({ origin, destination, journeys, returnJourneys, has
       </motion.div>
 
       {/* CTA */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.9 }}
-        className="w-full"
-      >
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9 }} className="w-full">
         <button
           onClick={onFinish}
           className="w-full h-14 rounded-full font-bold text-sm bg-primary text-primary-foreground transition-all flex items-center justify-center gap-2"
