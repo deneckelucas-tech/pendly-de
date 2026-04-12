@@ -18,7 +18,7 @@ export function RouteCard({ route, status }: RouteCardProps) {
   return (
     <Card
       className={cn(
-        'cursor-pointer transition-all hover:shadow-md active:scale-[0.99] card-amber-border',
+        'cursor-pointer transition-all hover:shadow-md active:scale-[0.99] card-amber-border shadow-sm',
         route.is_paused && 'opacity-60'
       )}
       onClick={() => navigate(`/route/${route.id}`)}
@@ -68,7 +68,7 @@ export function RouteCard({ route, status }: RouteCardProps) {
           </div>
         </div>
         {status?.message && (
-          <p className="text-xs text-muted-foreground mt-2 pt-2" style={{ borderTop: '1px solid #1A1A1A' }}>{status.message}</p>
+          <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border">{status.message}</p>
         )}
       </CardContent>
     </Card>

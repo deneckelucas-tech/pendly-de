@@ -52,20 +52,13 @@ export default function Auth() {
     }
   };
 
-  const inputClass = "w-full h-10 rounded-xl px-3 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-colors";
-  const inputStyle = {
-    backgroundColor: '#1A1A1A',
-    border: '1px solid #2A2A2A',
-  };
-  const inputFocusClass = "focus:border-primary";
-
   return (
     <div className="min-h-screen flex items-center justify-center px-4 bg-background">
-      <Card className="w-full max-w-sm card-amber-border">
+      <Card className="w-full max-w-sm card-amber-border shadow-md">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center gap-2 mb-2">
-            <div className="h-9 w-9 bg-card card-amber-border rounded-xl flex items-center justify-center">
-              <Train className="h-5 w-5 text-primary" />
+            <div className="h-9 w-9 bg-primary rounded-xl flex items-center justify-center shadow-sm">
+              <Train className="h-5 w-5 text-primary-foreground" />
             </div>
           </div>
           <CardTitle className="text-xl">{isLogin ? 'Anmelden' : 'Konto erstellen'}</CardTitle>
@@ -84,8 +77,7 @@ export default function Auth() {
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required
-                className={`${inputClass} ${inputFocusClass}`}
-                style={inputStyle}
+                className="w-full h-10 rounded-xl px-3 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-colors bg-muted border border-border focus:border-primary"
               />
             </div>
             <div className="space-y-2">
@@ -98,8 +90,7 @@ export default function Auth() {
                 onChange={e => setPassword(e.target.value)}
                 required
                 minLength={6}
-                className={`${inputClass} ${inputFocusClass}`}
-                style={inputStyle}
+                className="w-full h-10 rounded-xl px-3 text-sm text-foreground placeholder:text-muted-foreground outline-none transition-colors bg-muted border border-border focus:border-primary"
               />
             </div>
             <Button type="submit" className="w-full font-semibold h-12 rounded-xl" disabled={loading}>

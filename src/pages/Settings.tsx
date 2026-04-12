@@ -57,11 +57,11 @@ export default function Settings() {
         <button onClick={() => navigate('/dashboard')} className="p-2 -ml-2 rounded-full hover:bg-secondary/50 transition-colors">
           <ArrowLeft className="h-5 w-5 text-muted-foreground" />
         </button>
-        <h1 className="font-display text-2xl text-foreground">EINSTELLUNGEN</h1>
+        <h1 className="font-display text-2xl text-foreground">Einstellungen</h1>
       </div>
 
       {/* Account */}
-      <div className="bg-card rounded-[20px] card-amber-border p-5 mb-4">
+      <div className="bg-card rounded-[20px] card-amber-border p-5 mb-4 shadow-sm">
         <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium mb-3">Konto</p>
         <div>
           <Label className="text-xs text-muted-foreground">E-Mail</Label>
@@ -70,7 +70,7 @@ export default function Settings() {
       </div>
 
       {/* Subscription */}
-      <div className="bg-card rounded-[20px] card-amber-border p-5 mb-4">
+      <div className="bg-card rounded-[20px] card-amber-border p-5 mb-4 shadow-sm">
         <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium mb-3 flex items-center gap-2">
           <Crown className="h-4 w-4 text-primary" /> Abo
         </p>
@@ -105,7 +105,7 @@ export default function Settings() {
       </div>
 
       {/* Notifications */}
-      <div className="bg-card rounded-[20px] card-amber-border p-5 mb-4">
+      <div className="bg-card rounded-[20px] card-amber-border p-5 mb-4 shadow-sm">
         <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium mb-3 flex items-center gap-2">
           <Bell className="h-4 w-4" /> Benachrichtigungen
         </p>
@@ -129,19 +129,17 @@ export default function Settings() {
             </Label>
             <div className="flex gap-2 items-center">
               <input type="time" value={quietStart} onChange={e => setQuietStart(e.target.value)}
-                className="w-24 h-11 rounded-2xl px-3 text-sm text-foreground outline-none border border-transparent focus:border-primary"
-                style={{ backgroundColor: '#1A1A1A' }} />
+                className="w-24 h-11 rounded-2xl px-3 text-sm text-foreground outline-none border border-border bg-muted focus:border-primary" />
               <span className="text-muted-foreground text-sm">bis</span>
               <input type="time" value={quietEnd} onChange={e => setQuietEnd(e.target.value)}
-                className="w-24 h-11 rounded-2xl px-3 text-sm text-foreground outline-none border border-transparent focus:border-primary"
-                style={{ backgroundColor: '#1A1A1A' }} />
+                className="w-24 h-11 rounded-2xl px-3 text-sm text-foreground outline-none border border-border bg-muted focus:border-primary" />
             </div>
           </div>
         </div>
       </div>
 
       {/* General Settings */}
-      <div className="bg-card rounded-[20px] card-amber-border p-5 mb-4">
+      <div className="bg-card rounded-[20px] card-amber-border p-5 mb-4 shadow-sm">
         <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium mb-3">Allgemein</p>
         <div className="space-y-4">
           <div className="flex items-center justify-between">

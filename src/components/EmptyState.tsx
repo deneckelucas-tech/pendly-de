@@ -12,7 +12,7 @@ export function EmptyState({ icon = 'train', title, description, children }: Emp
 
   return (
     <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
-      <div className="h-16 w-16 rounded-2xl bg-card card-amber-border flex items-center justify-center mb-4">
+      <div className="h-16 w-16 rounded-2xl bg-primary/10 card-amber-border flex items-center justify-center mb-4">
         <IconComponent className="h-8 w-8 text-primary" />
       </div>
       <h3 className="font-semibold text-lg mb-1">{title}</h3>
