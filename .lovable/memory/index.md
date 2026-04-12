@@ -1,11 +1,11 @@
 # Project Memory
 
 ## Core
-Dark mode only. BG #0A0A0A, cards #131313, accent #F59E0B amber, text #F1F5F9, muted #6B7280.
-Inter font all weights. Lucide icons only. Zero emojis anywhere.
-Card borders: 1px solid rgba(245,158,11,0.08). Dividers: #1A1A1A.
-Section labels: #6B7280, uppercase, tracking 0.1em, 11px.
+Light cream theme. BG #FDF8F2 (cream), cards #FFFFFF, primary #1E4ED8 (blue), text #1C1917, muted #78716C.
+Plus Jakarta Sans headings (font-display), DM Sans body. Lucide icons only. Zero emojis anywhere.
+Card borders: 1.5px solid hsl(30 18% 87%). Shadows: 0 4px 24px rgba(0,0,0,0.07).
+Section labels: #78716C, uppercase, tracking 0.1em, 11px.
 German language UI. App name: Pendly.
 
 ## Memories
-- [Color system](mem://design/color-system) — Full token definitions, card glow, input styles, nav colors
+- [Color system](mem://design/color-system) — Full token definitions, card styling, input styles, nav colors
