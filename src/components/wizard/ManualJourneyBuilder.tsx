@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { ArrowLeft, Trash2, MapPin, ArrowRight, Search, Train, Repeat } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { searchStations, searchJourneys, formatTime } from '@/lib/transport-api';
 import { getLineBadgeStyle } from '@/lib/line-colors';
