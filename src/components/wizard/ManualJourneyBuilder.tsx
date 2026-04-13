@@ -252,8 +252,7 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, initialD
             type="time"
             value={departureTime}
             onChange={e => setDepartureTime(e.target.value)}
-            className="w-full h-12 rounded-2xl px-4 text-sm text-foreground outline-none border border-transparent focus:border-primary transition-all"
-            style={{ backgroundColor: '#1A1A1A' }}
+            className="w-full h-12 rounded-2xl px-4 text-sm text-foreground outline-none border border-border bg-card focus:border-primary transition-all"
           />
         </div>
         <div className="flex items-end">
@@ -262,7 +261,7 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, initialD
             disabled={loading}
             className="h-12 px-5 rounded-full bg-primary text-primary-foreground font-bold text-sm flex items-center gap-2 disabled:opacity-50"
           >
-            {loading ? <div className="amber-spinner" style={{ width: 16, height: 16, borderColor: 'rgba(0,0,0,0.2)', borderTopColor: '#000' }} /> : <Search className="h-4 w-4" />}
+            {loading ? <div className="amber-spinner" style={{ width: 16, height: 16, borderColor: 'rgba(255,255,255,0.3)', borderTopColor: '#fff' }} /> : <Search className="h-4 w-4" />}
             Suchen
           </button>
         </div>
@@ -276,8 +275,7 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, initialD
             value={filterText}
             onChange={e => setFilterText(e.target.value)}
             placeholder="Filtern: Linie oder Bahnhof..."
-            className="w-full h-11 rounded-2xl px-4 text-xs text-foreground placeholder:text-muted-foreground outline-none border border-transparent focus:border-primary"
-            style={{ backgroundColor: '#1A1A1A' }}
+            className="w-full h-11 rounded-2xl px-4 text-xs text-foreground placeholder:text-muted-foreground outline-none border border-border bg-card focus:border-primary"
           />
         </div>
       )}
@@ -313,11 +311,12 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, initialD
             <button
               key={journey.id}
               onClick={() => toggleJourney(journey)}
-              className="w-full text-left p-4 rounded-[20px] hover:opacity-90 transition-all active:scale-[0.99] relative"
-              style={{
-                backgroundColor: selectedJourneys.find(j => j.id === journey.id) ? 'rgba(245,158,11,0.1)' : '#111111',
-                border: selectedJourneys.find(j => j.id === journey.id) ? '1px solid rgba(245,158,11,0.5)' : '1px solid #1F1F1F',
-              }}
+              className={cn(
+                'w-full text-left p-4 rounded-[20px] transition-all active:scale-[0.99] relative border',
+                selectedJourneys.find(j => j.id === journey.id)
+                  ? 'bg-primary/5 border-primary'
+                  : 'bg-card border-border'
+              )}
             >
               {/* Times */}
               <div className="flex items-center justify-between mb-1">
@@ -371,7 +370,7 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, initialD
 
       {/* Bottom bar */}
       {selectedJourneys.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 px-5 py-4 flex items-center justify-between" style={{ backgroundColor: '#000', borderTop: '1px solid #1A1A1A' }}>
+        <div className="fixed bottom-0 left-0 right-0 px-5 py-4 flex items-center justify-between bg-background border-t border-border">
           <span className="text-sm text-muted-foreground">{selectedJourneys.length} Verbindung{selectedJourneys.length > 1 ? 'en' : ''} gewählt</span>
           <button
             onClick={handleFinish}
