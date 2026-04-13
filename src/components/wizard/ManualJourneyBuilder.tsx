@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { ArrowLeft, Trash2, MapPin, ArrowRight, Search, Train, Repeat } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
 import { searchStations, searchJourneys, formatTime } from '@/lib/transport-api';
 import { getLineBadgeStyle } from '@/lib/line-colors';
@@ -160,12 +161,12 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, initialD
                     return next;
                   });
                 }}
-                className="flex-1 h-10 rounded-xl text-xs font-bold transition-all"
-                style={{
-                  backgroundColor: isActive ? 'hsl(var(--primary))' : '#1A1A1A',
-                  color: isActive ? '#000' : '#6B7280',
-                  border: isActive ? 'none' : '1px solid #1F1F1F',
-                }}
+                className={cn(
+                  'flex-1 h-10 rounded-xl text-xs font-bold transition-all border',
+                  isActive
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'bg-card text-muted-foreground border-border'
+                )}
               >
                 {WEEKDAY_LABELS[day]}
               </button>
@@ -175,7 +176,7 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, initialD
       </div>
 
       {/* Two-field station picker: Ab + Richtung */}
-      <div className="rounded-[20px] p-3 space-y-0 mb-4" style={{ backgroundColor: '#111111', border: '1px solid #1F1F1F' }}>
+      <div className="rounded-[20px] p-3 space-y-0 mb-4 bg-card border border-border">
         {/* Ab (origin) */}
         <div className="flex items-center justify-between py-2">
           <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -193,7 +194,7 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, initialD
           </button>
         </div>
 
-        <div className="h-px" style={{ backgroundColor: '#1A1A1A' }} />
+        <div className="h-px bg-border" />
 
         {/* Richtung (direction/destination) */}
         <div className="flex items-center justify-between py-2">
@@ -214,22 +215,21 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, initialD
 
         {/* Search overlay */}
         {editingField && (
-          <div className="space-y-2 pt-2" style={{ borderTop: '1px solid #1A1A1A' }}>
+          <div className="space-y-2 pt-2 border-t border-border">
             <input
               type="text"
               value={stationQuery}
               onChange={e => handleStationSearch(e.target.value)}
               placeholder={editingField === 'origin' ? 'Abfahrtsbahnhof suchen...' : 'Zielbahnhof suchen...'}
               autoFocus
-              className="w-full h-12 rounded-2xl px-4 text-sm text-foreground placeholder:text-muted-foreground outline-none border border-transparent focus:border-primary"
-              style={{ backgroundColor: '#1A1A1A' }}
+              className="w-full h-12 rounded-2xl px-4 text-sm text-foreground placeholder:text-muted-foreground outline-none border border-border bg-secondary focus:border-primary"
             />
             {stationLoading && (
               <div className="flex justify-center py-3">
                 <div className="amber-spinner" style={{ width: 18, height: 18 }} />
               </div>
             )}
-            <div className="divide-y" style={{ borderColor: '#1A1A1A' }}>
+            <div className="divide-y divide-border">
               {stationResults.map(s => (
                 <button key={s.id} onClick={() => selectStation(s)} className="w-full text-left px-3 py-2.5 flex items-center gap-3 hover:bg-secondary/50 transition-colors">
                   <Train className="h-4 w-4 text-primary shrink-0" />
@@ -252,8 +252,7 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, initialD
             type="time"
             value={departureTime}
             onChange={e => setDepartureTime(e.target.value)}
-            className="w-full h-12 rounded-2xl px-4 text-sm text-foreground outline-none border border-transparent focus:border-primary transition-all"
-            style={{ backgroundColor: '#1A1A1A' }}
+            className="w-full h-12 rounded-2xl px-4 text-sm text-foreground outline-none border border-border bg-card focus:border-primary transition-all"
           />
         </div>
         <div className="flex items-end">
@@ -262,7 +261,7 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, initialD
             disabled={loading}
             className="h-12 px-5 rounded-full bg-primary text-primary-foreground font-bold text-sm flex items-center gap-2 disabled:opacity-50"
           >
-            {loading ? <div className="amber-spinner" style={{ width: 16, height: 16, borderColor: 'rgba(0,0,0,0.2)', borderTopColor: '#000' }} /> : <Search className="h-4 w-4" />}
+            {loading ? <div className="amber-spinner" style={{ width: 16, height: 16, borderColor: 'rgba(255,255,255,0.3)', borderTopColor: '#fff' }} /> : <Search className="h-4 w-4" />}
             Suchen
           </button>
         </div>
@@ -276,8 +275,7 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, initialD
             value={filterText}
             onChange={e => setFilterText(e.target.value)}
             placeholder="Filtern: Linie oder Bahnhof..."
-            className="w-full h-11 rounded-2xl px-4 text-xs text-foreground placeholder:text-muted-foreground outline-none border border-transparent focus:border-primary"
-            style={{ backgroundColor: '#1A1A1A' }}
+            className="w-full h-11 rounded-2xl px-4 text-xs text-foreground placeholder:text-muted-foreground outline-none border border-border bg-card focus:border-primary"
           />
         </div>
       )}
@@ -313,11 +311,12 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, initialD
             <button
               key={journey.id}
               onClick={() => toggleJourney(journey)}
-              className="w-full text-left p-4 rounded-[20px] hover:opacity-90 transition-all active:scale-[0.99] relative"
-              style={{
-                backgroundColor: selectedJourneys.find(j => j.id === journey.id) ? 'rgba(245,158,11,0.1)' : '#111111',
-                border: selectedJourneys.find(j => j.id === journey.id) ? '1px solid rgba(245,158,11,0.5)' : '1px solid #1F1F1F',
-              }}
+              className={cn(
+                'w-full text-left p-4 rounded-[20px] transition-all active:scale-[0.99] relative border',
+                selectedJourneys.find(j => j.id === journey.id)
+                  ? 'bg-primary/5 border-primary'
+                  : 'bg-card border-border'
+              )}
             >
               {/* Times */}
               <div className="flex items-center justify-between mb-1">
@@ -371,7 +370,7 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, initialD
 
       {/* Bottom bar */}
       {selectedJourneys.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 px-5 py-4 flex items-center justify-between" style={{ backgroundColor: '#000', borderTop: '1px solid #1A1A1A' }}>
+        <div className="fixed bottom-0 left-0 right-0 px-5 py-4 flex items-center justify-between bg-background border-t border-border">
           <span className="text-sm text-muted-foreground">{selectedJourneys.length} Verbindung{selectedJourneys.length > 1 ? 'en' : ''} gewählt</span>
           <button
             onClick={handleFinish}
