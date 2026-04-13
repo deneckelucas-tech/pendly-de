@@ -160,12 +160,12 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, initialD
                     return next;
                   });
                 }}
-                className="flex-1 h-10 rounded-xl text-xs font-bold transition-all"
-                style={{
-                  backgroundColor: isActive ? 'hsl(var(--primary))' : '#1A1A1A',
-                  color: isActive ? '#000' : '#6B7280',
-                  border: isActive ? 'none' : '1px solid #1F1F1F',
-                }}
+                className={cn(
+                  'flex-1 h-10 rounded-xl text-xs font-bold transition-all border',
+                  isActive
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'bg-card text-muted-foreground border-border'
+                )}
               >
                 {WEEKDAY_LABELS[day]}
               </button>
@@ -175,7 +175,7 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, initialD
       </div>
 
       {/* Two-field station picker: Ab + Richtung */}
-      <div className="rounded-[20px] p-3 space-y-0 mb-4" style={{ backgroundColor: '#111111', border: '1px solid #1F1F1F' }}>
+      <div className="rounded-[20px] p-3 space-y-0 mb-4 bg-card border border-border">
         {/* Ab (origin) */}
         <div className="flex items-center justify-between py-2">
           <div className="flex items-center gap-2 flex-1 min-w-0">
@@ -193,7 +193,7 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, initialD
           </button>
         </div>
 
-        <div className="h-px" style={{ backgroundColor: '#1A1A1A' }} />
+        <div className="h-px bg-border" />
 
         {/* Richtung (direction/destination) */}
         <div className="flex items-center justify-between py-2">
@@ -214,22 +214,21 @@ export function ManualJourneyBuilder({ initialOrigin, finalDestination, initialD
 
         {/* Search overlay */}
         {editingField && (
-          <div className="space-y-2 pt-2" style={{ borderTop: '1px solid #1A1A1A' }}>
+          <div className="space-y-2 pt-2 border-t border-border">
             <input
               type="text"
               value={stationQuery}
               onChange={e => handleStationSearch(e.target.value)}
               placeholder={editingField === 'origin' ? 'Abfahrtsbahnhof suchen...' : 'Zielbahnhof suchen...'}
               autoFocus
-              className="w-full h-12 rounded-2xl px-4 text-sm text-foreground placeholder:text-muted-foreground outline-none border border-transparent focus:border-primary"
-              style={{ backgroundColor: '#1A1A1A' }}
+              className="w-full h-12 rounded-2xl px-4 text-sm text-foreground placeholder:text-muted-foreground outline-none border border-border bg-secondary focus:border-primary"
             />
             {stationLoading && (
               <div className="flex justify-center py-3">
                 <div className="amber-spinner" style={{ width: 18, height: 18 }} />
               </div>
             )}
-            <div className="divide-y" style={{ borderColor: '#1A1A1A' }}>
+            <div className="divide-y divide-border">
               {stationResults.map(s => (
                 <button key={s.id} onClick={() => selectStation(s)} className="w-full text-left px-3 py-2.5 flex items-center gap-3 hover:bg-secondary/50 transition-colors">
                   <Train className="h-4 w-4 text-primary shrink-0" />
