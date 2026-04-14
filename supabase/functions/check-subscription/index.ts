@@ -29,14 +29,30 @@ serve(async (req) => {
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
 
     const authHeader = req.headers.get("Authorization");
-    if (!authHeader) throw new Error("No authorization header provided");
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 401,
+      });
+    }
 
     const token = authHeader.replace("Bearer ", "");
     const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
-    if (userError) throw new Error(`Authentication error: ${userError.message}`);
+    if (userError) {
+      logStep("Auth error", { message: userError.message });
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 401,
+      });
+    }
     const user = userData.user;
-    if (!user?.email) throw new Error("User not authenticated or email not available");
-    logStep("User authenticated", { userId: user.id, email: user.email });
+    if (!user?.email) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 401,
+      });
+    }
+    logStep("User authenticated", { userId: user.id });
 
     // Check trial status from profiles
     const { data: profile } = await supabaseClient
@@ -50,7 +66,7 @@ serve(async (req) => {
     const now = new Date();
     const trialActive = now < trialEnd;
 
-    logStep("Trial check", { trialStart, trialEnd, trialActive });
+    logStep("Trial check", { trialActive });
 
     const stripe = new Stripe(stripeKey, { apiVersion: "2025-08-27.basil" });
     const customers = await stripe.customers.list({ email: user.email, limit: 1 });
@@ -58,7 +74,6 @@ serve(async (req) => {
     if (customers.data.length === 0) {
       logStep("No Stripe customer found");
       
-      // Update profile status
       const status = trialActive ? "trialing" : "expired";
       await supabaseClient
         .from("profiles")
@@ -85,7 +100,6 @@ serve(async (req) => {
       limit: 1,
     });
 
-    // Also check trialing subscriptions
     const trialingSubs = await stripe.subscriptions.list({
       customer: customerId,
       status: "trialing",
@@ -101,10 +115,9 @@ serve(async (req) => {
     if (hasActiveSub) {
       subscriptionEnd = new Date(activeSub.current_period_end * 1000).toISOString();
       productId = activeSub.items.data[0].price.product;
-      logStep("Active subscription found", { subscriptionId: activeSub.id });
+      logStep("Active subscription found");
     }
 
-    // Update profile
     const newStatus = hasActiveSub ? "active" : (trialActive ? "trialing" : "expired");
     await supabaseClient
       .from("profiles")
@@ -129,7 +142,7 @@ serve(async (req) => {
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
     logStep("ERROR", { message: msg });
-    return new Response(JSON.stringify({ error: msg }), {
+    return new Response(JSON.stringify({ error: "An internal error occurred." }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });

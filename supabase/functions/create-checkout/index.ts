@@ -27,16 +27,36 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
-    const authHeader = req.headers.get("Authorization")!;
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 401,
+      });
+    }
+
     const token = authHeader.replace("Bearer ", "");
     const { data } = await supabaseClient.auth.getUser(token);
     const user = data.user;
-    if (!user?.email) throw new Error("User not authenticated or email not available");
-    logStep("User authenticated", { email: user.email });
+    if (!user?.email) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 401,
+      });
+    }
+    logStep("User authenticated");
 
-    const { plan } = await req.json();
+    const body = await req.json().catch(() => ({}));
+    const plan = body?.plan;
+    if (plan !== "monthly" && plan !== "yearly") {
+      return new Response(JSON.stringify({ error: "Invalid plan. Use 'monthly' or 'yearly'." }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400,
+      });
+    }
+
     const priceId = plan === "yearly" ? YEARLY_PRICE_ID : MONTHLY_PRICE_ID;
-    logStep("Plan selected", { plan, priceId });
+    logStep("Plan selected", { plan });
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",
@@ -47,7 +67,6 @@ serve(async (req) => {
     if (customers.data.length > 0) {
       customerId = customers.data[0].id;
     }
-    logStep("Customer lookup", { customerId: customerId || "new" });
 
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
@@ -61,7 +80,7 @@ serve(async (req) => {
       cancel_url: `${req.headers.get("origin")}/dashboard?checkout=cancel`,
     });
 
-    logStep("Checkout session created", { sessionId: session.id });
+    logStep("Checkout session created");
 
     return new Response(JSON.stringify({ url: session.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -70,7 +89,7 @@ serve(async (req) => {
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
     logStep("ERROR", { message: msg });
-    return new Response(JSON.stringify({ error: msg }), {
+    return new Response(JSON.stringify({ error: "An internal error occurred." }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });
