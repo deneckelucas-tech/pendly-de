@@ -93,9 +93,9 @@ Deno.serve(async (req) => {
     const stationId = url.searchParams.get("stationId");
     let apiPath: string;
     if (endpoint === "departures") {
-      if (!stationId) {
+      if (!stationId || !/^\d+$/.test(stationId)) {
         return new Response(
-          JSON.stringify({ error: "stationId required for departures" }),
+          JSON.stringify({ error: "Invalid or missing stationId" }),
           { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }

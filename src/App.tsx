@@ -18,6 +18,7 @@ import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import Legal from "./pages/Legal";
 import TodayView from "./pages/TodayView";
+import Paywall from "./pages/Paywall";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/legal" element={<Legal />} />
             <Route path="/onboarding" element={<Onboarding />} />
             <Route path="/route-setup" element={<RouteWizard />} />
+            <Route path="/paywall" element={<Paywall />} />
             <Route element={<ProtectedRoute />}>
               <Route element={<AppLayout />}>
                 <Route path="/dashboard" element={<Dashboard />} />

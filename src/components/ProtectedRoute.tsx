@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 const isDev = import.meta.env.DEV;
 
 export default function ProtectedRoute() {
-  const { user, loading, checkSubscription } = useAuth();
+  const { user, loading, checkSubscription, subscription } = useAuth();
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
@@ -29,6 +29,11 @@ export default function ProtectedRoute() {
 
   if (!user) {
     return <Navigate to="/auth?mode=login" replace />;
+  }
+
+  // Redirect expired users to paywall
+  if (!subscription.subscribed && subscription.status !== 'loading') {
+    return <Navigate to="/paywall" replace />;
   }
 
   return <Outlet />;
