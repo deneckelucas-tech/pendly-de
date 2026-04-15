@@ -57,6 +57,7 @@ nav {
   align-items: center;
   justify-content: space-between;
   padding: 14px 20px;
+  padding-top: max(14px, env(safe-area-inset-top, 14px));
   background: rgba(253,248,242,0.92);
   backdrop-filter: blur(16px);
   border-bottom: 1.5px solid var(--cream-3);
@@ -312,7 +313,7 @@ h1 em { font-style: normal; color: #FCD34D; }
 
 .hero-mockup-wrap {
   position: absolute;
-  bottom: 70px;
+  bottom: 140px;
   right: 16px;
   width: 160px;
   z-index: 10;
