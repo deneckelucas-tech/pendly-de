@@ -301,23 +301,18 @@ h1 em { font-style: normal; color: #FCD34D; }
   position: relative;
   z-index: 2;
   width: 100%;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  margin-top: 20px;
-  padding: 0 22px;
-  gap: 0;
+  margin-top: auto;
+  min-height: 140px;
 }
 
-.scene-svg { width: 100%; display: block; position: absolute; bottom: 0; left: 0; right: 0; }
+.scene-svg { width: 100%; display: block; }
 
 .hero-mockup-wrap {
-  position: relative;
-  width: 150px;
+  position: absolute;
+  top: 0;
+  right: 16px;
+  width: 130px;
   z-index: 10;
-  margin-left: auto;
-  margin-bottom: 60px;
-  flex-shrink: 0;
   animation: float 4s ease-in-out infinite;
 }
 
