@@ -193,25 +193,26 @@ h2 em { font-style: normal; color: var(--blue); }
 .hero-content {
   position: relative;
   z-index: 2;
-  padding: 28px 22px 0;
-  flex-shrink: 0;
+  padding: 28px 24px 0;
+  flex: 1;
   display: flex;
   flex-direction: column;
+  max-width: 600px;
 }
 
 .hero-badge {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  background: rgba(255,255,255,0.15);
-  border: 1px solid rgba(255,255,255,0.25);
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.2);
   border-radius: 100px;
   padding: 6px 14px;
   font-size: 12px;
   color: rgba(255,255,255,0.9);
   font-weight: 600;
   letter-spacing: 0.3px;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   width: fit-content;
   backdrop-filter: blur(8px);
 }
@@ -233,18 +234,19 @@ h2 em { font-style: normal; color: var(--blue); }
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-bottom: 16px;
-  background: rgba(255,255,255,0.12);
-  border: 1px solid rgba(255,255,255,0.2);
+  margin-bottom: 20px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
   border-radius: 100px;
   padding: 6px 14px;
+  width: fit-content;
 }
 
 .star { color: #FCD34D; font-size: 13px; line-height: 1; }
 
 .hero-stars-text {
   font-size: 12px;
-  color: rgba(255,255,255,0.85);
+  color: rgba(255,255,255,0.75);
   font-weight: 600;
   white-space: nowrap;
 }
@@ -252,30 +254,38 @@ h2 em { font-style: normal; color: var(--blue); }
 h1 {
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-weight: 800;
-  font-size: clamp(40px, 11vw, 56px);
+  font-size: clamp(38px, 10vw, 52px);
   line-height: 1.08;
   letter-spacing: -1px;
   color: #ffffff;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
 }
 
 h1 em { font-style: normal; color: #FCD34D; }
 
 .hero-sub {
   font-size: 16px;
-  color: rgba(255,255,255,0.75);
-  margin-bottom: 24px;
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 28px;
   line-height: 1.65;
+  max-width: 420px;
 }
 
 .hero-sub strong { color: #ffffff; font-weight: 700; }
+
+.hero-cta-group {
+  max-width: 380px;
+  margin-bottom: 0;
+  margin-top: auto;
+  padding-bottom: 24px;
+}
 
 .btn-hero {
   display: block;
   background: #ffffff;
   color: var(--blue);
   border-radius: 100px;
-  padding: 17px 36px;
+  padding: 16px 36px;
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 16px;
   font-weight: 800;
@@ -283,7 +293,7 @@ h1 em { font-style: normal; color: #FCD34D; }
   text-decoration: none;
   box-shadow: 0 8px 32px rgba(0,0,0,0.2);
   transition: transform 0.15s, box-shadow 0.15s;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .btn-hero:hover { transform: translateY(-2px); box-shadow: 0 14px 40px rgba(0,0,0,0.25); }
@@ -291,38 +301,50 @@ h1 em { font-style: normal; color: #FCD34D; }
 .hero-meta {
   text-align: center;
   font-size: 12px;
-  color: rgba(255,255,255,0.55);
+  color: rgba(255,255,255,0.5);
   margin-bottom: 0;
 }
 
 .hero-meta .green { color: #86efac; font-weight: 700; }
 
-.hero-scene {
-  position: relative;
-  z-index: 2;
-  width: 100%;
-  margin-top: auto;
-  height: 120px;
-}
-
-.scene-svg { width: 100%; height: 100%; display: block; }
-
+/* Mockup - floating absolute */
 .hero-mockup-wrap {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 20px;
-  padding-right: 0;
+  position: absolute;
+  bottom: 100px;
+  right: 20px;
+  z-index: 10;
+  width: 160px;
   animation: float 4s ease-in-out infinite;
 }
 
-.hero-mockup-wrap .mockup-card {
-  width: 150px;
+@media (min-width: 640px) {
+  .hero-mockup-wrap {
+    right: 40px;
+    bottom: 120px;
+    width: 180px;
+  }
+}
+
+@media (max-width: 380px) {
+  .hero-mockup-wrap { display: none; }
 }
 
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-7px); }
+  50% { transform: translateY(-8px); }
 }
+
+/* Hero bottom scene */
+.hero-scene {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 160px;
+  margin-top: auto;
+  flex-shrink: 0;
+}
+
+.scene-svg { width: 100%; height: 100%; display: block; }
 
 .mockup-card {
   background: #ffffff;
@@ -818,37 +840,39 @@ footer a:hover { color: var(--blue); }
 
     <p class="hero-sub">Pendly überwacht deine Strecke und meldet sich nur, wenn <strong>wirklich etwas los ist</strong>. Kein manuelles Checken mehr.</p>
 
-    <div>
+    <div class="hero-cta-group">
       <a href="#pricing" class="btn-hero">Jetzt kostenlos herunterladen</a>
       <p class="hero-meta"><span class="green">7 Tage kostenlos testen</span> · 4,99 €/Monat oder 39,99 €/Jahr</p>
     </div>
+  </div>
 
-    <div class="hero-mockup-wrap">
-      <div class="mockup-card">
-        <div class="mockup-header">
-          <div class="mockup-logo">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
-              <line x1="4" y1="22" x2="4" y2="15"/>
-            </svg>
-          </div>
-          <div class="mockup-app-name">Pendly</div>
+  <div class="hero-mockup-wrap">
+    <div class="mockup-card">
+      <div class="mockup-header">
+        <div class="mockup-logo">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+            <line x1="4" y1="22" x2="4" y2="15"/>
+          </svg>
         </div>
-        <div class="mockup-notif">
-          <div class="mockup-notif-icon">⚠️</div>
-          <div>
-            <div class="mockup-notif-title">RE 10 fällt aus</div>
-            <div class="mockup-notif-sub">Alt: S3 · 07:52 · pünktlich</div>
-          </div>
-        </div>
-        <div class="mockup-notif good">
-          <div class="mockup-notif-icon">✅</div>
-          <div>
-            <div class="mockup-notif-title">Zug pünktlich</div>
-            <div class="mockup-notif-sub">S3 · 17:45 · Gleis 2</div>
-          </div>
+        <div class="mockup-app-name">Pendly</div>
+      </div>
+      <div class="mockup-notif">
+        <div class="mockup-notif-icon">⚠️</div>
+        <div>
+          <div class="mockup-notif-title">RE 10 fällt aus</div>
+          <div class="mockup-notif-sub">Alt: S3 · 07:52 · pünktlich</div>
         </div>
       </div>
+      <div class="mockup-notif good">
+        <div class="mockup-notif-icon">✅</div>
+        <div>
+          <div class="mockup-notif-title">Zug pünktlich</div>
+          <div class="mockup-notif-sub">S3 · 17:45 · Gleis 2</div>
+        </div>
+      </div>
+    </div>
+  </div>
     </div>
   </div>
 
