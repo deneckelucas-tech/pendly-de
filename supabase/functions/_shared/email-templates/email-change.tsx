@@ -11,6 +11,7 @@ import {
   Html,
   Link,
   Preview,
+  Section,
   Text,
 } from 'npm:@react-email/components@0.0.22'
 
@@ -21,38 +22,28 @@ interface EmailChangeEmailProps {
   confirmationUrl: string
 }
 
-export const EmailChangeEmail = ({
-  siteName,
-  email,
-  newEmail,
-  confirmationUrl,
-}: EmailChangeEmailProps) => (
-  <Html lang="en" dir="ltr">
+export const EmailChangeEmail = ({ siteName, email, newEmail, confirmationUrl }: EmailChangeEmailProps) => (
+  <Html lang="de" dir="ltr">
     <Head />
-    <Preview>Confirm your email change for {siteName}</Preview>
+    <Preview>E-Mail-Adresse für Pendly bestätigen</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={h1}>Confirm your email change</Heading>
-        <Text style={text}>
-          You requested to change your email address for {siteName} from{' '}
-          <Link href={`mailto:${email}`} style={link}>
-            {email}
-          </Link>{' '}
-          to{' '}
-          <Link href={`mailto:${newEmail}`} style={link}>
-            {newEmail}
-          </Link>
-          .
-        </Text>
-        <Text style={text}>
-          Click the button below to confirm this change:
-        </Text>
-        <Button style={button} href={confirmationUrl}>
-          Confirm Email Change
-        </Button>
+        <Section style={brand}>
+          <Text style={brandText}>Pendly</Text>
+        </Section>
+        <Section style={card}>
+          <Heading style={h1}>E-Mail-Änderung bestätigen</Heading>
+          <Text style={text}>
+            Du hast angefragt, deine E-Mail-Adresse für {siteName} von <Link href={`mailto:${email}`} style={link}>{email}</Link> auf <Link href={`mailto:${newEmail}`} style={link}>{newEmail}</Link> zu ändern.
+          </Text>
+          <Section style={buttonWrap}>
+            <Button style={button} href={confirmationUrl}>Änderung bestätigen</Button>
+          </Section>
+          <Text style={smallText}>Falls der Button nicht funktioniert, kopiere diesen Link in deinen Browser:</Text>
+          <Text style={linkFallback}>{confirmationUrl}</Text>
+        </Section>
         <Text style={footer}>
-          If you didn't request this change, please secure your account
-          immediately.
+          Du hast diese Änderung nicht angefragt? Dann sichere bitte umgehend dein Konto.
         </Text>
       </Container>
     </Body>
@@ -61,27 +52,16 @@ export const EmailChangeEmail = ({
 
 export default EmailChangeEmail
 
-const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
-const container = { padding: '20px 25px' }
-const h1 = {
-  fontSize: '22px',
-  fontWeight: 'bold' as const,
-  color: '#000000',
-  margin: '0 0 20px',
-}
-const text = {
-  fontSize: '14px',
-  color: '#55575d',
-  lineHeight: '1.5',
-  margin: '0 0 25px',
-}
-const link = { color: 'inherit', textDecoration: 'underline' }
-const button = {
-  backgroundColor: '#000000',
-  color: '#ffffff',
-  fontSize: '14px',
-  borderRadius: '8px',
-  padding: '12px 20px',
-  textDecoration: 'none',
-}
-const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
+const main = { backgroundColor: '#ffffff', fontFamily: '"DM Sans", -apple-system, BlinkMacSystemFont, sans-serif', padding: '40px 0' }
+const container = { maxWidth: '480px', margin: '0 auto', padding: '0 20px' }
+const brand = { textAlign: 'center' as const, marginBottom: '24px' }
+const brandText = { fontFamily: '"Plus Jakarta Sans", -apple-system, sans-serif', fontSize: '24px', fontWeight: 800 as const, color: '#1E4ED8', letterSpacing: '-0.02em', margin: 0 }
+const card = { backgroundColor: '#FDF8F2', border: '1.5px solid #EDE4D8', borderRadius: '20px', padding: '36px 32px' }
+const h1 = { fontFamily: '"Plus Jakarta Sans", -apple-system, sans-serif', fontSize: '24px', fontWeight: 800 as const, color: '#1C1917', letterSpacing: '-0.02em', margin: '0 0 16px' }
+const text = { fontSize: '15px', color: '#1C1917', lineHeight: '1.6', margin: '0 0 24px' }
+const link = { color: '#1E4ED8', textDecoration: 'underline' }
+const buttonWrap = { textAlign: 'center' as const, margin: '8px 0 28px' }
+const button = { backgroundColor: '#1E4ED8', color: '#ffffff', fontSize: '15px', fontWeight: 600 as const, borderRadius: '999px', padding: '14px 28px', textDecoration: 'none', display: 'inline-block' }
+const smallText = { fontSize: '13px', color: '#78716C', lineHeight: '1.5', margin: '0 0 6px' }
+const linkFallback = { fontSize: '12px', color: '#1E4ED8', wordBreak: 'break-all' as const, margin: 0 }
+const footer = { fontSize: '12px', color: '#78716C', textAlign: 'center' as const, margin: '24px 0 0', lineHeight: '1.5' }
