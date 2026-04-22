@@ -350,7 +350,7 @@ export default function Dashboard() {
               'text-[11px] font-semibold px-2.5 py-1 rounded-full',
               getStatusColor(nextDep.status)
             )}>
-              {getStatusLabel(nextDep.status, statuses[nextDep.routeId]?.delay_minutes)}
+              {getStatusLabel(nextDep.status, nextDep.delayMinutes)}
             </span>
           </div>
 
