@@ -55,8 +55,10 @@ interface UpcomingDeparture {
   originName: string;
   destinationName: string;
   routeName: string;
-  status: string;
+  status: RouteStatus;
   routeId: string;
+  connectionId: string;
+  delayMinutes: number;
   allLegs: SavedLeg[];
 }
 
