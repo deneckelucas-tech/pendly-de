@@ -97,26 +97,28 @@ function getRemarkIcon(type: string) {
 export default function Dashboard() {
   const navigate = useNavigate();
   const [routes, setRoutes] = useState<CommuteRoute[]>([]);
-  const [statuses, setStatuses] = useState<Record<string, RouteStatusData>>({});
-  const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [routesLoading, setRoutesLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [secondsAgo, setSecondsAgo] = useState(0);
   const [routeNews, setRouteNews] = useState<Remark[]>([]);
   const [newsLoading, setNewsLoading] = useState(true);
 
-  const loadData = useCallback(() => {
-    const mockRoutes = getMockRoutes();
-    setRoutes(mockRoutes);
-    const newStatuses: Record<string, RouteStatusData> = {};
-    mockRoutes.forEach(r => { newStatuses[r.id] = generateMockStatus(r.id); });
-    setStatuses(newStatuses);
-    setAlerts(generateMockAlerts(mockRoutes));
-    setLastUpdated(new Date());
+  const loadRoutes = useCallback(async () => {
+    try {
+      const r = await fetchUserRoutes();
+      setRoutes(r);
+      setLastUpdated(new Date());
+    } catch (err) {
+      console.error('Routen laden fehlgeschlagen:', err);
+    } finally {
+      setRoutesLoading(false);
+    }
   }, []);
 
   // Fetch route news/remarks from HAFAS
   const loadNews = useCallback(async (currentRoutes: CommuteRoute[]) => {
     if (currentRoutes.length === 0) {
+      setRouteNews([]);
       setNewsLoading(false);
       return;
     }
@@ -132,15 +134,14 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
-    loadData();
-    const interval = setInterval(loadData, 30_000);
-    return () => clearInterval(interval);
-  }, [loadData]);
+    loadRoutes();
+  }, [loadRoutes]);
 
-  // Load news once routes are available
   useEffect(() => {
     if (routes.length > 0) {
       loadNews(routes);
+    } else {
+      setNewsLoading(false);
     }
   }, [routes, loadNews]);
 
@@ -157,15 +158,48 @@ export default function Dashboard() {
   const todayKey = WEEKDAY_KEYS[now.getDay()];
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
 
-  // Today's departures for the hero card
+  // Build today's connection list for live status fetching
+  const todayConnections = useMemo(() => {
+    const conns: Array<{ connectionId: string; routeId: string; routeName: string; legs: SavedLeg[] }> = [];
+    routes.forEach(route => {
+      if (route.is_paused) return;
+      route.connections.forEach(conn => {
+        if (!conn.weekdays.includes(todayKey)) return;
+        if (conn.legs.length === 0) return;
+        conns.push({
+          connectionId: conn.id,
+          routeId: route.id,
+          routeName: route.name,
+          legs: conn.legs,
+        });
+      });
+    });
+    return conns;
+  }, [routes, todayKey]);
+
+  const { statuses: liveStatuses } = useLiveStatus({
+    connections: todayConnections,
+    enabled: todayConnections.length > 0,
+  });
+
+  // Map live status by connection id
+  const liveByConnection = useMemo(() => {
+    const map = new Map<string, typeof liveStatuses[0]>();
+    liveStatuses.forEach(s => map.set(s.connectionId, s));
+    return map;
+  }, [liveStatuses]);
+
+  // Today's departures for the hero card (with live status)
   const todayDepartures = useMemo<UpcomingDeparture[]>(() => {
     const deps: UpcomingDeparture[] = [];
     routes.forEach(route => {
+      if (route.is_paused) return;
       route.connections.forEach(conn => {
         if (!conn.weekdays.includes(todayKey)) return;
         if (conn.legs.length === 0) return;
         const firstLeg = conn.legs[0];
         const depMinutes = timeToMinutes(firstLeg.plannedDeparture);
+        const live = liveByConnection.get(conn.id);
         deps.push({
           time: firstLeg.plannedDeparture,
           timeMinutes: depMinutes,
@@ -173,8 +207,10 @@ export default function Dashboard() {
           originName: firstLeg.originName,
           destinationName: conn.legs[conn.legs.length - 1].destinationName,
           routeName: route.name,
-          status: statuses[route.id]?.status || 'no_data',
+          status: live?.overallStatus || 'no_data',
           routeId: route.id,
+          connectionId: conn.id,
+          delayMinutes: live?.legs[0]?.delayMinutes || 0,
           allLegs: conn.legs,
         });
       });
@@ -187,7 +223,7 @@ export default function Dashboard() {
       return a.timeMinutes - b.timeMinutes;
     });
     return deps;
-  }, [routes, statuses, todayKey, nowMinutes]);
+  }, [routes, liveByConnection, todayKey, nowMinutes]);
 
   // Next day's departures
   const tomorrowDate = new Date(now);
@@ -198,6 +234,7 @@ export default function Dashboard() {
   const tomorrowDepartures = useMemo<UpcomingDeparture[]>(() => {
     const deps: UpcomingDeparture[] = [];
     routes.forEach(route => {
+      if (route.is_paused) return;
       route.connections.forEach(conn => {
         if (!conn.weekdays.includes(tomorrowKey)) return;
         if (conn.legs.length === 0) return;
@@ -212,6 +249,8 @@ export default function Dashboard() {
           routeName: route.name,
           status: 'no_data',
           routeId: route.id,
+          connectionId: conn.id,
+          delayMinutes: 0,
           allLegs: conn.legs,
         });
       });
@@ -221,7 +260,20 @@ export default function Dashboard() {
   }, [routes, tomorrowKey]);
 
   const nextDep = todayDepartures.length > 0 ? todayDepartures[0] : null;
-  const unreadCount = alerts.filter(a => !a.is_read).length;
+  const unreadCount = 0;
+
+  const handleTogglePause = async (routeId: string, currentlyPaused: boolean) => {
+    // Optimistic update
+    setRoutes(prev => prev.map(r => r.id === routeId ? { ...r, is_paused: !currentlyPaused } : r));
+    try {
+      await setRoutePaused(routeId, !currentlyPaused);
+    } catch (err) {
+      // Revert
+      setRoutes(prev => prev.map(r => r.id === routeId ? { ...r, is_paused: currentlyPaused } : r));
+      const message = err instanceof Error ? err.message : 'Aktualisierung fehlgeschlagen';
+      toast({ title: 'Fehler', description: message, variant: 'destructive' });
+    }
+  };
 
   return (
     <div className="px-5 pt-5 pb-4 min-h-screen">
