@@ -531,39 +531,58 @@ export default function Dashboard() {
         <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] mb-3 text-muted-foreground">
           Meine Routen
         </h2>
-        <div className="space-y-2.5">
-          {routes.map((route) => {
-            const status = statuses[route.id];
-            const firstLeg = route.connections[0]?.legs[0];
-            return (
-              <div
-                key={route.id}
-                onClick={() => navigate(`/route/${route.id}`)}
-                className="card-amber-border bg-card rounded-[20px] p-4 flex items-center gap-3 cursor-pointer hover:bg-secondary/50 transition-colors"
-              >
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <p className="text-sm font-semibold text-foreground">{route.name}</p>
-                    {firstLeg && (
-                      <span className="text-[10px] font-semibold bg-secondary text-foreground px-2 py-0.5 rounded-lg">
-                        {firstLeg.lineName}
-                      </span>
-                    )}
+        {routesLoading ? (
+          <div className="card-amber-border bg-card rounded-[20px] p-6 flex items-center justify-center">
+            <div className="amber-spinner" />
+          </div>
+        ) : routes.length === 0 ? (
+          <EmptyState
+            icon="route"
+            title="Noch keine Routen"
+            description="Lege deine erste Pendelroute an, damit Pendly sie überwachen kann."
+          >
+            <button
+              onClick={() => navigate('/route-setup')}
+              className="h-12 px-6 rounded-full bg-primary text-primary-foreground font-bold text-sm"
+            >
+              Route hinzufügen
+            </button>
+          </EmptyState>
+        ) : (
+          <div className="space-y-2.5">
+            {routes.map((route) => {
+              const firstLeg = route.connections[0]?.legs[0];
+              return (
+                <div
+                  key={route.id}
+                  onClick={() => navigate(`/route/${route.id}`)}
+                  className="card-amber-border bg-card rounded-[20px] p-4 flex items-center gap-3 cursor-pointer hover:bg-secondary/50 transition-colors"
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="text-sm font-semibold text-foreground">{route.name}</p>
+                      {firstLeg && (
+                        <span className="text-[10px] font-semibold bg-secondary text-foreground px-2 py-0.5 rounded-lg">
+                          {firstLeg.lineName}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {route.origin.name} → {route.destination.name}
+                    </p>
                   </div>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {route.origin.name} → {route.destination.name}
-                  </p>
+                  <Switch
+                    checked={!route.is_paused}
+                    onClick={(e) => e.stopPropagation()}
+                    onCheckedChange={() => handleTogglePause(route.id, route.is_paused)}
+                    className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-secondary"
+                  />
+                  <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 </div>
-                <Switch
-                  checked={!route.is_paused}
-                  onClick={(e) => e.stopPropagation()}
-                  className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-secondary"
-                />
-                <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </motion.section>
     </div>
   );
