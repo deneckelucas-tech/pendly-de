@@ -47,6 +47,148 @@ export type Database = {
         }
         Relationships: []
       }
+      routes: {
+        Row: {
+          created_at: string
+          destination_id: string
+          destination_name: string
+          id: string
+          is_favorite: boolean
+          is_paused: boolean
+          name: string
+          notification_type: string
+          origin_id: string
+          origin_name: string
+          transport_types: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          destination_id: string
+          destination_name: string
+          id?: string
+          is_favorite?: boolean
+          is_paused?: boolean
+          name: string
+          notification_type?: string
+          origin_id: string
+          origin_name: string
+          transport_types?: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          destination_id?: string
+          destination_name?: string
+          id?: string
+          is_favorite?: boolean
+          is_paused?: boolean
+          name?: string
+          notification_type?: string
+          origin_id?: string
+          origin_name?: string
+          transport_types?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      saved_connections: {
+        Row: {
+          created_at: string
+          id: string
+          notifications_enabled: boolean
+          route_id: string
+          sort_order: number
+          user_id: string
+          weekdays: string[]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notifications_enabled?: boolean
+          route_id: string
+          sort_order?: number
+          user_id: string
+          weekdays?: string[]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notifications_enabled?: boolean
+          route_id?: string
+          sort_order?: number
+          user_id?: string
+          weekdays?: string[]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_connections_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "routes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      saved_legs: {
+        Row: {
+          connection_id: string
+          created_at: string
+          destination_id: string
+          destination_name: string
+          id: string
+          leg_index: number
+          line_name: string
+          origin_id: string
+          origin_name: string
+          planned_arrival: string
+          planned_departure: string
+          product_name: string
+          user_id: string
+        }
+        Insert: {
+          connection_id: string
+          created_at?: string
+          destination_id: string
+          destination_name: string
+          id?: string
+          leg_index: number
+          line_name: string
+          origin_id: string
+          origin_name: string
+          planned_arrival: string
+          planned_departure: string
+          product_name?: string
+          user_id: string
+        }
+        Update: {
+          connection_id?: string
+          created_at?: string
+          destination_id?: string
+          destination_name?: string
+          id?: string
+          leg_index?: number
+          line_name?: string
+          origin_id?: string
+          origin_name?: string
+          planned_arrival?: string
+          planned_departure?: string
+          product_name?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_legs_connection_id_fkey"
+            columns: ["connection_id"]
+            isOneToOne: false
+            referencedRelation: "saved_connections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transport_cache: {
         Row: {
           cache_key: string
