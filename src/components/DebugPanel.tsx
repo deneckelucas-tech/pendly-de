@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { searchJourneys } from '@/lib/transport-api';
-import { getMockRoutes } from '@/lib/mock-data';
+import { fetchUserRoutes } from '@/lib/routes-service';
 import { Bug, RefreshCw, ChevronDown, ChevronUp, CheckCircle, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -12,7 +12,7 @@ interface DebugEntry {
   timestamp: string;
   status: 'success' | 'error';
   error?: string;
-  rawResponse?: any;
+  rawResponse?: unknown;
   journeyCount?: number;
 }
 
@@ -27,7 +27,7 @@ export function DebugPanel() {
   const fetchAll = useCallback(async () => {
     if (isProd) return;
     setLoading(true);
-    const routes = getMockRoutes();
+    const routes = await fetchUserRoutes();
     const results: DebugEntry[] = [];
 
     for (const route of routes) {
@@ -49,7 +49,8 @@ export function DebugPanel() {
           rawResponse: raw,
           journeyCount: journeys.length,
         });
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
         results.push({
           routeId: route.id,
           routeName: route.name,
@@ -57,7 +58,7 @@ export function DebugPanel() {
           toId,
           timestamp: new Date().toISOString(),
           status: 'error',
-          error: err.message || String(err),
+          error: message,
         });
       }
     }

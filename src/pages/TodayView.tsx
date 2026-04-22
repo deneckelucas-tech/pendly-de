@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getMockRoutes } from '@/lib/mock-data';
-import { useLiveStatus, type LiveConnectionStatus } from '@/hooks/useLiveStatus';
+import { fetchUserRoutes } from '@/lib/routes-service';
+import { useLiveStatus } from '@/hooks/useLiveStatus';
 import type { CommuteRoute, Weekday, RouteStatus } from '@/lib/types';
 import { ArrowLeft, RefreshCw, Clock, AlertTriangle, CheckCircle, XCircle, Info, Bus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -27,7 +27,7 @@ export default function TodayView() {
   const [routes, setRoutes] = useState<CommuteRoute[]>([]);
 
   useEffect(() => {
-    setRoutes(getMockRoutes());
+    fetchUserRoutes().then(setRoutes).catch(err => console.error('Routen laden fehlgeschlagen:', err));
   }, []);
 
   const todayKey = (['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const)[new Date().getDay()] as Weekday;
