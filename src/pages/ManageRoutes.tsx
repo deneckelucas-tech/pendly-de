@@ -1,22 +1,21 @@
 import { useState, useEffect } from 'react';
 import { RouteCard } from '@/components/RouteCard';
 import { EmptyState } from '@/components/EmptyState';
-import { getMockRoutes, generateMockStatus } from '@/lib/mock-data';
-import type { CommuteRoute, RouteStatusData } from '@/lib/types';
+import { fetchUserRoutes } from '@/lib/routes-service';
+import type { CommuteRoute } from '@/lib/types';
 import { useNavigate } from 'react-router-dom';
 import { Plus, ArrowLeft } from 'lucide-react';
 
 export default function ManageRoutes() {
   const navigate = useNavigate();
   const [routes, setRoutes] = useState<CommuteRoute[]>([]);
-  const [statuses, setStatuses] = useState<Record<string, RouteStatusData>>({});
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const mockRoutes = getMockRoutes();
-    setRoutes(mockRoutes);
-    const s: Record<string, RouteStatusData> = {};
-    mockRoutes.forEach(r => { s[r.id] = generateMockStatus(r.id); });
-    setStatuses(s);
+    fetchUserRoutes()
+      .then(setRoutes)
+      .catch(err => console.error('Routen laden fehlgeschlagen:', err))
+      .finally(() => setLoading(false));
   }, []);
 
   return (
@@ -36,10 +35,14 @@ export default function ManageRoutes() {
         </button>
       </div>
 
-      {routes.length > 0 ? (
+      {loading ? (
+        <div className="flex items-center justify-center py-20">
+          <div className="amber-spinner" />
+        </div>
+      ) : routes.length > 0 ? (
         <div className="space-y-3">
           {routes.map(route => (
-            <RouteCard key={route.id} route={route} status={statuses[route.id]} />
+            <RouteCard key={route.id} route={route} status={undefined} />
           ))}
         </div>
       ) : (

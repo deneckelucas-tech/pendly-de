@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { getMockRoutes, generateMockAlerts, generateMockStatus } from '@/lib/mock-data';
+import { fetchUserRoutes, setRoutePaused } from '@/lib/routes-service';
 import { getRemarks, type Remark } from '@/lib/transport-api';
-import type { CommuteRoute, RouteStatusData, Alert, SavedLeg, Weekday } from '@/lib/types';
+import { useLiveStatus } from '@/hooks/useLiveStatus';
+import type { CommuteRoute, SavedLeg, Weekday, RouteStatus } from '@/lib/types';
 import { useNavigate } from 'react-router-dom';
 import { Bell, ChevronRight, Plus, ArrowRightLeft, AlertTriangle, Info, Construction, Train as TrainIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -10,6 +11,8 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { DebugPanel } from '@/components/DebugPanel';
 import { TrialBanner } from '@/components/TrialBanner';
+import { EmptyState } from '@/components/EmptyState';
+import { toast } from '@/hooks/use-toast';
 
 function getStatusLabel(status: string, delayMinutes?: number) {
   if (status === 'on_time') return 'Pünktlich';
@@ -52,8 +55,10 @@ interface UpcomingDeparture {
   originName: string;
   destinationName: string;
   routeName: string;
-  status: string;
+  status: RouteStatus;
   routeId: string;
+  connectionId: string;
+  delayMinutes: number;
   allLegs: SavedLeg[];
 }
 
@@ -94,26 +99,28 @@ function getRemarkIcon(type: string) {
 export default function Dashboard() {
   const navigate = useNavigate();
   const [routes, setRoutes] = useState<CommuteRoute[]>([]);
-  const [statuses, setStatuses] = useState<Record<string, RouteStatusData>>({});
-  const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [routesLoading, setRoutesLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [secondsAgo, setSecondsAgo] = useState(0);
   const [routeNews, setRouteNews] = useState<Remark[]>([]);
   const [newsLoading, setNewsLoading] = useState(true);
 
-  const loadData = useCallback(() => {
-    const mockRoutes = getMockRoutes();
-    setRoutes(mockRoutes);
-    const newStatuses: Record<string, RouteStatusData> = {};
-    mockRoutes.forEach(r => { newStatuses[r.id] = generateMockStatus(r.id); });
-    setStatuses(newStatuses);
-    setAlerts(generateMockAlerts(mockRoutes));
-    setLastUpdated(new Date());
+  const loadRoutes = useCallback(async () => {
+    try {
+      const r = await fetchUserRoutes();
+      setRoutes(r);
+      setLastUpdated(new Date());
+    } catch (err) {
+      console.error('Routen laden fehlgeschlagen:', err);
+    } finally {
+      setRoutesLoading(false);
+    }
   }, []);
 
   // Fetch route news/remarks from HAFAS
   const loadNews = useCallback(async (currentRoutes: CommuteRoute[]) => {
     if (currentRoutes.length === 0) {
+      setRouteNews([]);
       setNewsLoading(false);
       return;
     }
@@ -129,15 +136,14 @@ export default function Dashboard() {
   }, []);
 
   useEffect(() => {
-    loadData();
-    const interval = setInterval(loadData, 30_000);
-    return () => clearInterval(interval);
-  }, [loadData]);
+    loadRoutes();
+  }, [loadRoutes]);
 
-  // Load news once routes are available
   useEffect(() => {
     if (routes.length > 0) {
       loadNews(routes);
+    } else {
+      setNewsLoading(false);
     }
   }, [routes, loadNews]);
 
@@ -154,15 +160,48 @@ export default function Dashboard() {
   const todayKey = WEEKDAY_KEYS[now.getDay()];
   const nowMinutes = now.getHours() * 60 + now.getMinutes();
 
-  // Today's departures for the hero card
+  // Build today's connection list for live status fetching
+  const todayConnections = useMemo(() => {
+    const conns: Array<{ connectionId: string; routeId: string; routeName: string; legs: SavedLeg[] }> = [];
+    routes.forEach(route => {
+      if (route.is_paused) return;
+      route.connections.forEach(conn => {
+        if (!conn.weekdays.includes(todayKey)) return;
+        if (conn.legs.length === 0) return;
+        conns.push({
+          connectionId: conn.id,
+          routeId: route.id,
+          routeName: route.name,
+          legs: conn.legs,
+        });
+      });
+    });
+    return conns;
+  }, [routes, todayKey]);
+
+  const { statuses: liveStatuses } = useLiveStatus({
+    connections: todayConnections,
+    enabled: todayConnections.length > 0,
+  });
+
+  // Map live status by connection id
+  const liveByConnection = useMemo(() => {
+    const map = new Map<string, typeof liveStatuses[0]>();
+    liveStatuses.forEach(s => map.set(s.connectionId, s));
+    return map;
+  }, [liveStatuses]);
+
+  // Today's departures for the hero card (with live status)
   const todayDepartures = useMemo<UpcomingDeparture[]>(() => {
     const deps: UpcomingDeparture[] = [];
     routes.forEach(route => {
+      if (route.is_paused) return;
       route.connections.forEach(conn => {
         if (!conn.weekdays.includes(todayKey)) return;
         if (conn.legs.length === 0) return;
         const firstLeg = conn.legs[0];
         const depMinutes = timeToMinutes(firstLeg.plannedDeparture);
+        const live = liveByConnection.get(conn.id);
         deps.push({
           time: firstLeg.plannedDeparture,
           timeMinutes: depMinutes,
@@ -170,8 +209,10 @@ export default function Dashboard() {
           originName: firstLeg.originName,
           destinationName: conn.legs[conn.legs.length - 1].destinationName,
           routeName: route.name,
-          status: statuses[route.id]?.status || 'no_data',
+          status: live?.overallStatus || 'no_data',
           routeId: route.id,
+          connectionId: conn.id,
+          delayMinutes: live?.legs[0]?.delayMinutes || 0,
           allLegs: conn.legs,
         });
       });
@@ -184,7 +225,7 @@ export default function Dashboard() {
       return a.timeMinutes - b.timeMinutes;
     });
     return deps;
-  }, [routes, statuses, todayKey, nowMinutes]);
+  }, [routes, liveByConnection, todayKey, nowMinutes]);
 
   // Next day's departures
   const tomorrowDate = new Date(now);
@@ -195,6 +236,7 @@ export default function Dashboard() {
   const tomorrowDepartures = useMemo<UpcomingDeparture[]>(() => {
     const deps: UpcomingDeparture[] = [];
     routes.forEach(route => {
+      if (route.is_paused) return;
       route.connections.forEach(conn => {
         if (!conn.weekdays.includes(tomorrowKey)) return;
         if (conn.legs.length === 0) return;
@@ -209,6 +251,8 @@ export default function Dashboard() {
           routeName: route.name,
           status: 'no_data',
           routeId: route.id,
+          connectionId: conn.id,
+          delayMinutes: 0,
           allLegs: conn.legs,
         });
       });
@@ -218,7 +262,20 @@ export default function Dashboard() {
   }, [routes, tomorrowKey]);
 
   const nextDep = todayDepartures.length > 0 ? todayDepartures[0] : null;
-  const unreadCount = alerts.filter(a => !a.is_read).length;
+  const unreadCount = 0;
+
+  const handleTogglePause = async (routeId: string, currentlyPaused: boolean) => {
+    // Optimistic update
+    setRoutes(prev => prev.map(r => r.id === routeId ? { ...r, is_paused: !currentlyPaused } : r));
+    try {
+      await setRoutePaused(routeId, !currentlyPaused);
+    } catch (err) {
+      // Revert
+      setRoutes(prev => prev.map(r => r.id === routeId ? { ...r, is_paused: currentlyPaused } : r));
+      const message = err instanceof Error ? err.message : 'Aktualisierung fehlgeschlagen';
+      toast({ title: 'Fehler', description: message, variant: 'destructive' });
+    }
+  };
 
   return (
     <div className="px-5 pt-5 pb-4 min-h-screen">
@@ -293,7 +350,7 @@ export default function Dashboard() {
               'text-[11px] font-semibold px-2.5 py-1 rounded-full',
               getStatusColor(nextDep.status)
             )}>
-              {getStatusLabel(nextDep.status, statuses[nextDep.routeId]?.delay_minutes)}
+              {getStatusLabel(nextDep.status, nextDep.delayMinutes)}
             </span>
           </div>
 
@@ -474,39 +531,58 @@ export default function Dashboard() {
         <h2 className="text-[11px] font-semibold uppercase tracking-[0.1em] mb-3 text-muted-foreground">
           Meine Routen
         </h2>
-        <div className="space-y-2.5">
-          {routes.map((route) => {
-            const status = statuses[route.id];
-            const firstLeg = route.connections[0]?.legs[0];
-            return (
-              <div
-                key={route.id}
-                onClick={() => navigate(`/route/${route.id}`)}
-                className="card-amber-border bg-card rounded-[20px] p-4 flex items-center gap-3 cursor-pointer hover:bg-secondary/50 transition-colors"
-              >
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <p className="text-sm font-semibold text-foreground">{route.name}</p>
-                    {firstLeg && (
-                      <span className="text-[10px] font-semibold bg-secondary text-foreground px-2 py-0.5 rounded-lg">
-                        {firstLeg.lineName}
-                      </span>
-                    )}
+        {routesLoading ? (
+          <div className="card-amber-border bg-card rounded-[20px] p-6 flex items-center justify-center">
+            <div className="amber-spinner" />
+          </div>
+        ) : routes.length === 0 ? (
+          <EmptyState
+            icon="route"
+            title="Noch keine Routen"
+            description="Lege deine erste Pendelroute an, damit Pendly sie überwachen kann."
+          >
+            <button
+              onClick={() => navigate('/route-setup')}
+              className="h-12 px-6 rounded-full bg-primary text-primary-foreground font-bold text-sm"
+            >
+              Route hinzufügen
+            </button>
+          </EmptyState>
+        ) : (
+          <div className="space-y-2.5">
+            {routes.map((route) => {
+              const firstLeg = route.connections[0]?.legs[0];
+              return (
+                <div
+                  key={route.id}
+                  onClick={() => navigate(`/route/${route.id}`)}
+                  className="card-amber-border bg-card rounded-[20px] p-4 flex items-center gap-3 cursor-pointer hover:bg-secondary/50 transition-colors"
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <p className="text-sm font-semibold text-foreground">{route.name}</p>
+                      {firstLeg && (
+                        <span className="text-[10px] font-semibold bg-secondary text-foreground px-2 py-0.5 rounded-lg">
+                          {firstLeg.lineName}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {route.origin.name} → {route.destination.name}
+                    </p>
                   </div>
-                  <p className="text-xs text-muted-foreground truncate">
-                    {route.origin.name} → {route.destination.name}
-                  </p>
+                  <Switch
+                    checked={!route.is_paused}
+                    onClick={(e) => e.stopPropagation()}
+                    onCheckedChange={() => handleTogglePause(route.id, route.is_paused)}
+                    className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-secondary"
+                  />
+                  <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 </div>
-                <Switch
-                  checked={!route.is_paused}
-                  onClick={(e) => e.stopPropagation()}
-                  className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-secondary"
-                />
-                <ChevronRight className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </motion.section>
     </div>
   );

@@ -173,6 +173,7 @@ export default function RouteWizard() {
                 journeys={selectedJourneys}
                 returnJourneys={returnJourneys}
                 hasReturn={hasReturn || false}
+                weekdays={commuteDays}
                 onFinish={() => navigate('/dashboard')}
                 onBack={() => goTo(3)}
               />
