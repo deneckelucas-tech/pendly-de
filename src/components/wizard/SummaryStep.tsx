@@ -1,8 +1,11 @@
-import { ArrowLeft, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { useState } from 'react';
+import { ArrowLeft, ArrowRight, CheckCircle2, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import type { Station, Journey } from '@/lib/types';
+import type { Station, Journey, Weekday } from '@/lib/types';
 import { formatTime } from '@/lib/transport-api';
 import { getLineBadgeStyle } from '@/lib/line-colors';
+import { createRoute } from '@/lib/routes-service';
+import { toast } from '@/hooks/use-toast';
 
 interface SummaryStepProps {
   origin: Station;
@@ -10,11 +13,13 @@ interface SummaryStepProps {
   journeys: Journey[];
   returnJourneys: Journey[];
   hasReturn: boolean;
+  weekdays: Weekday[];
   onFinish: () => void;
   onBack: () => void;
 }
 
-export function SummaryStep({ origin, destination, journeys, returnJourneys, hasReturn, onFinish, onBack }: SummaryStepProps) {
+export function SummaryStep({ origin, destination, journeys, returnJourneys, hasReturn, weekdays, onFinish, onBack }: SummaryStepProps) {
+  const [saving, setSaving] = useState(false);
   const totalConnections = journeys.length + returnJourneys.length;
   const allLines = new Set<string>();
   [...journeys, ...returnJourneys].forEach(j => {
@@ -23,16 +28,44 @@ export function SummaryStep({ origin, destination, journeys, returnJourneys, has
     });
   });
 
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const shortOrigin = origin.name.split(',')[0];
+      const shortDest = destination.name.split(',')[0];
+      const routeName = `${shortOrigin} → ${shortDest}`;
+      await createRoute({
+        name: routeName,
+        origin,
+        destination,
+        outboundJourneys: journeys,
+        returnJourneys: hasReturn ? returnJourneys : [],
+        weekdays,
+      });
+      toast({
+        title: 'Route gespeichert',
+        description: 'Pendly überwacht deine Strecke ab jetzt.',
+      });
+      onFinish();
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Unbekannter Fehler';
+      toast({
+        title: 'Speichern fehlgeschlagen',
+        description: message,
+        variant: 'destructive',
+      });
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-[calc(100vh-5rem)]">
-      {/* Back */}
       <div className="flex items-center mb-4">
-        <button onClick={onBack} className="p-2 -ml-2 rounded-full hover:bg-secondary/50 transition-colors">
+        <button onClick={onBack} disabled={saving} className="p-2 -ml-2 rounded-full hover:bg-secondary/50 transition-colors disabled:opacity-50">
           <ArrowLeft className="h-5 w-5 text-muted-foreground" />
         </button>
       </div>
 
-      {/* Success animation */}
       <motion.div
         initial={{ scale: 0.5, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -51,7 +84,6 @@ export function SummaryStep({ origin, destination, journeys, returnJourneys, has
         Pendly überwacht ab jetzt deine Strecke.
       </p>
 
-      {/* Stats */}
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
@@ -68,7 +100,6 @@ export function SummaryStep({ origin, destination, journeys, returnJourneys, has
         </div>
       </motion.div>
 
-      {/* Journey summary cards */}
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
@@ -100,7 +131,7 @@ export function SummaryStep({ origin, destination, journeys, returnJourneys, has
           </div>
         )}
 
-        {returnJourneys.length > 0 && (
+        {hasReturn && returnJourneys.length > 0 && (
           <div className="rounded-[20px] p-4 bg-card border border-border shadow-sm">
             <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium mb-3">
               Rückweg · {destination.name.split(',')[0]} → {origin.name.split(',')[0]}
@@ -126,7 +157,6 @@ export function SummaryStep({ origin, destination, journeys, returnJourneys, has
         )}
       </motion.div>
 
-      {/* CTA */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -134,12 +164,22 @@ export function SummaryStep({ origin, destination, journeys, returnJourneys, has
         className="pt-6 pb-4"
       >
         <button
-          onClick={onFinish}
-          className="w-full h-14 rounded-full font-bold text-sm bg-primary text-primary-foreground transition-all flex items-center justify-center gap-2"
+          onClick={handleSave}
+          disabled={saving}
+          className="w-full h-14 rounded-full font-bold text-sm bg-primary text-primary-foreground transition-all flex items-center justify-center gap-2 disabled:opacity-70"
           style={{ boxShadow: '0 8px 32px rgba(30,78,216,0.20)' }}
         >
-          Los geht's – Pendly starten
-          <ArrowRight className="h-4 w-4" />
+          {saving ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Speichere…
+            </>
+          ) : (
+            <>
+              Los geht's – Pendly starten
+              <ArrowRight className="h-4 w-4" />
+            </>
+          )}
         </button>
       </motion.div>
     </div>
