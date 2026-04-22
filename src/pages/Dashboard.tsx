@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { getMockRoutes, generateMockAlerts, generateMockStatus } from '@/lib/mock-data';
+import { fetchUserRoutes, setRoutePaused } from '@/lib/routes-service';
 import { getRemarks, type Remark } from '@/lib/transport-api';
-import type { CommuteRoute, RouteStatusData, Alert, SavedLeg, Weekday } from '@/lib/types';
+import { useLiveStatus } from '@/hooks/useLiveStatus';
+import type { CommuteRoute, SavedLeg, Weekday, RouteStatus } from '@/lib/types';
 import { useNavigate } from 'react-router-dom';
 import { Bell, ChevronRight, Plus, ArrowRightLeft, AlertTriangle, Info, Construction, Train as TrainIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -10,6 +11,8 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { DebugPanel } from '@/components/DebugPanel';
 import { TrialBanner } from '@/components/TrialBanner';
+import { EmptyState } from '@/components/EmptyState';
+import { toast } from '@/hooks/use-toast';
 
 function getStatusLabel(status: string, delayMinutes?: number) {
   if (status === 'on_time') return 'Pünktlich';
