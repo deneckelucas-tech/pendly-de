@@ -327,6 +327,63 @@ export type Database = {
         }
         Relationships: []
       }
+      user_preferences: {
+        Row: {
+          created_at: string
+          dark_mode: boolean
+          default_weekdays: string[]
+          id: string
+          language: string
+          notify_alternatives: boolean
+          notify_cancellations: boolean
+          notify_daily_summary: boolean
+          notify_delays: boolean
+          notify_disruptions: boolean
+          notify_platform_changes: boolean
+          quiet_hours_end: string
+          quiet_hours_start: string
+          time_format: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          dark_mode?: boolean
+          default_weekdays?: string[]
+          id?: string
+          language?: string
+          notify_alternatives?: boolean
+          notify_cancellations?: boolean
+          notify_daily_summary?: boolean
+          notify_delays?: boolean
+          notify_disruptions?: boolean
+          notify_platform_changes?: boolean
+          quiet_hours_end?: string
+          quiet_hours_start?: string
+          time_format?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          dark_mode?: boolean
+          default_weekdays?: string[]
+          id?: string
+          language?: string
+          notify_alternatives?: boolean
+          notify_cancellations?: boolean
+          notify_daily_summary?: boolean
+          notify_delays?: boolean
+          notify_disruptions?: boolean
+          notify_platform_changes?: boolean
+          quiet_hours_end?: string
+          quiet_hours_start?: string
+          time_format?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
