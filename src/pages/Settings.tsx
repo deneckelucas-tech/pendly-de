@@ -2,35 +2,36 @@ import { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { WEEKDAY_LABELS, type Weekday } from '@/lib/types';
-import { ArrowLeft, LogOut, Moon, Sun, Bell, Clock, Globe, Calendar, CreditCard, Crown } from 'lucide-react';
+import { ArrowLeft, LogOut, Moon, Sun, Bell, Clock, Globe, Calendar, CreditCard, Crown, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePreferences } from '@/hooks/usePreferences';
 
 const ALL_WEEKDAYS: Weekday[] = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+
+const NOTIFICATION_FIELDS: Array<{ key: keyof Pick<ReturnType<typeof usePreferences>['prefs'],
+  'notifyDelays' | 'notifyCancellations' | 'notifyDisruptions' | 'notifyPlatformChanges' | 'notifyAlternatives' | 'notifyDailySummary'>; label: string }> = [
+  { key: 'notifyDelays', label: 'Verspätungen' },
+  { key: 'notifyCancellations', label: 'Ausfälle' },
+  { key: 'notifyDisruptions', label: 'Störungen' },
+  { key: 'notifyPlatformChanges', label: 'Gleisänderungen' },
+  { key: 'notifyAlternatives', label: 'Alternative Routen' },
+  { key: 'notifyDailySummary', label: 'Tägliche Zusammenfassung' },
+];
 
 export default function Settings() {
   const navigate = useNavigate();
   const { user, subscription, signOut } = useAuth();
+  const { prefs, loading, saving, update } = usePreferences();
   const [portalLoading, setPortalLoading] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
-  const [timeFormat, setTimeFormat] = useState<'24h' | '12h'>('24h');
-  const [language, setLanguage] = useState('de');
-  const [quietStart, setQuietStart] = useState('22:00');
-  const [quietEnd, setQuietEnd] = useState('06:00');
-  const [defaultDays, setDefaultDays] = useState<Weekday[]>(['mon', 'tue', 'wed', 'thu', 'fri']);
-  const [notifications, setNotifications] = useState({
-    delays: true, cancellations: true, disruptions: true, platformChanges: true, alternatives: false, dailySummary: true,
-  });
-
-  const toggleDarkMode = (enabled: boolean) => {
-    setDarkMode(enabled);
-    document.documentElement.classList.toggle('dark', enabled);
-  };
 
   const toggleDay = (day: Weekday) => {
-    setDefaultDays(prev => prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day]);
+    const next = prefs.defaultWeekdays.includes(day)
+      ? prefs.defaultWeekdays.filter(d => d !== day)
+      : [...prefs.defaultWeekdays, day];
+    update({ defaultWeekdays: next });
   };
 
   const handleLogout = async () => {
@@ -53,11 +54,18 @@ export default function Settings() {
 
   return (
     <div className="px-5 pt-5 pb-6">
-      <div className="flex items-center gap-3 mb-6">
-        <button onClick={() => navigate('/dashboard')} className="p-2 -ml-2 rounded-full hover:bg-secondary/50 transition-colors">
-          <ArrowLeft className="h-5 w-5 text-muted-foreground" />
-        </button>
-        <h1 className="font-display text-2xl text-foreground">Einstellungen</h1>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate('/dashboard')} className="p-2 -ml-2 rounded-full hover:bg-secondary/50 transition-colors">
+            <ArrowLeft className="h-5 w-5 text-muted-foreground" />
+          </button>
+          <h1 className="font-display text-2xl text-foreground">Einstellungen</h1>
+        </div>
+        {saving && (
+          <span className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
+            <Loader2 className="h-3 w-3 animate-spin" /> Speichern…
+          </span>
+        )}
       </div>
 
       {/* Account */}
@@ -105,20 +113,17 @@ export default function Settings() {
       </div>
 
       {/* Notifications */}
-      <div className="bg-card rounded-[20px] card-amber-border p-5 mb-4 shadow-sm">
+      <div className={cn('bg-card rounded-[20px] card-amber-border p-5 mb-4 shadow-sm transition-opacity', loading && 'opacity-60 pointer-events-none')}>
         <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium mb-3 flex items-center gap-2">
           <Bell className="h-4 w-4" /> Benachrichtigungen
         </p>
         <div className="space-y-3">
-          {Object.entries({
-            delays: 'Verspätungen', cancellations: 'Ausfälle', disruptions: 'Störungen',
-            platformChanges: 'Gleisänderungen', alternatives: 'Alternative Routen', dailySummary: 'Tägliche Zusammenfassung',
-          }).map(([key, label]) => (
+          {NOTIFICATION_FIELDS.map(({ key, label }) => (
             <div key={key} className="flex items-center justify-between">
               <Label className="text-sm">{label}</Label>
               <Switch
-                checked={notifications[key as keyof typeof notifications]}
-                onCheckedChange={v => setNotifications(prev => ({ ...prev, [key]: v }))}
+                checked={prefs[key]}
+                onCheckedChange={v => update({ [key]: v } as Partial<typeof prefs>)}
               />
             </div>
           ))}
@@ -128,34 +133,42 @@ export default function Settings() {
               <Clock className="h-3 w-3" /> Ruhezeiten
             </Label>
             <div className="flex gap-2 items-center">
-              <input type="time" value={quietStart} onChange={e => setQuietStart(e.target.value)}
-                className="w-24 h-11 rounded-2xl px-3 text-sm text-foreground outline-none border border-border bg-muted focus:border-primary" />
+              <input
+                type="time"
+                value={prefs.quietHoursStart}
+                onChange={e => update({ quietHoursStart: e.target.value })}
+                className="w-24 h-11 rounded-2xl px-3 text-sm text-foreground outline-none border border-border bg-muted focus:border-primary"
+              />
               <span className="text-muted-foreground text-sm">bis</span>
-              <input type="time" value={quietEnd} onChange={e => setQuietEnd(e.target.value)}
-                className="w-24 h-11 rounded-2xl px-3 text-sm text-foreground outline-none border border-border bg-muted focus:border-primary" />
+              <input
+                type="time"
+                value={prefs.quietHoursEnd}
+                onChange={e => update({ quietHoursEnd: e.target.value })}
+                className="w-24 h-11 rounded-2xl px-3 text-sm text-foreground outline-none border border-border bg-muted focus:border-primary"
+              />
             </div>
           </div>
         </div>
       </div>
 
       {/* General Settings */}
-      <div className="bg-card rounded-[20px] card-amber-border p-5 mb-4 shadow-sm">
+      <div className={cn('bg-card rounded-[20px] card-amber-border p-5 mb-4 shadow-sm transition-opacity', loading && 'opacity-60 pointer-events-none')}>
         <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium mb-3">Allgemein</p>
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <Label className="text-sm flex items-center gap-2">
-              {darkMode ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+              {prefs.darkMode ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
               Dark Mode
             </Label>
-            <Switch checked={darkMode} onCheckedChange={toggleDarkMode} />
+            <Switch checked={prefs.darkMode} onCheckedChange={v => update({ darkMode: v })} />
           </div>
           <div className="flex items-center justify-between">
             <Label className="text-sm flex items-center gap-2"><Clock className="h-4 w-4" /> Zeitformat</Label>
             <div className="flex gap-1">
               {(['24h', '12h'] as const).map(f => (
-                <button key={f} onClick={() => setTimeFormat(f)} className={cn(
+                <button key={f} onClick={() => update({ timeFormat: f })} className={cn(
                   'px-3 py-1.5 rounded-full text-xs font-medium transition-colors',
-                  timeFormat === f ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground'
+                  prefs.timeFormat === f ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground'
                 )}>{f}</button>
               ))}
             </div>
@@ -172,7 +185,7 @@ export default function Settings() {
               {ALL_WEEKDAYS.map(day => (
                 <button key={day} onClick={() => toggleDay(day)} className={cn(
                   'h-9 w-9 rounded-full text-[10px] font-semibold transition-colors',
-                  defaultDays.includes(day) ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground'
+                  prefs.defaultWeekdays.includes(day) ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground'
                 )}>{WEEKDAY_LABELS[day]}</button>
               ))}
             </div>
