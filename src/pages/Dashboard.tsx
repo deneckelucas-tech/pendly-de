@@ -13,6 +13,7 @@ import { DebugPanel } from '@/components/DebugPanel';
 import { TrialBanner } from '@/components/TrialBanner';
 import { EmptyState } from '@/components/EmptyState';
 import { toast } from '@/hooks/use-toast';
+import { useNotifications } from '@/hooks/useNotifications';
 
 function getStatusLabel(status: string, delayMinutes?: number) {
   if (status === 'on_time') return 'Pünktlich';
@@ -262,7 +263,7 @@ export default function Dashboard() {
   }, [routes, tomorrowKey]);
 
   const nextDep = todayDepartures.length > 0 ? todayDepartures[0] : null;
-  const unreadCount = 0;
+  const { unreadCount } = useNotifications();
 
   const handleTogglePause = async (routeId: string, currentlyPaused: boolean) => {
     // Optimistic update
