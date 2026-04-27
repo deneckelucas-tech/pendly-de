@@ -3,10 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pendly – Dein Pendelalarm für Deutschland</title>
+<title>Pendly – Hör auf zu hoffen.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -16,10 +20,13 @@
   --cream-2: #F7F0E6;
   --cream-3: #EDE4D8;
   --blue: #1E4ED8;
+  --blue-dark: #1a3a8f;
   --blue-light: #3B6FEE;
   --blue-pale: #EEF2FF;
   --blue-pale-2: #DBEAFE;
   --sky: #60A5FA;
+  --gold: #FCD34D;
+  --gold-warm: #F59E0B;
   --text: #1C1917;
   --text-2: #44403C;
   --text-3: #78716C;
@@ -33,9 +40,12 @@
   --white: #ffffff;
   --radius: 20px;
   --radius-sm: 12px;
+  --radius-lg: 28px;
   --shadow: 0 4px 24px rgba(0,0,0,0.07);
   --shadow-md: 0 8px 40px rgba(0,0,0,0.10);
+  --shadow-lg: 0 24px 80px rgba(0,0,0,0.16);
   --shadow-blue: 0 8px 32px rgba(30,78,216,0.20);
+  --shadow-blue-lg: 0 24px 80px rgba(30,78,216,0.32);
 }
 
 html { scroll-behavior: smooth; }
@@ -47,9 +57,11 @@ body {
   font-size: 16px;
   line-height: 1.6;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
-nav {
+/* ============ NAV ============ */
+nav.topnav {
   position: fixed;
   top: 0; left: 0; right: 0;
   z-index: 100;
@@ -58,15 +70,24 @@ nav {
   justify-content: space-between;
   padding: 14px 20px;
   padding-top: max(14px, env(safe-area-inset-top, 14px));
-  background: rgba(253,248,242,0.92);
-  backdrop-filter: blur(16px);
-  border-bottom: 1.5px solid var(--cream-3);
+  background: rgba(253,248,242,0.85);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  transition: background 0.3s ease, border-color 0.3s ease;
 }
+
+body.hero-dark nav.topnav {
+  background: rgba(20,40,100,0.4);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+body.hero-dark nav.topnav .logo-text { color: #fff; }
+body.hero-dark nav.topnav .logo-text span { color: var(--gold); }
 
 .logo {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 10px;
   text-decoration: none;
 }
 
@@ -77,28 +98,20 @@ nav {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 12px rgba(30,78,216,0.3);
+  box-shadow: 0 4px 16px rgba(30,78,216,0.35);
 }
 
 .logo-text {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-weight: 700;
+  font-weight: 800;
   font-size: 22px;
   color: var(--text);
-  letter-spacing: -0.5px;
+  letter-spacing: -0.6px;
+  transition: color 0.3s ease;
 }
+.logo-text span { color: var(--blue); transition: color 0.3s ease; }
 
-.logo-text span { color: var(--blue); }
-
-.btn {
-  display: inline-block;
-  text-decoration: none;
-  font-family: 'DM Sans', sans-serif;
-  font-weight: 700;
-  cursor: pointer;
-  border: none;
-  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s;
-}
+.btn { display: inline-block; text-decoration: none; font-family: 'DM Sans', sans-serif; font-weight: 700; cursor: pointer; border: none; transition: transform 0.15s ease, box-shadow 0.15s ease; }
 
 .btn-nav {
   background: var(--blue);
@@ -108,8 +121,12 @@ nav {
   font-size: 14px;
   box-shadow: var(--shadow-blue);
 }
+.btn-nav:hover { transform: translateY(-1px); box-shadow: 0 12px 36px rgba(30,78,216,0.35); }
 
-.btn-nav:hover { transform: translateY(-1px); box-shadow: 0 12px 36px rgba(30,78,216,0.28); }
+body.hero-dark nav.topnav .btn-nav {
+  background: #fff;
+  color: var(--blue);
+}
 
 .btn-primary {
   background: var(--blue);
@@ -122,581 +139,726 @@ nav {
   box-shadow: var(--shadow-blue);
   display: block;
   text-decoration: none;
-  font-family: 'DM Sans', sans-serif;
   font-weight: 700;
 }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 40px rgba(30,78,216,0.32); }
 
-.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 40px rgba(30,78,216,0.3); }
-.btn-primary:active { transform: translateY(0); }
-
-section { padding: 64px 22px; }
+section { padding: 80px 22px; }
+@media (min-width: 768px) { section { padding: 120px 40px; } }
 
 .eyebrow {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 1.2px;
+  letter-spacing: 0.12em;
   color: var(--blue);
   background: var(--blue-pale);
-  padding: 5px 12px;
+  padding: 6px 14px;
   border-radius: 100px;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 
 h2 {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-weight: 700;
-  font-size: clamp(34px, 9vw, 44px);
-  line-height: 1.1;
+  font-weight: 800;
+  font-size: clamp(36px, 8.5vw, 56px);
+  line-height: 1.05;
   color: var(--text);
-  letter-spacing: -0.5px;
-  margin-bottom: 14px;
+  letter-spacing: -1.2px;
+  margin-bottom: 16px;
+  text-wrap: balance;
 }
-
 h2 em { font-style: normal; color: var(--blue); }
 
-/* HERO */
+.section-sub {
+  font-size: 17px;
+  color: var(--text-3);
+  line-height: 1.55;
+  max-width: 540px;
+  margin-bottom: 8px;
+}
+
+/* ============ HERO ============ */
 .hero {
   min-height: 100svh;
-  padding: 90px 0 0;
-  display: flex;
-  flex-direction: column;
-  background: linear-gradient(175deg, #1a3a8f 0%, #1E4ED8 45%, #3d6ef5 100%);
   position: relative;
   overflow: hidden;
-}
-
-.hero-sky {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 80% 40% at 50% 0%, rgba(255,200,100,0.18) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 50% at 20% 30%, rgba(255,160,60,0.10) 0%, transparent 50%);
-  pointer-events: none;
-}
-
-.hero-sky::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background-image:
-    radial-gradient(1.5px 1.5px at 15% 12%, rgba(255,255,255,0.5) 0%, transparent 100%),
-    radial-gradient(1px 1px at 72% 8%, rgba(255,255,255,0.4) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 88% 20%, rgba(255,255,255,0.3) 0%, transparent 100%),
-    radial-gradient(1px 1px at 40% 5%, rgba(255,255,255,0.5) 0%, transparent 100%),
-    radial-gradient(1px 1px at 60% 15%, rgba(255,255,255,0.3) 0%, transparent 100%);
-}
-
-.hero-content {
-  position: relative;
-  z-index: 2;
-  padding: 28px 24px 0;
-  flex: 1;
   display: flex;
   flex-direction: column;
-  max-width: 600px;
+  padding: 0;
 }
+
+/* Variant: Aurora dark (default) */
+.hero.v-aurora {
+  background:
+    radial-gradient(ellipse 90% 60% at 50% 0%, #2952c4 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 100% 100%, #5b8cf5 0%, transparent 50%),
+    radial-gradient(ellipse 50% 70% at 0% 100%, #1a3a8f 0%, transparent 50%),
+    linear-gradient(180deg, #0e1f4a 0%, #1a3a8f 40%, #2c5cd6 100%);
+}
+
+/* Variant: Cream warm */
+.hero.v-cream {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% 0%, #fde9c8 0%, transparent 60%),
+    radial-gradient(ellipse 60% 60% at 100% 100%, var(--blue-pale-2) 0%, transparent 50%),
+    var(--cream);
+}
+
+/* Variant: Indigo midnight */
+.hero.v-midnight {
+  background:
+    radial-gradient(ellipse 70% 50% at 30% 20%, #4338ca 0%, transparent 60%),
+    radial-gradient(ellipse 60% 70% at 90% 90%, #7c3aed 0%, transparent 50%),
+    linear-gradient(180deg, #0a0820 0%, #1e1b4b 100%);
+}
+
+/* Stars layer (only on dark variants) */
+.hero-stars-bg {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.hero.v-aurora .hero-stars-bg,
+.hero.v-midnight .hero-stars-bg { opacity: 1; }
+
+.hero-stars-bg::before, .hero-stars-bg::after {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    radial-gradient(1.5px 1.5px at 8% 12%, rgba(255,255,255,0.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 22% 18%, rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(2px 2px at 38% 8%, #fff 0%, transparent 100%),
+    radial-gradient(1px 1px at 52% 14%, rgba(255,255,255,0.6) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 68% 6%, rgba(255,255,255,0.8) 0%, transparent 100%),
+    radial-gradient(1px 1px at 78% 22%, rgba(255,255,255,0.4) 0%, transparent 100%),
+    radial-gradient(2px 2px at 92% 10%, #fff 0%, transparent 100%),
+    radial-gradient(1px 1px at 12% 32%, rgba(255,255,255,0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 88% 38%, rgba(255,255,255,0.45) 0%, transparent 100%);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+.hero-stars-bg::after {
+  background-image:
+    radial-gradient(1px 1px at 28% 42%, rgba(255,255,255,0.3) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 42% 28%, rgba(255,255,255,0.55) 0%, transparent 100%),
+    radial-gradient(1px 1px at 62% 36%, rgba(255,255,255,0.4) 0%, transparent 100%);
+  animation: twinkle 4s ease-in-out infinite;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* Aurora glow ribbon */
+.hero-aurora {
+  position: absolute;
+  top: 8%; left: -10%;
+  width: 120%; height: 40%;
+  background:
+    radial-gradient(ellipse 50% 100% at 50% 50%, rgba(252,211,77,0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 30% 60% at 30% 50%, rgba(96,165,250,0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 30% 60% at 70% 50%, rgba(167,139,250,0.18) 0%, transparent 60%);
+  filter: blur(40px);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.hero.v-aurora .hero-aurora,
+.hero.v-midnight .hero-aurora { opacity: 1; }
+
+/* Geometric line-art rail (replaces cheap cartoon train) */
+.hero-railart {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.hero-content-wrap {
+  position: relative;
+  z-index: 5;
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+  align-items: center;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 110px 24px 60px;
+}
+
+@media (min-width: 900px) {
+  .hero-content-wrap {
+    grid-template-columns: 1.1fr 1fr;
+    gap: 80px;
+    padding: 120px 60px 80px;
+  }
+}
+
+.hero-text { max-width: 600px; }
 
 .hero-badge {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  background: rgba(255,255,255,0.12);
-  border: 1px solid rgba(255,255,255,0.2);
+  gap: 8px;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.18);
   border-radius: 100px;
-  padding: 6px 14px;
+  padding: 7px 14px;
   font-size: 12px;
-  color: rgba(255,255,255,0.9);
+  color: rgba(255,255,255,0.92);
   font-weight: 600;
   letter-spacing: 0.3px;
-  margin-bottom: 12px;
-  width: fit-content;
+  margin-bottom: 20px;
   backdrop-filter: blur(8px);
+}
+.hero.v-cream .hero-badge {
+  background: var(--blue-pale);
+  border-color: var(--blue-pale-2);
+  color: var(--blue);
 }
 
 .badge-pulse {
-  width: 7px; height: 7px;
+  width: 8px; height: 8px;
   border-radius: 50%;
   background: #86efac;
   animation: ripple 2s infinite;
 }
+.hero.v-cream .badge-pulse { background: var(--green); }
 
 @keyframes ripple {
-  0% { box-shadow: 0 0 0 0 rgba(134,239,172,0.6); }
-  70% { box-shadow: 0 0 0 8px rgba(134,239,172,0); }
+  0% { box-shadow: 0 0 0 0 rgba(134,239,172,0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(134,239,172,0); }
   100% { box-shadow: 0 0 0 0 rgba(134,239,172,0); }
-}
-
-.hero-stars {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 20px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.12);
-  border-radius: 100px;
-  padding: 6px 14px;
-  width: fit-content;
-}
-
-.star { color: #FCD34D; font-size: 13px; line-height: 1; }
-
-.hero-stars-text {
-  font-size: 12px;
-  color: rgba(255,255,255,0.75);
-  font-weight: 600;
-  white-space: nowrap;
 }
 
 h1 {
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-weight: 800;
-  font-size: clamp(38px, 10vw, 52px);
-  line-height: 1.08;
-  letter-spacing: -1px;
-  color: #ffffff;
-  margin-bottom: 14px;
+  font-size: clamp(44px, 11vw, 84px);
+  line-height: 0.96;
+  letter-spacing: -2.5px;
+  color: #fff;
+  margin-bottom: 22px;
+  text-wrap: balance;
 }
-
-h1 em { font-style: normal; color: #FCD34D; }
+h1 em { font-style: normal; color: var(--gold); }
+.hero.v-cream h1 { color: var(--text); }
+.hero.v-cream h1 em { color: var(--blue); }
 
 .hero-sub {
-  font-size: 16px;
-  color: rgba(255,255,255,0.7);
-  margin-bottom: 28px;
-  line-height: 1.65;
-  max-width: 420px;
+  font-size: clamp(16px, 2.4vw, 19px);
+  color: rgba(255,255,255,0.75);
+  margin-bottom: 32px;
+  line-height: 1.55;
+  max-width: 480px;
+}
+.hero-sub strong { color: #fff; font-weight: 700; }
+.hero.v-cream .hero-sub { color: var(--text-3); }
+.hero.v-cream .hero-sub strong { color: var(--text); }
+
+.hero-stars-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 100px;
+  padding: 7px 14px;
+}
+.hero.v-cream .hero-stars-row {
+  background: #fff;
+  border-color: var(--cream-3);
+  box-shadow: var(--shadow);
 }
 
-.hero-sub strong { color: #ffffff; font-weight: 700; }
+.star-row { display: inline-flex; gap: 1px; }
+.star { color: var(--gold); font-size: 14px; line-height: 1; }
+.hero.v-cream .star { color: var(--gold-warm); }
+
+.hero-stars-text {
+  font-size: 12px;
+  color: rgba(255,255,255,0.8);
+  font-weight: 600;
+}
+.hero.v-cream .hero-stars-text { color: var(--text-2); }
 
 .hero-cta-group {
-  max-width: 380px;
-  margin-bottom: 0;
-  padding-bottom: 24px;
-}
-
-.btn-hero {
-  display: block;
-  background: #ffffff;
-  color: var(--blue);
-  border-radius: 100px;
-  padding: 16px 36px;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 16px;
-  font-weight: 800;
-  text-align: center;
-  text-decoration: none;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-  transition: transform 0.15s, box-shadow 0.15s;
-  margin-bottom: 10px;
-}
-
-.btn-hero:hover { transform: translateY(-2px); box-shadow: 0 14px 40px rgba(0,0,0,0.25); }
-
-.hero-meta {
-  text-align: center;
-  font-size: 12px;
-  color: rgba(255,255,255,0.5);
-  margin-bottom: 0;
-}
-
-.hero-meta .green { color: #86efac; font-weight: 700; }
-
-/* Mockup - floating absolute, only on wider screens */
-.hero-mockup-wrap {
-  position: absolute;
-  bottom: 180px;
-  right: 24px;
-  z-index: 10;
-  width: 160px;
-  animation: float 4s ease-in-out infinite;
-  display: none;
-}
-
-@media (min-width: 520px) {
-  .hero-mockup-wrap {
-    display: block;
-  }
-}
-
-@media (min-width: 768px) {
-  .hero-mockup-wrap {
-    right: 40px;
-    bottom: 180px;
-    width: 190px;
-  }
-  .hero-content {
-    max-width: 50%;
-  }
-  .hero-cta-group {
-    max-width: 340px;
-  }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-8px); }
-}
-
-/* Hero bottom scene */
-.hero-scene {
-  position: relative;
-  z-index: 2;
-  width: 100%;
-  height: 160px;
-  margin-top: auto;
-  flex-shrink: 0;
-}
-
-.scene-svg { width: 100%; height: 100%; display: block; }
-
-.mockup-card {
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 12px 12px 10px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.28), 0 2px 8px rgba(0,0,0,0.12);
-}
-
-.mockup-header {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  margin-bottom: 11px;
-}
-
-.mockup-logo {
-  width: 22px; height: 22px;
-  background: var(--blue);
-  border-radius: 6px;
-  display: flex; align-items: center; justify-content: center;
-}
-
-.mockup-app-name {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 12px;
-  font-weight: 800;
-  color: var(--text);
-}
-
-.mockup-notif {
-  background: #FEE2E2;
-  border-radius: 10px;
-  padding: 8px 9px;
-  margin-bottom: 7px;
-  display: flex;
-  gap: 6px;
-  align-items: flex-start;
-}
-
-.mockup-notif.good { background: #DCFCE7; }
-.mockup-notif-icon { font-size: 13px; flex-shrink: 0; }
-.mockup-notif-title { font-size: 10px; font-weight: 800; color: var(--text); line-height: 1.2; margin-bottom: 1px; }
-.mockup-notif-sub { font-size: 9px; color: var(--text-3); line-height: 1.3; }
-
-/* 9 vs 1 */
-.nine-one-section {
-  background: var(--cream-2);
-  border-top: 1.5px solid var(--cream-3);
-  border-bottom: 1.5px solid var(--cream-3);
-  padding: 64px 22px;
-}
-
-.nine-card {
-  background: var(--white);
-  border-radius: var(--radius);
-  padding: 22px 18px;
-  margin-top: 28px;
-  box-shadow: var(--shadow);
-  border: 1.5px solid var(--cream-3);
-  margin-bottom: 14px;
-}
-
-.nine-card-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 18px;
-  padding-bottom: 14px;
-  border-bottom: 1.5px solid var(--cream-3);
-}
-
-.nine-number {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 36px;
-  font-weight: 800;
-  color: var(--text-4);
-  line-height: 1;
-}
-
-.nine-number span { font-size: 18px; }
-.nine-label { font-size: 13px; font-weight: 700; color: var(--text-3); }
-.nine-steps { display: flex; flex-direction: column; gap: 10px; }
-
-.nine-step {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 14px;
-  color: var(--text-3);
-}
-
-.nine-step-icon { font-size: 18px; flex-shrink: 0; width: 28px; text-align: center; }
-
-.one-card {
-  background: var(--blue);
-  border-radius: var(--radius);
-  padding: 22px 18px;
-  box-shadow: var(--shadow-blue);
-}
-
-.one-card-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 18px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid rgba(255,255,255,0.15);
-}
-
-.one-number {
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 36px;
-  font-weight: 800;
-  color: #FCD34D;
-  line-height: 1;
-}
-
-.one-number span { font-size: 18px; }
-.one-label { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.8); }
-.one-steps { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
-
-.one-step {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 14px;
-  color: rgba(255,255,255,0.75);
-}
-
-.one-step-icon { font-size: 18px; flex-shrink: 0; width: 28px; text-align: center; }
-
-.one-step-highlight {
-  background: rgba(255,255,255,0.12);
-  border-radius: 12px;
-  padding: 10px 12px;
-  color: #ffffff;
-}
-
-.one-step-highlight strong { color: #FCD34D; }
-
-.one-card-footer {
-  font-size: 12px;
-  color: rgba(255,255,255,0.55);
-  line-height: 1.6;
-  padding-top: 16px;
-  border-top: 1px solid rgba(255,255,255,0.12);
-}
-
-/* USP */
-.usp-section { background: var(--cream); padding: 64px 22px; }
-.usp-cards { display: flex; flex-direction: column; gap: 14px; margin-top: 28px; }
-
-.usp-card {
-  background: var(--white);
-  border-radius: var(--radius);
-  padding: 22px 18px;
-  box-shadow: var(--shadow);
-  border: 1.5px solid var(--cream-3);
-  display: flex;
-  gap: 16px;
-  align-items: flex-start;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.usp-card:hover {
-  border-color: var(--blue-pale-2);
-  box-shadow: 0 8px 32px rgba(30,78,216,0.10);
-}
-
-.usp-ico {
-  width: 44px; height: 44px;
-  background: var(--blue-pale);
-  border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-}
-
-.usp-title { font-size: 15px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
-.usp-desc { font-size: 13px; color: var(--text-3); line-height: 1.55; }
-
-/* HOW */
-.how-section {
-  background: var(--cream-2);
-  border-top: 1.5px solid var(--cream-3);
-  border-bottom: 1.5px solid var(--cream-3);
-  padding: 64px 22px;
-}
-
-.steps { margin-top: 32px; display: flex; flex-direction: column; gap: 0; }
-
-.step {
-  display: flex;
-  gap: 18px;
-  padding-bottom: 28px;
-  position: relative;
-}
-
-.step:not(:last-child)::after {
-  content: '';
-  position: absolute;
-  left: 19px; top: 44px; bottom: 0;
-  width: 2px;
-  background: linear-gradient(to bottom, var(--blue-pale-2), transparent);
-}
-
-.step-num {
-  width: 40px; height: 40px;
-  border-radius: 50%;
-  background: var(--blue);
-  color: var(--white);
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 18px;
-  font-weight: 700;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
-  box-shadow: var(--shadow-blue);
-}
-
-.step-body { padding-top: 6px; }
-.step-title { font-size: 15px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
-.step-desc { font-size: 13px; color: var(--text-3); line-height: 1.5; }
-
-/* PROOF */
-.proof-section {
-  background: var(--cream);
-  padding: 64px 0;
-  overflow: hidden;
-}
-
-.proof-inner { padding: 0 22px; margin-bottom: 32px; }
-
-.marquee-wrap {
-  position: relative;
+  max-width: 420px;
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.marquee-fade-left,
-.marquee-fade-right {
+.btn-hero {
+  display: block;
+  background: #fff;
+  color: var(--blue);
+  border-radius: 100px;
+  padding: 18px 36px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 17px;
+  font-weight: 800;
+  text-align: center;
+  text-decoration: none;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.btn-hero:hover { transform: translateY(-2px); box-shadow: 0 18px 50px rgba(0,0,0,0.3); }
+.hero.v-cream .btn-hero {
+  background: var(--blue);
+  color: #fff;
+  box-shadow: var(--shadow-blue);
+}
+
+.hero-meta {
+  font-size: 13px;
+  color: rgba(255,255,255,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.hero.v-cream .hero-meta { color: var(--text-3); }
+.hero-meta .green { color: #86efac; font-weight: 700; }
+.hero.v-cream .hero-meta .green { color: var(--green); }
+.hero-meta-dot { opacity: 0.4; }
+
+/* Mockup display */
+.hero-mockup-stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 600px;
+  perspective: 1200px;
+}
+
+.mockup-glow {
   position: absolute;
-  top: 0; bottom: 0;
-  width: 48px;
-  z-index: 2;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(252,211,77,0.18) 0%, transparent 50%),
+    radial-gradient(circle at 30% 70%, rgba(96,165,250,0.20) 0%, transparent 50%);
+  filter: blur(60px);
   pointer-events: none;
 }
 
-.marquee-fade-left { left: 0; background: linear-gradient(to right, var(--cream), transparent); }
-.marquee-fade-right { right: 0; background: linear-gradient(to left, var(--cream), transparent); }
-.marquee-track { overflow: hidden; width: 100%; }
-.marquee-inner { display: flex; gap: 12px; width: max-content; }
-.marquee-left { animation: scrollLeft 35s linear infinite; }
-.marquee-right { animation: scrollRight 35s linear infinite; }
+.mockup-orbit {
+  position: absolute;
+  width: 480px; height: 480px;
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 50%;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.mockup-orbit.small { width: 360px; height: 360px; }
+.hero.v-cream .mockup-orbit { border-color: rgba(30,78,216,0.10); }
 
-@keyframes scrollLeft {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+.mockup-tag {
+  position: absolute;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(12px);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 12px;
+  color: var(--text);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  z-index: 10;
+}
+.mockup-tag .dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
-@keyframes scrollRight {
-  0% { transform: translateX(-50%); }
-  100% { transform: translateX(0); }
+.mockup-tag-1 {
+  top: 12%; right: -20px;
+  animation: floatA 5s ease-in-out infinite;
+}
+.mockup-tag-2 {
+  bottom: 18%; left: -30px;
+  animation: floatB 6s ease-in-out infinite;
 }
 
-.marquee-inner:hover { animation-play-state: paused; }
+@keyframes floatA {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes floatB {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(8px); }
+}
 
-.testimonial {
+.mockup-floater {
+  animation: phoneFloat 6s ease-in-out infinite;
+  position: relative;
+  z-index: 5;
+}
+@keyframes phoneFloat {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  50% { transform: translateY(-12px) rotate(-2deg); }
+}
+
+/* ============ SHOWCASE (3-up phones) ============ */
+.showcase-section {
+  background: var(--cream);
+  padding: 120px 22px;
+  position: relative;
+  overflow: hidden;
+}
+
+.showcase-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 50% 40% at 100% 0%, rgba(30,78,216,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 0% 100%, rgba(252,211,77,0.08) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.showcase-inner { max-width: 1280px; margin: 0 auto; position: relative; }
+.showcase-head { text-align: center; margin-bottom: 64px; }
+.showcase-head .eyebrow { margin-left: auto; margin-right: auto; }
+
+.showcase-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+  align-items: end;
+}
+@media (min-width: 768px) {
+  .showcase-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+}
+
+.showcase-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+}
+
+.showcase-phone-wrap {
+  display: flex;
+  justify-content: center;
+  position: relative;
+}
+
+.showcase-caption {
+  text-align: center;
+  max-width: 320px;
+}
+.showcase-num {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--blue);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.showcase-title {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+  margin-bottom: 8px;
+}
+.showcase-desc {
+  font-size: 14px;
+  color: var(--text-3);
+  line-height: 1.55;
+}
+
+/* ============ 9 vs 1 ============ */
+.nine-one-section {
+  background: var(--cream-2);
+  border-top: 1.5px solid var(--cream-3);
+  border-bottom: 1.5px solid var(--cream-3);
+}
+.nine-one-inner { max-width: 720px; margin: 0 auto; }
+
+.nine-card {
   background: var(--white);
   border-radius: var(--radius);
-  padding: 20px 18px;
+  padding: 26px 22px;
+  margin-top: 32px;
   box-shadow: var(--shadow);
   border: 1.5px solid var(--cream-3);
-  width: 260px;
-  flex-shrink: 0;
+  margin-bottom: 16px;
+}
+.nine-card-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+  padding-bottom: 16px;
+  border-bottom: 1.5px solid var(--cream-3);
+}
+.nine-number {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 44px;
+  font-weight: 800;
+  color: var(--text-4);
+  line-height: 1;
+}
+.nine-number span { font-size: 20px; }
+.nine-label { font-size: 13px; font-weight: 700; color: var(--text-3); }
+.nine-steps { display: flex; flex-direction: column; gap: 12px; }
+.nine-step { display: flex; align-items: center; gap: 14px; font-size: 15px; color: var(--text-3); }
+.nine-step-icon { font-size: 20px; flex-shrink: 0; width: 32px; text-align: center; }
+
+.one-card {
+  background: linear-gradient(155deg, var(--blue-dark) 0%, var(--blue) 60%, var(--blue-light) 100%);
+  border-radius: var(--radius);
+  padding: 26px 22px;
+  box-shadow: var(--shadow-blue-lg);
+  position: relative;
+  overflow: hidden;
+}
+.one-card::before {
+  content: '';
+  position: absolute;
+  top: -40%; right: -20%;
+  width: 60%; height: 80%;
+  background: radial-gradient(ellipse, rgba(252,211,77,0.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+.one-card-header {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 20px; padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.18);
+  position: relative;
+}
+.one-number {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 44px; font-weight: 800; color: var(--gold); line-height: 1;
+}
+.one-number span { font-size: 20px; }
+.one-label { font-size: 13px; font-weight: 700; color: rgba(255,255,255,0.85); }
+.one-steps { display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px; position: relative; }
+.one-step { display: flex; align-items: center; gap: 14px; font-size: 15px; color: rgba(255,255,255,0.78); }
+.one-step-icon { font-size: 20px; flex-shrink: 0; width: 32px; text-align: center; }
+.one-step-highlight {
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 14px;
+  padding: 14px 16px;
+  color: #fff;
+}
+.one-step-highlight strong { color: var(--gold); }
+.one-card-footer {
+  font-size: 13px; color: rgba(255,255,255,0.6);
+  line-height: 1.6; padding-top: 18px;
+  border-top: 1px solid rgba(255,255,255,0.14);
+  position: relative;
 }
 
-.t-stars { color: #F59E0B; letter-spacing: 2px; font-size: 14px; margin-bottom: 10px; }
-.t-quote { font-size: 14px; color: var(--text-2); line-height: 1.65; margin-bottom: 16px; font-style: italic; }
-.t-author { display: flex; align-items: center; gap: 10px; }
+/* ============ USP ============ */
+.usp-section { background: var(--cream); }
+.usp-inner { max-width: 1100px; margin: 0 auto; }
 
-.t-avatar {
-  width: 36px; height: 36px;
-  border-radius: 50%;
+.usp-cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-top: 40px;
+}
+@media (min-width: 700px) { .usp-cards { grid-template-columns: repeat(2, 1fr); } }
+@media (min-width: 1000px) { .usp-cards { grid-template-columns: repeat(3, 1fr); } }
+
+.usp-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 26px 22px;
+  box-shadow: var(--shadow);
+  border: 1.5px solid var(--cream-3);
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+.usp-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--blue-pale-2);
+  box-shadow: 0 12px 36px rgba(30,78,216,0.10);
+}
+
+.usp-ico {
+  width: 48px; height: 48px;
   background: var(--blue-pale);
-  color: var(--blue);
-  font-weight: 800;
-  font-size: 12px;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 16px;
+}
+.usp-title { font-size: 17px; font-weight: 800; color: var(--text); margin-bottom: 6px; line-height: 1.25; letter-spacing: -0.3px; }
+.usp-desc { font-size: 14px; color: var(--text-3); line-height: 1.55; }
+
+/* ============ HOW ============ */
+.how-section {
+  background: var(--cream-2);
+  border-top: 1.5px solid var(--cream-3);
+  border-bottom: 1.5px solid var(--cream-3);
+}
+.how-inner { max-width: 720px; margin: 0 auto; }
+.steps { margin-top: 40px; display: flex; flex-direction: column; gap: 0; }
+
+.step {
+  display: flex; gap: 22px;
+  padding-bottom: 32px;
+  position: relative;
+}
+.step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 23px; top: 52px; bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--blue-pale-2), transparent);
+}
+
+.step-num {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: var(--blue);
+  color: var(--white);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 20px; font-weight: 700;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
+  box-shadow: var(--shadow-blue);
 }
 
-.t-name { font-size: 13px; font-weight: 800; color: var(--text); }
-.t-route { font-size: 11px; color: var(--text-4); }
+.step-body { padding-top: 8px; }
+.step-title { font-size: 17px; font-weight: 800; color: var(--text); margin-bottom: 6px; letter-spacing: -0.3px; }
+.step-desc { font-size: 14px; color: var(--text-3); line-height: 1.55; }
 
-/* TRUST BANNER */
+/* ============ TRUST BANNER ============ */
 .trust-banner {
-  background: linear-gradient(135deg, #1E4ED8 0%, #3B6FEE 50%, #60A5FA 100%);
-  padding: 28px 12px;
+  background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue) 50%, var(--blue-light) 100%);
+  padding: 36px 16px;
   display: flex;
   align-items: center;
   justify-content: space-around;
   position: relative;
   overflow: hidden;
 }
-
+.trust-banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 80% at 50% 50%, rgba(252,211,77,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
 .trust-stat {
   text-align: center;
   flex: 1;
-  padding: 0 2px;
+  padding: 0 4px;
   position: relative;
   z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
 }
+.trust-stat-icon { display: flex; align-items: center; justify-content: center; height: 24px; }
+.trust-stat-num { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 17px; font-weight: 800; color: #fff; line-height: 1; }
+.trust-stat-label { font-size: 11px; color: rgba(255,255,255,0.65); font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; }
+.trust-divider { width: 1px; height: 50px; background: rgba(255,255,255,0.18); flex-shrink: 0; }
 
-.trust-stat-icon { display: flex; align-items: center; justify-content: center; height: 22px; }
-.trust-stat-num { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 15px; font-weight: 800; color: #ffffff; line-height: 1; }
-.trust-stat-label { font-size: 10px; color: rgba(255,255,255,0.55); font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
-.trust-divider { width: 1px; height: 44px; background: rgba(255,255,255,0.15); flex-shrink: 0; }
+/* ============ PROOF / TESTIMONIALS ============ */
+.proof-section { background: var(--cream); padding: 100px 0; overflow: hidden; }
+.proof-inner { padding: 0 22px; margin-bottom: 40px; max-width: 720px; margin-left: auto; margin-right: auto; }
 
-/* PRICING */
-.pricing-section { background: var(--blue-pale); border-top: 1.5px solid var(--blue-pale-2); padding: 64px 22px; }
+.marquee-wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.marquee-fade-left,
+.marquee-fade-right {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 80px;
+  z-index: 2;
+  pointer-events: none;
+}
+.marquee-fade-left { left: 0; background: linear-gradient(to right, var(--cream), transparent); }
+.marquee-fade-right { right: 0; background: linear-gradient(to left, var(--cream), transparent); }
+.marquee-track { overflow: hidden; width: 100%; }
+.marquee-inner { display: flex; gap: 14px; width: max-content; }
+.marquee-left { animation: scrollLeft 50s linear infinite; }
+.marquee-right { animation: scrollRight 50s linear infinite; }
 
+@keyframes scrollLeft { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+@keyframes scrollRight { 0% { transform: translateX(-50%); } 100% { transform: translateX(0); } }
+
+.marquee-inner:hover { animation-play-state: paused; }
+
+.testimonial {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 22px 20px;
+  box-shadow: var(--shadow);
+  border: 1.5px solid var(--cream-3);
+  width: 300px;
+  flex-shrink: 0;
+}
+.t-stars { color: var(--gold-warm); letter-spacing: 2px; font-size: 14px; margin-bottom: 12px; }
+.t-quote { font-size: 14px; color: var(--text-2); line-height: 1.65; margin-bottom: 18px; }
+.t-author { display: flex; align-items: center; gap: 12px; }
+.t-avatar {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: var(--blue-pale);
+  color: var(--blue);
+  font-weight: 800;
+  font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.t-name { font-size: 13px; font-weight: 800; color: var(--text); }
+.t-route { font-size: 11px; color: var(--text-4); }
+
+/* ============ PRICING ============ */
+.pricing-section {
+  background: linear-gradient(180deg, var(--blue-pale) 0%, var(--cream) 100%);
+  border-top: 1.5px solid var(--blue-pale-2);
+}
+.pricing-inner { max-width: 520px; margin: 0 auto; }
 .pricing-card {
   background: var(--white);
-  border-radius: 28px;
-  padding: 28px 22px;
-  margin-top: 28px;
+  border-radius: var(--radius-lg);
+  padding: 36px 28px;
+  margin-top: 36px;
   box-shadow: var(--shadow-md);
   border: 1.5px solid var(--blue-pale-2);
   position: relative;
   overflow: hidden;
 }
-
 .pricing-card::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, var(--blue), var(--sky));
+  height: 4px;
+  background: linear-gradient(90deg, var(--blue), var(--sky), var(--gold));
 }
-
 .trial-badge {
   display: inline-flex;
   align-items: center;
@@ -705,68 +867,58 @@ h1 em { font-style: normal; color: #FCD34D; }
   color: var(--green);
   font-size: 12px;
   font-weight: 700;
-  padding: 5px 14px;
+  padding: 6px 14px;
   border-radius: 100px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
-
-.price-row { display: flex; align-items: baseline; gap: 6px; margin-bottom: 4px; }
-
+.price-row { display: flex; align-items: baseline; gap: 8px; margin-bottom: 4px; }
 .price-big {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 64px;
-  font-weight: 700;
+  font-size: 72px;
+  font-weight: 800;
   color: var(--text);
   line-height: 1;
+  letter-spacing: -2px;
 }
+.price-unit { font-size: 17px; color: var(--text-3); }
+.price-annual { font-size: 13px; color: var(--blue); font-weight: 700; margin-bottom: 28px; }
 
-.price-unit { font-size: 16px; color: var(--text-3); }
-.price-annual { font-size: 13px; color: var(--blue); font-weight: 700; margin-bottom: 24px; }
-
-.feature-checklist { list-style: none; display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
-
-.feature-checklist li {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 14px;
-  color: var(--text-2);
-  font-weight: 500;
-}
-
+.feature-checklist { list-style: none; display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
+.feature-checklist li { display: flex; align-items: center; gap: 12px; font-size: 15px; color: var(--text-2); font-weight: 500; }
 .chk {
-  width: 22px; height: 22px;
+  width: 24px; height: 24px;
   border-radius: 50%;
   background: var(--green-bg);
   color: var(--green);
-  font-size: 12px;
+  font-size: 13px;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
   font-weight: 800;
 }
 
-/* FAQ */
-.faq-section { background: var(--cream); padding: 64px 22px; }
-.faq-items { margin-top: 28px; display: flex; flex-direction: column; }
+/* ============ FAQ ============ */
+.faq-section { background: var(--cream); }
+.faq-inner { max-width: 720px; margin: 0 auto; }
+.faq-items { margin-top: 36px; display: flex; flex-direction: column; }
 .faq-item { border-bottom: 1.5px solid var(--cream-3); cursor: pointer; user-select: none; }
 
 .faq-q {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  padding: 16px 0;
-  font-size: 15px;
+  gap: 14px;
+  padding: 20px 0;
+  font-size: 16px;
   font-weight: 700;
   color: var(--text);
   line-height: 1.4;
+  letter-spacing: -0.2px;
 }
-
 .faq-arrow { flex-shrink: 0; color: var(--text-4); transition: transform 0.25s ease; }
-.faq-item.open .faq-arrow { transform: rotate(180deg); }
+.faq-item.open .faq-arrow { transform: rotate(180deg); color: var(--blue); }
 
 .faq-a {
-  font-size: 14px;
+  font-size: 15px;
   color: var(--text-3);
   line-height: 1.65;
   max-height: 0;
@@ -774,50 +926,67 @@ h1 em { font-style: normal; color: #FCD34D; }
   transition: max-height 0.3s ease, padding 0.3s ease;
   padding-bottom: 0;
 }
+.faq-item.open .faq-a { max-height: 220px; padding-bottom: 20px; }
 
-.faq-item.open .faq-a { max-height: 200px; padding-bottom: 16px; }
-
-/* FINAL CTA */
+/* ============ FINAL CTA ============ */
 .final-cta {
   text-align: center;
-  padding: 72px 22px;
-  background: var(--blue-pale);
+  padding: 100px 22px 80px;
+  background: linear-gradient(160deg, var(--blue-dark) 0%, var(--blue) 50%, var(--blue-light) 100%);
+  color: #fff;
+  position: relative;
+  overflow: hidden;
 }
+.final-cta::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 70% 50% at 50% 0%, rgba(252,211,77,0.18) 0%, transparent 60%);
+  pointer-events: none;
+}
+.final-cta-inner { max-width: 600px; margin: 0 auto; position: relative; }
+.final-cta h2 { color: #fff; margin-bottom: 16px; }
+.final-cta h2 em { color: var(--gold); }
+.final-cta p { font-size: 17px; color: rgba(255,255,255,0.78); margin-bottom: 28px; line-height: 1.6; }
+.final-cta p strong { color: #fff; }
+.final-cta .btn-primary {
+  background: #fff;
+  color: var(--blue);
+  max-width: 380px;
+  margin: 0 auto;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+}
+.final-cta .btn-primary:hover { box-shadow: 0 24px 60px rgba(0,0,0,0.35); }
 
-.final-cta h2 { margin-bottom: 14px; }
-.final-cta p { font-size: 15px; color: var(--text-3); margin-bottom: 24px; line-height: 1.65; }
-.final-cta p strong { color: var(--text); }
-
-/* FOOTER */
+/* ============ FOOTER ============ */
 footer {
-  background: var(--cream-2);
-  border-top: 1.5px solid var(--cream-3);
-  padding: 28px 22px;
+  background: var(--text);
+  color: rgba(255,255,255,0.55);
+  padding: 36px 22px;
   text-align: center;
-  font-size: 12px;
-  color: var(--text-4);
+  font-size: 13px;
   line-height: 2;
 }
+footer a { color: rgba(255,255,255,0.7); text-decoration: none; }
+footer a:hover { color: #fff; }
 
-footer a { color: var(--text-4); text-decoration: none; }
-footer a:hover { color: var(--blue); }
-
+/* ============ ANIMATIONS ============ */
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(22px); }
+  from { opacity: 0; transform: translateY(24px); }
   to { opacity: 1; transform: translateY(0); }
 }
-
-.fu { opacity: 0; animation: fadeUp 0.55s ease forwards; }
+.fu { opacity: 0; animation: fadeUp 0.6s ease forwards; }
 .fu:nth-child(1) { animation-delay: 0.05s; }
-.fu:nth-child(2) { animation-delay: 0.15s; }
-.fu:nth-child(3) { animation-delay: 0.28s; }
-.fu:nth-child(4) { animation-delay: 0.42s; }
-.fu:nth-child(5) { animation-delay: 0.56s; }
+.fu:nth-child(2) { animation-delay: 0.18s; }
+.fu:nth-child(3) { animation-delay: 0.32s; }
+.fu:nth-child(4) { animation-delay: 0.46s; }
+.fu:nth-child(5) { animation-delay: 0.6s; }
+.fu:nth-child(6) { animation-delay: 0.74s; }
 </style>
 </head>
 <body>
 
-<nav>
+<nav class="topnav">
   <a href="#" class="logo">
     <div class="logo-icon">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -830,270 +999,153 @@ footer a:hover { color: var(--blue); }
   <a href="#pricing" class="btn btn-nav">Kostenlos testen</a>
 </nav>
 
-<section class="hero">
-  <div class="hero-sky"></div>
+<div id="hero-root"></div>
 
-  <div class="hero-content">
-    <div class="hero-badge">
-      <div class="badge-pulse"></div>
-      Echtzeit · DB &amp; Regionalverkehr
-    </div>
-
-    <div class="hero-stars">
-      <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
-      <span class="hero-stars-text">14.000 Pendler vertrauen Pendly</span>
-    </div>
-
-    <h1>Hör auf<br>zu <em>hoffen.</em></h1>
-
-    <p class="hero-sub">Pendly überwacht deine Strecke und meldet sich nur, wenn <strong>wirklich etwas los ist</strong>. Kein manuelles Checken mehr.</p>
-
-    <div class="hero-cta-group">
-      <a href="#pricing" class="btn-hero">Jetzt kostenlos herunterladen</a>
-      <p class="hero-meta"><span class="green">7 Tage kostenlos testen</span> · 4,99 €/Monat oder 39,99 €/Jahr</p>
-    </div>
-  </div>
-
-  <div class="hero-mockup-wrap">
-    <div class="mockup-card">
-      <div class="mockup-header">
-        <div class="mockup-logo">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
-            <line x1="4" y1="22" x2="4" y2="15"/>
-          </svg>
-        </div>
-        <div class="mockup-app-name">Pendly</div>
-      </div>
-      <div class="mockup-notif">
-        <div class="mockup-notif-icon">⚠️</div>
-        <div>
-          <div class="mockup-notif-title">RE 10 fällt aus</div>
-          <div class="mockup-notif-sub">Alt: S3 · 07:52 · pünktlich</div>
-        </div>
-      </div>
-      <div class="mockup-notif good">
-        <div class="mockup-notif-icon">✅</div>
-        <div>
-          <div class="mockup-notif-title">Zug pünktlich</div>
-          <div class="mockup-notif-sub">S3 · 17:45 · Gleis 2</div>
-        </div>
-      </div>
-    </div>
-  </div>
-    </div>
-  </div>
-
-  <div class="hero-scene">
-
-    <svg class="scene-svg" viewBox="0 0 400 180" preserveAspectRatio="xMidYMax slice" fill="none">
-      <defs>
-        <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#4ade80" stop-opacity="0.25"/>
-          <stop offset="100%" stop-color="#1E4ED8" stop-opacity="0.15"/>
-        </linearGradient>
-        <linearGradient id="horizon-glow" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="transparent"/>
-          <stop offset="60%" stop-color="rgba(255,255,255,0.04)"/>
-          <stop offset="100%" stop-color="rgba(255,255,255,0.08)"/>
-        </linearGradient>
-        <linearGradient id="rail-shine" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stop-color="rgba(255,255,255,0.1)"/>
-          <stop offset="50%" stop-color="rgba(255,255,255,0.35)"/>
-          <stop offset="100%" stop-color="rgba(255,255,255,0.1)"/>
-        </linearGradient>
-        <filter id="glow">
-          <feGaussianBlur stdDeviation="3" result="blur"/>
-          <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-      </defs>
-
-      <!-- Horizon glow -->
-      <rect x="0" y="80" width="400" height="100" fill="url(#horizon-glow)"/>
-
-      <!-- Ground plane with subtle gradient -->
-      <path d="M0 140 Q100 130 200 135 Q300 140 400 132 L400 180 L0 180 Z" fill="rgba(255,255,255,0.06)"/>
-      <path d="M0 148 Q100 142 200 146 Q300 150 400 144 L400 180 L0 180 Z" fill="rgba(255,255,255,0.04)"/>
-
-      <!-- Rails - sleek metallic -->
-      <rect x="0" y="143" width="400" height="1.5" fill="url(#rail-shine)" rx="0.75"/>
-      <rect x="0" y="149" width="400" height="1.5" fill="url(#rail-shine)" rx="0.75"/>
-
-      <!-- Sleepers - subtle -->
-      <g opacity="0.15">
-        <rect x="30" y="142" width="12" height="10" rx="1" fill="white"/>
-        <rect x="60" y="142" width="12" height="10" rx="1" fill="white"/>
-        <rect x="90" y="142" width="12" height="10" rx="1" fill="white"/>
-        <rect x="120" y="142" width="12" height="10" rx="1" fill="white"/>
-        <rect x="150" y="142" width="12" height="10" rx="1" fill="white"/>
-        <rect x="180" y="142" width="12" height="10" rx="1" fill="white"/>
-        <rect x="210" y="142" width="12" height="10" rx="1" fill="white"/>
-        <rect x="240" y="142" width="12" height="10" rx="1" fill="white"/>
-        <rect x="270" y="142" width="12" height="10" rx="1" fill="white"/>
-        <rect x="300" y="142" width="12" height="10" rx="1" fill="white"/>
-      </g>
-
-      <!-- Modern train - clean, minimal -->
-      <g>
-        <!-- Main body -->
-        <rect x="40" y="112" width="200" height="28" rx="6" fill="white" opacity="0.95"/>
-        <!-- Accent stripe -->
-        <rect x="40" y="112" width="200" height="4" rx="2" fill="#3B6FEE"/>
-        <!-- Windows -->
-        <g opacity="0.7">
-          <rect x="55" y="120" width="18" height="12" rx="3" fill="#93c5fd"/>
-          <rect x="80" y="120" width="18" height="12" rx="3" fill="#93c5fd"/>
-          <rect x="105" y="120" width="18" height="12" rx="3" fill="#93c5fd"/>
-          <rect x="130" y="120" width="18" height="12" rx="3" fill="#93c5fd"/>
-          <rect x="155" y="120" width="18" height="12" rx="3" fill="#93c5fd"/>
-          <rect x="180" y="120" width="18" height="12" rx="3" fill="#93c5fd"/>
-          <rect x="205" y="120" width="18" height="12" rx="3" fill="#93c5fd"/>
-        </g>
-        <!-- Front cab -->
-        <path d="M240 112 L240 140 Q250 140 255 135 L255 118 Q255 112 248 112 Z" fill="white" opacity="0.95"/>
-        <rect x="240" y="112" width="15" height="4" rx="2" fill="#3B6FEE"/>
-        <rect x="244" y="120" width="8" height="14" rx="3" fill="#60a5fa" opacity="0.7"/>
-        <!-- Headlight -->
-        <circle cx="254" cy="130" r="2" fill="#FCD34D" filter="url(#glow)"/>
-        <!-- Wheels - minimal dots -->
-        <circle cx="70" cy="142" r="4" fill="rgba(255,255,255,0.3)"/>
-        <circle cx="70" cy="142" r="2" fill="rgba(255,255,255,0.5)"/>
-        <circle cx="160" cy="142" r="4" fill="rgba(255,255,255,0.3)"/>
-        <circle cx="160" cy="142" r="2" fill="rgba(255,255,255,0.5)"/>
-        <circle cx="240" cy="142" r="4" fill="rgba(255,255,255,0.3)"/>
-        <circle cx="240" cy="142" r="2" fill="rgba(255,255,255,0.5)"/>
-      </g>
-
-      <!-- Platform - modern, clean -->
-      <rect x="300" y="128" width="100" height="22" rx="3" fill="rgba(255,255,255,0.12)"/>
-      <rect x="300" y="126" width="100" height="3" rx="1.5" fill="rgba(255,255,255,0.2)"/>
-
-      <!-- Platform sign -->
-      <line x1="340" y1="126" x2="340" y2="102" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
-      <rect x="325" y="100" width="30" height="14" rx="3" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.2)" stroke-width="0.5"/>
-      <text x="340" y="110" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="7" font-weight="700" fill="rgba(255,255,255,0.8)">Gl. 3</text>
-
-      <!-- Decorative dots along bottom -->
-      <g opacity="0.1">
-        <circle cx="20" cy="170" r="1.5" fill="white"/>
-        <circle cx="60" cy="168" r="1" fill="white"/>
-        <circle cx="120" cy="172" r="1.5" fill="white"/>
-        <circle cx="200" cy="169" r="1" fill="white"/>
-        <circle cx="280" cy="171" r="1.5" fill="white"/>
-        <circle cx="360" cy="168" r="1" fill="white"/>
-      </g>
-    </svg>
-  </div>
-</section>
+<div id="showcase-root"></div>
 
 <section class="nine-one-section">
-  <div class="eyebrow">☕ Dein Morgen, neu gedacht</div>
-  <h2>9 von 10 Pendlern<br>machen <em>das hier.</em></h2>
+  <div class="nine-one-inner">
+    <div class="eyebrow fu">☕ Dein Morgen, neu gedacht</div>
+    <h2 class="fu">9 von 10 Pendlern<br>machen <em>das hier.</em></h2>
 
-  <div class="nine-card">
-    <div class="nine-card-header">
-      <div class="nine-number">9<span>/10</span></div>
-      <div class="nine-label">Pendler ohne Pendly</div>
+    <div class="nine-card fu">
+      <div class="nine-card-header">
+        <div class="nine-number">9<span>/10</span></div>
+        <div class="nine-label">Pendler ohne Pendly</div>
+      </div>
+      <div class="nine-steps">
+        <div class="nine-step"><span class="nine-step-icon">😴</span> Aufwachen. Direkt zum Handy greifen.</div>
+        <div class="nine-step"><span class="nine-step-icon">📱</span> DB Navigator öffnen. Warten bis er lädt.</div>
+        <div class="nine-step"><span class="nine-step-icon">🔍</span> Route manuell checken. Verspätungen suchen.</div>
+        <div class="nine-step"><span class="nine-step-icon">🤞</span> Hoffen dass heute alles normal läuft.</div>
+        <div class="nine-step"><span class="nine-step-icon">😤</span> Am Bahnsteig merken: Zug fällt aus.</div>
+      </div>
     </div>
-    <div class="nine-steps">
-      <div class="nine-step"><span class="nine-step-icon">😴</span> Aufwachen. Direkt zum Handy greifen.</div>
-      <div class="nine-step"><span class="nine-step-icon">📱</span> DB Navigator öffnen. Warten bis er lädt.</div>
-      <div class="nine-step"><span class="nine-step-icon">🔍</span> Route manuell checken. Verspätungen suchen.</div>
-      <div class="nine-step"><span class="nine-step-icon">🤞</span> Hoffen dass heute alles normal läuft.</div>
-      <div class="nine-step"><span class="nine-step-icon">😤</span> Am Bahnsteig merken: Zug fällt aus.</div>
-    </div>
-  </div>
 
-  <div class="one-card">
-    <div class="one-card-header">
-      <div class="one-number">1<span>/10</span></div>
-      <div class="one-label">Pendler mit Pendly</div>
+    <div class="one-card fu">
+      <div class="one-card-header">
+        <div class="one-number">1<span>/10</span></div>
+        <div class="one-label">Pendler mit Pendly</div>
+      </div>
+      <div class="one-steps">
+        <div class="one-step"><span class="one-step-icon">😴</span> Aufwachen.</div>
+        <div class="one-step"><span class="one-step-icon">📲</span> Einmal aufs Handy schauen — keine Nachricht von Pendly.</div>
+        <div class="one-step one-step-highlight"><span class="one-step-icon">☕</span> Entspannt Kaffee trinken. <strong>Pendly hat alles im Blick.</strong></div>
+      </div>
+      <div class="one-card-footer">Pendly überwacht deine gespeicherten Routen rund um die Uhr — und meldet sich nur, wenn wirklich etwas los ist.</div>
     </div>
-    <div class="one-steps">
-      <div class="one-step"><span class="one-step-icon">😴</span> Aufwachen.</div>
-      <div class="one-step"><span class="one-step-icon">📲</span> Einmal aufs Handy schauen – keine Nachricht von Pendly.</div>
-      <div class="one-step one-step-highlight"><span class="one-step-icon">☕</span> Entspannt Kaffee trinken. <strong>Pendly hat alles im Blick.</strong></div>
-    </div>
-    <div class="one-card-footer">Pendly überwacht deine gespeicherten Routen rund um die Uhr – und meldet sich nur, wenn wirklich etwas los ist.</div>
   </div>
 </section>
 
 <section class="usp-section">
-  <div class="eyebrow">✨ Was Pendly für dich tut</div>
-  <h2>Dein stiller<br><em>Zugwächter.</em></h2>
+  <div class="usp-inner">
+    <div class="eyebrow fu">✨ Was Pendly für dich tut</div>
+    <h2 class="fu">Dein stiller<br><em>Zugwächter.</em></h2>
 
-  <div class="usp-cards">
-    <div class="usp-card">
-      <div class="usp-ico">🛤️</div>
-      <div>
+    <div class="usp-cards">
+      <div class="usp-card fu">
+        <div class="usp-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E4ED8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17h14M5 17V7a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v10M5 17l-2 4M19 17l2 4M9 21h6"/><circle cx="9" cy="11" r="1"/><circle cx="15" cy="11" r="1"/></svg></div>
         <div class="usp-title">Routen einmal speichern</div>
-        <div class="usp-desc">Leg deine täglichen Strecken an – Pendly überwacht sie ab sofort automatisch, jeden Tag.</div>
+        <div class="usp-desc">Leg deine täglichen Strecken an — Pendly überwacht sie ab sofort automatisch, jeden Tag.</div>
       </div>
-    </div>
-    <div class="usp-card">
-      <div class="usp-ico">⚡</div>
-      <div>
+      <div class="usp-card fu">
+        <div class="usp-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E4ED8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
         <div class="usp-title">Echtzeit-Überwachung</div>
-        <div class="usp-desc">Verspätungen, Ausfälle, Gleisänderungen – Pendly erkennt es bevor die DB es offiziell anzeigt.</div>
+        <div class="usp-desc">Verspätungen, Ausfälle, Gleisänderungen — Pendly erkennt es bevor die DB es offiziell anzeigt.</div>
       </div>
-    </div>
-    <div class="usp-card">
-      <div class="usp-ico">🔔</div>
-      <div>
+      <div class="usp-card fu">
+        <div class="usp-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E4ED8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></div>
         <div class="usp-title">Nur eine Nachricht</div>
-        <div class="usp-desc">Kein Rauschen. Du wirst nur benachrichtigt wenn du wirklich handeln musst – sonst: Stille.</div>
+        <div class="usp-desc">Kein Rauschen. Du wirst nur benachrichtigt wenn du wirklich handeln musst — sonst: Stille.</div>
       </div>
-    </div>
-    <div class="usp-card">
-      <div class="usp-ico">🔄</div>
-      <div>
+      <div class="usp-card fu">
+        <div class="usp-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E4ED8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></div>
         <div class="usp-title">Alternative sofort dabei</div>
-        <div class="usp-desc">Fällt dein Zug aus, zeigt Pendly die beste Alternative – inklusive ob du es noch rechtzeitig schaffst.</div>
+        <div class="usp-desc">Fällt dein Zug aus, zeigt Pendly die beste Alternative — inklusive ob du es noch rechtzeitig schaffst.</div>
       </div>
-    </div>
-    <div class="usp-card">
-      <div class="usp-ico">🕐</div>
-      <div>
+      <div class="usp-card fu">
+        <div class="usp-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E4ED8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
         <div class="usp-title">Stammzüge &amp; Puffer</div>
         <div class="usp-desc">Speichere die 7:12, die 6:58 als Backup und die 8:00 für schlechte Tage. Pendly kennt deinen Rhythmus.</div>
+      </div>
+      <div class="usp-card fu">
+        <div class="usp-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1E4ED8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+        <div class="usp-title">Made in Germany</div>
+        <div class="usp-desc">Server in Deutschland. DSGVO-konform. Keine Daten an Dritte. Faires Abo, jederzeit kündbar.</div>
       </div>
     </div>
   </div>
 </section>
 
 <section class="how-section">
-  <div class="eyebrow">🚀 So funktioniert's</div>
-  <h2>In 3 Minuten<br><em>eingerichtet.</em></h2>
+  <div class="how-inner">
+    <div class="eyebrow fu">🚀 So funktioniert's</div>
+    <h2 class="fu">In 3 Minuten<br><em>eingerichtet.</em></h2>
 
-  <div class="steps">
-    <div class="step">
-      <div class="step-num">1</div>
-      <div class="step-body">
-        <div class="step-title">Route einrichten</div>
-        <div class="step-desc">Start- und Zielhaltestelle eingeben. Pendly findet alle Verbindungen automatisch – DB, S-Bahn, RE, Bus.</div>
+    <div class="steps">
+      <div class="step fu">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">Route einrichten</div>
+          <div class="step-desc">Start- und Zielhaltestelle eingeben. Pendly findet alle Verbindungen automatisch — DB, S-Bahn, RE, Bus.</div>
+        </div>
       </div>
-    </div>
-    <div class="step">
-      <div class="step-num">2</div>
-      <div class="step-body">
-        <div class="step-title">Stammzüge wählen</div>
-        <div class="step-desc">Deine täglichen Züge speichern – plus die Verbindung davor als Backup für stressige Morgen.</div>
+      <div class="step fu">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">Stammzüge wählen</div>
+          <div class="step-desc">Deine täglichen Züge speichern — plus die Verbindung davor als Backup für stressige Morgen.</div>
+        </div>
       </div>
-    </div>
-    <div class="step">
-      <div class="step-num">3</div>
-      <div class="step-body">
-        <div class="step-title">Handy weglegen</div>
-        <div class="step-desc">Pendly überwacht alles. Du bekommst nur eine Nachricht, wenn wirklich etwas los ist.</div>
+      <div class="step fu">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title">Handy weglegen</div>
+          <div class="step-desc">Pendly überwacht alles. Du bekommst nur eine Nachricht, wenn wirklich etwas los ist.</div>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
+<div class="trust-banner">
+  <div class="trust-stat">
+    <div class="trust-stat-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    </div>
+    <div class="trust-stat-num">14.000+</div>
+    <div class="trust-stat-label">Pendler</div>
+  </div>
+  <div class="trust-divider"></div>
+  <div class="trust-stat">
+    <div class="trust-stat-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/></svg>
+    </div>
+    <div class="trust-stat-num">7 Tage</div>
+    <div class="trust-stat-label">Gratis</div>
+  </div>
+  <div class="trust-divider"></div>
+  <div class="trust-stat">
+    <div class="trust-stat-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    </div>
+    <div class="trust-stat-num">DSGVO</div>
+    <div class="trust-stat-label">konform</div>
+  </div>
+  <div class="trust-divider"></div>
+  <div class="trust-stat">
+    <div class="trust-stat-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+    </div>
+    <div class="trust-stat-num">Flexibel</div>
+    <div class="trust-stat-label">Kündbar</div>
+  </div>
+</div>
+
 <section class="proof-section">
   <div class="proof-inner">
-    <div class="eyebrow">💬 Stimmen</div>
-    <h2>Pendler<br><em>lieben es.</em></h2>
+    <div class="eyebrow fu">💬 Stimmen aus der Community</div>
+    <h2 class="fu">Pendler<br><em>lieben es.</em></h2>
   </div>
 
   <div class="marquee-wrap">
@@ -1109,12 +1161,12 @@ footer a:hover { color: var(--blue); }
         </div>
         <div class="testimonial">
           <div class="t-stars">★★★★★</div>
-          <div class="t-quote">„Vorher hab ich den DB Navigator 20x täglich geöffnet. Jetzt macht Pendly das. Verändert wirklich den Morgen."</div>
+          <div class="t-quote">„Vorher hab ich den DB Navigator 20× täglich geöffnet. Jetzt macht Pendly das. Verändert wirklich den Morgen."</div>
           <div class="t-author"><div class="t-avatar">PM</div><div><div class="t-name">Petra M.</div><div class="t-route">Augsburg → München</div></div></div>
         </div>
         <div class="testimonial">
           <div class="t-stars">★★★★★</div>
-          <div class="t-quote">„Der Alert kam, ich bin zur S-Bahn – alles gut. Vorher hab ich Ausfälle immer zu spät erfahren."</div>
+          <div class="t-quote">„Der Alert kam, ich bin zur S-Bahn — alles gut. Vorher hab ich Ausfälle immer zu spät erfahren."</div>
           <div class="t-author"><div class="t-avatar">JK</div><div><div class="t-name">Julia K.</div><div class="t-route">Bremen → Verden</div></div></div>
         </div>
         <div class="testimonial">
@@ -1129,12 +1181,12 @@ footer a:hover { color: var(--blue); }
         </div>
         <div class="testimonial">
           <div class="t-stars">★★★★★</div>
-          <div class="t-quote">„Vorher hab ich den DB Navigator 20x täglich geöffnet. Jetzt macht Pendly das. Verändert wirklich den Morgen."</div>
+          <div class="t-quote">„Vorher hab ich den DB Navigator 20× täglich geöffnet. Jetzt macht Pendly das. Verändert wirklich den Morgen."</div>
           <div class="t-author"><div class="t-avatar">PM</div><div><div class="t-name">Petra M.</div><div class="t-route">Augsburg → München</div></div></div>
         </div>
         <div class="testimonial">
           <div class="t-stars">★★★★★</div>
-          <div class="t-quote">„Der Alert kam, ich bin zur S-Bahn – alles gut. Vorher hab ich Ausfälle immer zu spät erfahren."</div>
+          <div class="t-quote">„Der Alert kam, ich bin zur S-Bahn — alles gut. Vorher hab ich Ausfälle immer zu spät erfahren."</div>
           <div class="t-author"><div class="t-avatar">JK</div><div><div class="t-name">Julia K.</div><div class="t-route">Bremen → Verden</div></div></div>
         </div>
         <div class="testimonial">
@@ -1149,7 +1201,7 @@ footer a:hover { color: var(--blue); }
       <div class="marquee-inner marquee-right">
         <div class="testimonial">
           <div class="t-stars">★★★★★</div>
-          <div class="t-quote">„Gleisänderung kurz vor Abfahrt – Pendly hat mich rechtzeitig informiert. Ohne die App hätte ich den falschen Zug genommen."</div>
+          <div class="t-quote">„Gleisänderung kurz vor Abfahrt — Pendly hat mich rechtzeitig informiert. Ohne die App hätte ich den falschen Zug genommen."</div>
           <div class="t-author"><div class="t-avatar">SR</div><div><div class="t-name">Sandra R.</div><div class="t-route">Frankfurt → Darmstadt</div></div></div>
         </div>
         <div class="testimonial">
@@ -1169,7 +1221,7 @@ footer a:hover { color: var(--blue); }
         </div>
         <div class="testimonial">
           <div class="t-stars">★★★★★</div>
-          <div class="t-quote">„Gleisänderung kurz vor Abfahrt – Pendly hat mich rechtzeitig informiert. Ohne die App hätte ich den falschen Zug genommen."</div>
+          <div class="t-quote">„Gleisänderung kurz vor Abfahrt — Pendly hat mich rechtzeitig informiert. Ohne die App hätte ich den falschen Zug genommen."</div>
           <div class="t-author"><div class="t-avatar">SR</div><div><div class="t-name">Sandra R.</div><div class="t-route">Frankfurt → Darmstadt</div></div></div>
         </div>
         <div class="testimonial">
@@ -1192,101 +1244,88 @@ footer a:hover { color: var(--blue); }
   </div>
 </section>
 
-<div class="trust-banner">
-  <div class="trust-stat">
-    <div class="trust-stat-icon">👥</div>
-    <div class="trust-stat-num">14.000+</div>
-    <div class="trust-stat-label">Pendler</div>
-  </div>
-  <div class="trust-divider"></div>
-  <div class="trust-stat">
-    <div class="trust-stat-icon">🎁</div>
-    <div class="trust-stat-num">7 Tage</div>
-    <div class="trust-stat-label">Gratis testen</div>
-  </div>
-  <div class="trust-divider"></div>
-  <div class="trust-stat">
-    <div class="trust-stat-icon">🇩🇪</div>
-    <div class="trust-stat-num">Deutsches</div>
-    <div class="trust-stat-label">Startup</div>
-  </div>
-  <div class="trust-divider"></div>
-  <div class="trust-stat">
-    <div class="trust-stat-icon">🔄</div>
-    <div class="trust-stat-num">Flexibel</div>
-    <div class="trust-stat-label">Kündbar</div>
-  </div>
-</div>
-
 <section class="pricing-section" id="pricing">
-  <div class="eyebrow">💰 Preise</div>
-  <h2>Einfach.<br><em>Fair. Klar.</em></h2>
+  <div class="pricing-inner">
+    <div class="eyebrow fu">💰 Preise</div>
+    <h2 class="fu">Einfach.<br><em>Fair. Klar.</em></h2>
 
-  <div class="pricing-card">
-    <div class="trial-badge">🎁 7 Tage kostenlos – keine Kreditkarte</div>
+    <div class="pricing-card fu">
+      <div class="trial-badge">🎁 7 Tage kostenlos — keine Kreditkarte</div>
+      <div class="price-row">
+        <div class="price-big">4,99</div>
+        <div class="price-unit">€ / Monat</div>
+      </div>
+      <div class="price-annual">oder 39,99 € / Jahr — 2 Monate geschenkt</div>
 
-    <div class="price-row">
-      <div class="price-big">4,99</div>
-      <div class="price-unit">€ / Monat</div>
+      <ul class="feature-checklist">
+        <li><span class="chk">✓</span> Unbegrenzte Routen &amp; Stammzüge</li>
+        <li><span class="chk">✓</span> Echtzeit Push-Benachrichtigungen</li>
+        <li><span class="chk">✓</span> Gleisänderungs-Alerts</li>
+        <li><span class="chk">✓</span> Automatische Alternativen bei Ausfall</li>
+        <li><span class="chk">✓</span> Verspätungs-Verlauf &amp; Statistiken</li>
+        <li><span class="chk">✓</span> DB, S-Bahn, RE, Bus, Tram</li>
+      </ul>
+
+      <a href="#" class="btn btn-primary">Jetzt kostenlos herunterladen</a>
     </div>
-    <div class="price-annual">oder 39,99 € / Jahr – 2 Monate geschenkt</div>
-
-    <ul class="feature-checklist">
-      <li><span class="chk">✓</span> Unbegrenzte Routen &amp; Stammzüge</li>
-      <li><span class="chk">✓</span> Echtzeit Push-Benachrichtigungen</li>
-      <li><span class="chk">✓</span> Gleisänderungs-Alerts</li>
-      <li><span class="chk">✓</span> Automatische Alternativen bei Ausfall</li>
-      <li><span class="chk">✓</span> Verspätungs-Verlauf &amp; Statistiken</li>
-      <li><span class="chk">✓</span> DB, S-Bahn, RE, Bus, Tram</li>
-    </ul>
-
-    <a href="#" class="btn btn-primary">Jetzt kostenlos herunterladen</a>
   </div>
 </section>
 
 <section class="faq-section">
-  <div class="eyebrow">🤔 Häufige Fragen</div>
-  <h2>Deine Fragen.<br><em>Unsere Antworten.</em></h2>
+  <div class="faq-inner">
+    <div class="eyebrow fu">🤔 Häufige Fragen</div>
+    <h2 class="fu">Deine Fragen.<br><em>Unsere Antworten.</em></h2>
 
-  <div class="faq-items">
-    <div class="faq-item" onclick="this.classList.toggle('open')">
-      <div class="faq-q">Was wenn Pendly mir nichts schickt? <svg class="faq-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
-      <div class="faq-a">Dann läuft heute alles perfekt. Das ist der Punkt – kein Rauschen, keine unnötigen Pings. Stille bedeutet: dein Zug fährt.</div>
-    </div>
-    <div class="faq-item" onclick="this.classList.toggle('open')">
-      <div class="faq-q">Woher kommen die Daten? <svg class="faq-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
-      <div class="faq-a">Pendly nutzt offizielle Echtzeit-Daten der Deutschen Bahn und des Deutschlandweiten Regionalverkehrs – dieselbe Quelle wie der DB Navigator, nur schneller ausgewertet.</div>
-    </div>
-    <div class="faq-item" onclick="this.classList.toggle('open')">
-      <div class="faq-q">Muss ich die App täglich öffnen? <svg class="faq-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
-      <div class="faq-a">Nein. Das ist der Kern von Pendly. Du richtest es einmal ein und vergisst es. Pendly arbeitet im Hintergrund und meldet sich nur wenn nötig.</div>
-    </div>
-    <div class="faq-item" onclick="this.classList.toggle('open')">
-      <div class="faq-q">Funktioniert das auch für Bus &amp; Tram? <svg class="faq-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
-      <div class="faq-a">Ja. Pendly unterstützt alle Linien im deutschen ÖPNV – DB Fernverkehr, S-Bahn, RE, RB, Bus und Tram.</div>
-    </div>
-    <div class="faq-item" onclick="this.classList.toggle('open')">
-      <div class="faq-q">Was passiert nach den 7 Tagen? <svg class="faq-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
-      <div class="faq-a">Du wirst gefragt ob du weitermachen möchtest. Keine automatische Abbuchung, keine versteckten Kosten. Nur wenn du aktiv zustimmst geht's weiter – für 4,99 €/Monat oder 39,99 €/Jahr.</div>
-    </div>
-    <div class="faq-item" onclick="this.classList.toggle('open')">
-      <div class="faq-q">Warum kostet Pendly 4,99 €? <svg class="faq-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
-      <div class="faq-a">Pendly fragt sekündlich Echtzeit-Daten von DB und Regionalverkehr ab – das verursacht laufende API-Kosten. Dazu kommen Serverinfrastruktur, Weiterentwicklung und Support für tausende Verbindungen täglich. Auf den Tag gerechnet sind das 16 Cent – für die Optimierung deines Pendler-Alltags.</div>
+    <div class="faq-items">
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">Was wenn Pendly mir nichts schickt? <svg class="faq-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a">Dann läuft heute alles perfekt. Das ist der Punkt — kein Rauschen, keine unnötigen Pings. Stille bedeutet: dein Zug fährt.</div>
+      </div>
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">Woher kommen die Daten? <svg class="faq-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a">Pendly nutzt offizielle Echtzeit-Daten der Deutschen Bahn und des deutschlandweiten Regionalverkehrs — dieselbe Quelle wie der DB Navigator, nur schneller ausgewertet.</div>
+      </div>
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">Muss ich die App täglich öffnen? <svg class="faq-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a">Nein. Das ist der Kern von Pendly. Du richtest es einmal ein und vergisst es. Pendly arbeitet im Hintergrund und meldet sich nur wenn nötig.</div>
+      </div>
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">Funktioniert das auch für Bus &amp; Tram? <svg class="faq-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a">Ja. Pendly unterstützt alle Linien im deutschen ÖPNV — DB Fernverkehr, S-Bahn, RE, RB, Bus und Tram.</div>
+      </div>
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">Was passiert nach den 7 Tagen? <svg class="faq-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a">Du wirst gefragt ob du weitermachen möchtest. Keine automatische Abbuchung, keine versteckten Kosten. Nur wenn du aktiv zustimmst geht's weiter — für 4,99 €/Monat oder 39,99 €/Jahr.</div>
+      </div>
+      <div class="faq-item" onclick="this.classList.toggle('open')">
+        <div class="faq-q">Warum kostet Pendly 4,99 €? <svg class="faq-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
+        <div class="faq-a">Pendly fragt sekündlich Echtzeit-Daten von DB und Regionalverkehr ab — das verursacht laufende API-Kosten. Dazu kommen Serverinfrastruktur, Weiterentwicklung und Support für tausende Verbindungen täglich. Auf den Tag gerechnet sind das 16 Cent — für die Optimierung deines Pendler-Alltags.</div>
+      </div>
     </div>
   </div>
 </section>
 
 <section class="final-cta">
-  <h2>Hör auf zu hoffen.<br><em>Fang an zu wissen.</em></h2>
-  <p><strong>Morgen früh</strong> steht einer von zehn Pendlern entspannt am Bahnsteig.<br>Weil Pendly für ihn schaut.</p>
-  <a href="#pricing" class="btn btn-primary">Jetzt kostenlos herunterladen</a>
-  <p style="margin-top: 12px; font-size: 13px; color: var(--text-4);">4,99 €/Monat oder 39,99 €/Jahr</p>
+  <div class="final-cta-inner">
+    <h2>Hör auf zu hoffen.<br><em>Fang an zu wissen.</em></h2>
+    <p><strong>Morgen früh</strong> steht einer von zehn Pendlern entspannt am Bahnsteig.<br>Weil Pendly für ihn schaut.</p>
+    <a href="#pricing" class="btn btn-primary">Jetzt kostenlos herunterladen</a>
+    <p style="margin-top: 16px; font-size: 13px; color: rgba(255,255,255,0.55);">4,99 €/Monat · 39,99 €/Jahr · jederzeit kündbar</p>
+  </div>
 </section>
 
 <footer>
   © 2025 Pendly · LMD Commerce<br>
-  <a href="/legal?tab=impressum">Impressum</a> · <a href="/legal?tab=datenschutz">Datenschutz</a> · <a href="/legal?tab=agb">AGB</a>
+  <a href="#">Impressum</a> · <a href="#">Datenschutz</a> · <a href="#">AGB</a>
 </footer>
+
+<div id="tweaks-root"></div>
+
+<script type="text/babel" src="../tweaks-panel.jsx"></script>
+<script type="text/babel" src="mockup.jsx"></script>
+<script type="text/babel" src="hero.jsx"></script>
+<script type="text/babel" src="showcase.jsx"></script>
+<script type="text/babel" src="app.jsx"></script>
 
 </body>
 </html>
