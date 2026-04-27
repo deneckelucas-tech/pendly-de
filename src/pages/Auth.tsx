@@ -7,6 +7,9 @@ import { Train, Mail, Phone } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
 import { useToast } from '@/hooks/use-toast';
+import { Capacitor } from '@capacitor/core';
+
+const isNative = Capacitor.isNativePlatform();
 
 export default function Auth() {
   const [searchParams] = useSearchParams();
@@ -30,10 +33,13 @@ export default function Auth() {
         if (error) throw error;
         navigate('/dashboard');
       } else {
+        const redirectTo = isNative
+          ? 'https://dd7c08af-3db7-46ed-8595-6570d08c946a.lovableproject.com'
+          : window.location.origin;
         const { data: signUpData, error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: window.location.origin },
+          options: { emailRedirectTo: redirectTo },
         });
         if (error) throw error;
         if (signUpData.session) {
@@ -137,7 +143,7 @@ export default function Auth() {
 
           <CardContent className="space-y-5">
             {/* Social Login Buttons */}
-            <div className="space-y-2.5">
+            {!isNative && <div className="space-y-2.5">
               <Button
                 variant="outline"
                 className="w-full h-12 rounded-xl font-medium gap-3 border-border"
@@ -164,14 +170,14 @@ export default function Auth() {
                 </svg>
                 Mit Apple fortfahren
               </Button>
-            </div>
+            </div>}
 
             {/* Divider */}
-            <div className="flex items-center gap-3">
+            {!isNative && <div className="flex items-center gap-3">
               <div className="flex-1 h-px bg-border" />
               <span className="text-[11px] text-muted-foreground uppercase tracking-wider">oder</span>
               <div className="flex-1 h-px bg-border" />
-            </div>
+            </div>}
 
             {/* Method Tabs */}
             <div className="flex gap-2">
@@ -187,7 +193,7 @@ export default function Auth() {
                 <Mail className="h-4 w-4" />
                 E-Mail
               </button>
-              <button
+              {!isNative && <button
                 type="button"
                 onClick={() => { setMethod('phone'); setOtpSent(false); }}
                 className={`flex-1 flex items-center justify-center gap-2 h-10 rounded-xl text-sm font-medium transition-colors ${
@@ -198,7 +204,7 @@ export default function Auth() {
               >
                 <Phone className="h-4 w-4" />
                 Telefon
-              </button>
+              </button>}
             </div>
 
             {/* Email Form */}
