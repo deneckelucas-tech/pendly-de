@@ -56,10 +56,7 @@ export default function Paywall() {
         )}
 
         {/* Yearly - Highlighted */}
-        <div
-          className="rounded-2xl p-5 space-y-4 relative card-amber-glow"
-          style={{ backgroundColor: '#131313', border: '1px solid rgba(245, 158, 11, 0.25)' }}
-        >
+        <div className="rounded-2xl p-5 space-y-4 relative bg-card card-amber-glow">
           <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-[10px] font-bold px-3 py-1 rounded-full flex items-center gap-1">
             <Star className="h-3 w-3" />
             Beliebteste Wahl
@@ -92,10 +89,7 @@ export default function Paywall() {
         </div>
 
         {/* Monthly */}
-        <div
-          className="rounded-2xl p-5 space-y-4 card-amber-border"
-          style={{ backgroundColor: '#131313' }}
-        >
+        <div className="rounded-2xl p-5 space-y-4 bg-card card-amber-border">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-semibold text-foreground">Monatlich</p>
