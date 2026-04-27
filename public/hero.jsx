@@ -89,16 +89,88 @@ function HeroRailArt({ variant }) {
 
 function Hero({ variant = 'aurora' }) {
   const isDark = variant !== 'cream';
+  const [isMobile, setIsMobile] = React.useState(
+    typeof window !== 'undefined' && window.innerWidth < 768
+  );
 
   React.useEffect(() => {
     document.body.classList.toggle('hero-dark', isDark);
   }, [isDark]);
+
+  React.useEffect(() => {
+    const onResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  const phoneWidth = isMobile ? 220 : 280;
+  const phoneHeight = isMobile ? 464 : 590;
 
   return (
     <section className={`hero v-${variant}`}>
       <div className="hero-stars-bg"/>
       <div className="hero-aurora"/>
       <HeroRailArt variant={variant}/>
+
+      {/* Light pulses traveling along the rails — represents live data flowing */}
+      <div className="rail-pulse">
+        <div className="rail-pulse-dot"/>
+        <div className="rail-pulse-dot dot-2"/>
+        <div className="rail-pulse-dot dot-3"/>
+      </div>
+
+      {/* Train-window light streaks across the horizon */}
+      <div className="window-streaks">
+        <div className="window-streak"/>
+        <div className="window-streak s2"/>
+        <div className="window-streak s3"/>
+      </div>
+
+      {/* Floating live departure board — left */}
+      <div className="departure-board departure-board-1">
+        <div className="dep-board-header">
+          <div className="dep-live-dot"/>
+          <span>Live · Stade</span>
+        </div>
+        <div className="dep-row">
+          <span className="dep-time">09:14</span>
+          <span className="dep-line-chip">S3</span>
+          <span className="dep-dest">HH Hbf</span>
+          <span className="dep-status ok">pünktl.</span>
+        </div>
+        <div className="dep-row">
+          <span className="dep-time">09:42</span>
+          <span className="dep-line-chip">RE 5</span>
+          <span className="dep-dest">Cuxhaven</span>
+          <span className="dep-status warn">+6</span>
+        </div>
+        <div className="dep-row">
+          <span className="dep-time">10:14</span>
+          <span className="dep-line-chip">S3</span>
+          <span className="dep-dest">HH Hbf</span>
+          <span className="dep-status bad">Ausfall</span>
+        </div>
+      </div>
+
+      {/* Floating live departure board — right */}
+      <div className="departure-board departure-board-2">
+        <div className="dep-board-header">
+          <div className="dep-live-dot"/>
+          <span>Pendly überwacht · 14.082 Routen</span>
+        </div>
+        <div className="dep-row">
+          <span className="dep-time">08:47</span>
+          <span className="dep-line-chip">RE 1</span>
+          <span className="dep-dest">Köln Hbf</span>
+          <span className="dep-status ok">pünktl.</span>
+        </div>
+        <div className="dep-row">
+          <span className="dep-time">08:52</span>
+          <span className="dep-line-chip">ICE</span>
+          <span className="dep-dest">München</span>
+          <span className="dep-status warn">+4</span>
+        </div>
+      </div>
 
       <div className="hero-content-wrap">
         {/* TEXT */}
@@ -117,19 +189,19 @@ function Hero({ variant = 'aurora' }) {
             <span className="hero-stars-text">14.000 Pendler vertrauen Pendly</span>
           </div>
 
-          <h1 className="fu">Hör auf<br/>zu <em>hoffen.</em></h1>
+          <h1 className="fu">Spar dir die<br/><em>14 Minuten</em><br/>Bahn-Roulette.</h1>
 
           <p className="hero-sub fu">
-            Pendly überwacht deine Strecke und meldet sich nur, wenn{' '}
-            <strong>wirklich etwas los ist</strong>. Kein manuelles Checken mehr.
+            Pendly überwacht deine Strecke im Hintergrund und{' '}
+            <strong>sagt Bescheid, bevor du am Bahnsteig stehst</strong>. Kein manuelles Checken mehr.
           </p>
 
           <div className="hero-cta-group fu">
-            <a href="#pricing" className="btn-hero">Jetzt 7 Tage kostenlos testen</a>
+            <a href="#pricing" className="btn-hero">Jetzt kostenlos herunterladen</a>
             <p className="hero-meta">
-              <span className="green">● Keine Kreditkarte</span>
+              <span className="green">● 7 Tage kostenlos testen</span>
               <span className="hero-meta-dot">·</span>
-              <span>4,99 €/Monat oder 39,99 €/Jahr</span>
+              <span>danach 4,99 €/Monat oder 49,99 €/Jahr</span>
             </p>
           </div>
         </div>
@@ -157,7 +229,7 @@ function Hero({ variant = 'aurora' }) {
           </div>
 
           <div className="mockup-floater">
-            <PendlyMockup variant="today" width={280} height={590} glow/>
+            <PendlyMockup variant="today" width={phoneWidth} height={phoneHeight} glow/>
           </div>
         </div>
       </div>

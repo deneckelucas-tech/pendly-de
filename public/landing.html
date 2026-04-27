@@ -62,43 +62,40 @@ body {
 
 /* ============ NAV ============ */
 nav.topnav {
-  position: fixed;
+  position: absolute;
   top: 0; left: 0; right: 0;
   z-index: 100;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14px 20px;
-  padding-top: max(14px, env(safe-area-inset-top, 14px));
-  background: rgba(253,248,242,0.85);
-  backdrop-filter: blur(20px) saturate(1.4);
-  -webkit-backdrop-filter: blur(20px) saturate(1.4);
-  border-bottom: 1px solid rgba(0,0,0,0.05);
-  transition: background 0.3s ease, border-color 0.3s ease;
+  padding: 18px 28px;
+  padding-top: max(18px, env(safe-area-inset-top, 18px));
+  background: transparent;
+  border-bottom: none;
 }
 
 body.hero-dark nav.topnav {
-  background: rgba(20,40,100,0.4);
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  background: transparent;
+  border-bottom: none;
 }
 body.hero-dark nav.topnav .logo-text { color: #fff; }
 body.hero-dark nav.topnav .logo-text span { color: var(--gold); }
+body.hero-dark nav.topnav .logo-mark { color: #fff; }
+body.hero-dark nav.topnav .logo-mark-bg { fill: rgba(255,255,255,0.12); }
+body.hero-dark nav.topnav .logo-mark-stroke { stroke: #fff; }
+body.hero-dark nav.topnav .logo-mark-dot { fill: var(--gold); }
 
 .logo {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 11px;
   text-decoration: none;
 }
 
-.logo-icon {
+.logo-mark {
   width: 38px; height: 38px;
-  background: var(--blue);
-  border-radius: 11px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 16px rgba(30,78,216,0.35);
+  flex-shrink: 0;
+  display: block;
 }
 
 .logo-text {
@@ -106,7 +103,7 @@ body.hero-dark nav.topnav .logo-text span { color: var(--gold); }
   font-weight: 800;
   font-size: 22px;
   color: var(--text);
-  letter-spacing: -0.6px;
+  letter-spacing: -0.8px;
   transition: color 0.3s ease;
 }
 .logo-text span { color: var(--blue); transition: color 0.3s ease; }
@@ -278,6 +275,231 @@ h2 em { font-style: normal; color: var(--blue); }
   inset: 0;
   pointer-events: none;
   z-index: 1;
+}
+
+/* Pulse of light traveling along the rail — represents live data */
+.rail-pulse {
+  position: absolute;
+  bottom: 18%;
+  left: 0;
+  width: 100%;
+  height: 60%;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.hero.v-aurora .rail-pulse,
+.hero.v-midnight .rail-pulse { opacity: 1; }
+.hero.v-cream .rail-pulse { opacity: 0.6; }
+
+.rail-pulse-dot {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow:
+    0 0 12px var(--gold),
+    0 0 24px rgba(252,211,77,0.8),
+    0 0 60px rgba(252,211,77,0.4);
+  animation: railTravel 7s ease-in-out infinite;
+}
+.rail-pulse-dot.dot-2 {
+  animation-delay: 2.5s;
+  background: #86efac;
+  box-shadow:
+    0 0 12px #86efac,
+    0 0 24px rgba(134,239,172,0.7),
+    0 0 60px rgba(134,239,172,0.3);
+}
+.rail-pulse-dot.dot-3 {
+  animation-delay: 4.8s;
+  background: var(--sky);
+  box-shadow:
+    0 0 12px var(--sky),
+    0 0 24px rgba(96,165,250,0.7),
+    0 0 60px rgba(96,165,250,0.3);
+}
+
+@keyframes railTravel {
+  0% { transform: translate(-300px, 280px) scale(0.4); opacity: 0; }
+  10% { opacity: 1; }
+  50% { transform: translate(0, 60px) scale(1); opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translate(280px, -180px) scale(1.6); opacity: 0; }
+}
+
+/* Departure board floating chip — vintage split-flap reference, modernized */
+.departure-board {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+  background: rgba(8, 16, 40, 0.55);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 14px;
+  padding: 10px 14px;
+  font-family: 'DM Sans', monospace;
+  color: rgba(255,255,255,0.95);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 200px;
+  box-shadow: 0 12px 32px rgba(0,0,0,0.3);
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.hero.v-aurora .departure-board,
+.hero.v-midnight .departure-board { opacity: 1; }
+.hero.v-cream .departure-board {
+  background: rgba(255,255,255,0.92);
+  border-color: var(--cream-3);
+  color: var(--text);
+  opacity: 1;
+  box-shadow: 0 12px 32px rgba(30,78,216,0.12);
+}
+
+.departure-board-1 {
+  top: 18%;
+  left: 4%;
+  animation: floatBoard 7s ease-in-out infinite;
+}
+.departure-board-2 {
+  bottom: 26%;
+  right: 4%;
+  animation: floatBoard 8s ease-in-out infinite reverse;
+}
+
+@media (max-width: 900px) {
+  .departure-board { display: none; }
+}
+
+@keyframes floatBoard {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+.dep-row {
+  display: grid;
+  grid-template-columns: 38px 1fr auto auto;
+  gap: 10px;
+  align-items: center;
+  font-weight: 600;
+}
+.dep-time {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+}
+.dep-line-chip {
+  display: inline-block;
+  background: rgba(255,255,255,0.14);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.hero.v-cream .dep-line-chip { background: var(--secondary, #E9E1D7); }
+.dep-dest {
+  font-size: 11px;
+  opacity: 0.75;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dep-status {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 100px;
+  white-space: nowrap;
+}
+.dep-status.ok { background: rgba(134,239,172,0.18); color: #86efac; }
+.dep-status.warn { background: rgba(252,211,77,0.18); color: var(--gold); }
+.dep-status.bad { background: rgba(252,165,165,0.18); color: #fca5a5; }
+.hero.v-cream .dep-status.ok { background: var(--green-bg); color: var(--green); }
+.hero.v-cream .dep-status.warn { background: #FEF3C7; color: var(--gold-warm); }
+.hero.v-cream .dep-status.bad { background: var(--red-bg); color: var(--red); }
+
+.dep-board-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  opacity: 0.7;
+}
+.hero.v-cream .dep-board-header { border-bottom-color: var(--cream-3); }
+
+.dep-live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #86efac;
+  box-shadow: 0 0 0 0 rgba(134,239,172,0.6);
+  animation: pulseDot 1.8s ease-in-out infinite;
+}
+.hero.v-cream .dep-live-dot { background: var(--green); }
+
+@keyframes pulseDot {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(134,239,172,0.7); }
+  50% { box-shadow: 0 0 0 8px rgba(134,239,172,0); }
+}
+
+/* Train-window light streaks — slow horizontal motion suggesting passing trains */
+.window-streaks {
+  position: absolute;
+  bottom: 22%;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.hero.v-aurora .window-streaks,
+.hero.v-midnight .window-streaks { opacity: 0.7; }
+
+.window-streak {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 60px;
+  background: linear-gradient(90deg, transparent, var(--gold) 30%, var(--gold) 70%, transparent);
+  border-radius: 2px;
+  filter: blur(0.5px);
+  animation: streakMove 4.5s linear infinite;
+}
+.window-streak.s2 {
+  width: 40px;
+  background: linear-gradient(90deg, transparent, #86efac 30%, #86efac 70%, transparent);
+  animation-delay: 1.6s;
+  animation-duration: 5.2s;
+  top: 1px;
+}
+.window-streak.s3 {
+  width: 80px;
+  animation-delay: 3.2s;
+  animation-duration: 4s;
+}
+
+@keyframes streakMove {
+  0% { transform: translateX(-120px); opacity: 0; }
+  10%, 90% { opacity: 1; }
+  100% { transform: translateX(calc(100vw + 120px)); opacity: 0; }
 }
 
 .hero-content-wrap {
@@ -982,18 +1204,272 @@ footer a:hover { color: #fff; }
 .fu:nth-child(4) { animation-delay: 0.46s; }
 .fu:nth-child(5) { animation-delay: 0.6s; }
 .fu:nth-child(6) { animation-delay: 0.74s; }
+
+/* ============================================================
+   MOBILE OPTIMIZATION (the four big wins)
+   ============================================================ */
+@media (max-width: 767px) {
+
+  /* ---- 1. HERO COMPRESSION ---- */
+  .hero-content-wrap {
+    padding: 88px 22px 56px;
+    gap: 16px;
+  }
+  /* On mobile: mockup ABOVE text — visual proof first, then headline & CTA */
+  .hero-mockup-stage {
+    order: 1;
+    height: 500px;
+    margin-top: 0;
+    overflow: visible;
+  }
+  .hero-text { order: 2; }
+
+  /* Phone is already smaller (220x464) via prop — don't double-scale */
+  .hero-mockup-stage .mockup-floater {
+    transform: none;
+    animation: phoneFloat 6s ease-in-out infinite;
+  }
+  .mockup-orbit { width: 300px; height: 300px; }
+  .mockup-orbit.small { width: 220px; height: 220px; }
+
+  /* Pull the floating status tags in close to the smaller phone */
+  .mockup-tag {
+    font-size: 11px;
+    padding: 8px 11px;
+    transform: scale(0.95);
+  }
+  .mockup-tag-1 {
+    top: 14%;
+    right: 8px;
+  }
+  .mockup-tag-2 {
+    bottom: 18%;
+    left: 8px;
+  }
+  .mockup-tag .dot { width: 7px; height: 7px; }
+  .mockup-tag div div:first-child { font-size: 10px !important; }
+  .mockup-tag div div:last-child { font-size: 12px !important; }
+
+  h1 {
+    font-size: clamp(40px, 12vw, 56px);
+    line-height: 0.98;
+    letter-spacing: -2px;
+    margin-bottom: 16px;
+  }
+
+  .hero-sub {
+    font-size: 15px;
+    line-height: 1.5;
+    margin-bottom: 24px;
+  }
+
+  .hero-stars-row {
+    margin-bottom: 18px;
+    padding: 6px 12px;
+  }
+  .hero-stars-text { font-size: 11px; }
+
+  .hero-badge {
+    font-size: 11px;
+    padding: 6px 12px;
+    margin-bottom: 16px;
+  }
+
+  /* Move mockup tags inside the phone bounds so they don't clip */
+  .mockup-tag-1 { top: 6%; right: 4px; transform: scale(0.85); transform-origin: top right; }
+  .mockup-tag-2 { bottom: 12%; left: 4px; transform: scale(0.85); transform-origin: bottom left; }
+
+  .mockup-orbit { width: 360px; height: 360px; }
+  .mockup-orbit.small { width: 280px; height: 280px; }
+
+  .btn-hero {
+    padding: 16px 24px;
+    font-size: 16px;
+  }
+
+  .hero-meta { font-size: 12px; }
+
+  /* ---- 3. TRUST BANNER → 2x2 GRID ---- */
+  .trust-banner {
+    flex-wrap: wrap;
+    padding: 28px 20px;
+    gap: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 0;
+  }
+  .trust-stat {
+    padding: 18px 8px;
+    border-right: 1px solid rgba(255,255,255,0.14);
+    border-bottom: 1px solid rgba(255,255,255,0.14);
+  }
+  .trust-stat:nth-child(odd) ~ .trust-divider,
+  .trust-divider { display: none; }
+  .trust-stat:nth-child(2) ~ .trust-stat { /* 3rd onward */ }
+  /* remove right border on right column items (2nd, 4th visible stats) */
+  .trust-banner > .trust-stat:nth-of-type(2),
+  .trust-banner > .trust-stat:nth-of-type(4) {
+    border-right: none;
+  }
+  /* remove bottom border on bottom row */
+  .trust-banner > .trust-stat:nth-of-type(3),
+  .trust-banner > .trust-stat:nth-of-type(4) {
+    border-bottom: none;
+  }
+  .trust-stat-num { font-size: 18px; }
+  .trust-stat-label { font-size: 10px; }
+
+  /* ---- 4. SHOWCASE → SNAP CAROUSEL ---- */
+  .showcase-section {
+    padding: 88px 0 64px;
+    overflow: hidden;
+  }
+  .showcase-head { margin-bottom: 36px; padding: 0 22px; }
+
+  .showcase-grid {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    overflow-y: visible;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 24px 22px 32px;
+    align-items: stretch;
+  }
+  .showcase-grid::-webkit-scrollbar { display: none; }
+
+  .showcase-item {
+    scroll-snap-align: center;
+    flex: 0 0 calc(100vw - 44px);
+    max-width: calc(100vw - 44px);
+    padding: 0 8px;
+    gap: 24px;
+  }
+
+  /* Kill tilt on mobile — keep phones upright in carousel for clarity */
+  .showcase-phone-wrap {
+    transform: none !important;
+  }
+  .showcase-item .mockup-floater {
+    transform: none !important;
+    animation: none !important;
+  }
+  /* Override the inline tilt prop on the PhoneFrame */
+  .showcase-item [style*="rotate"] {
+    transform: none !important;
+  }
+
+  /* Carousel dots */
+  .showcase-dots {
+    display: flex !important;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 24px;
+    padding: 0 22px;
+  }
+  .showcase-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--cream-3);
+    transition: all 0.25s ease;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+  }
+  .showcase-dot.active {
+    background: var(--blue);
+    width: 24px;
+    border-radius: 100px;
+  }
+
+  /* ---- 2. STICKY MOBILE CTA ---- */
+  .mobile-sticky-cta {
+    position: fixed;
+    left: 12px; right: 12px;
+    bottom: 12px;
+    bottom: max(12px, env(safe-area-inset-bottom, 12px));
+    z-index: 95;
+    background: var(--blue);
+    color: #fff;
+    border-radius: 100px;
+    padding: 14px 22px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
+    text-decoration: none;
+    text-align: center;
+    box-shadow: 0 10px 32px rgba(30,78,216,0.45), 0 2px 8px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transform: translateY(120%);
+    opacity: 0;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+    pointer-events: none;
+  }
+  .mobile-sticky-cta.visible {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .mobile-sticky-cta-arrow {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.18);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .mobile-sticky-cta::before {
+    content: '';
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #86efac;
+    box-shadow: 0 0 0 3px rgba(134,239,172,0.3);
+    animation: ripple 2s infinite;
+    flex-shrink: 0;
+  }
+
+  /* Hide nav button when sticky is showing — avoid duplication */
+  .mobile-sticky-cta.visible ~ nav.topnav .btn-nav {
+    /* keep it visible for backup */
+  }
+
+  /* Other mobile nice-to-haves */
+  section { padding: 64px 22px; }
+
+  .section-sub { font-size: 15px; }
+
+  /* Hide departure boards entirely on mobile (already done via 900px) — confirm */
+  .departure-board { display: none; }
+}
+
+/* ---- Hide carousel dots on desktop ---- */
+.showcase-dots { display: none; }
 </style>
 </head>
 <body>
 
 <nav class="topnav">
   <a href="#" class="logo">
-    <div class="logo-icon">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
-        <line x1="4" y1="22" x2="4" y2="15"/>
-      </svg>
-    </div>
+    <svg class="logo-mark" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Rounded square background -->
+      <rect class="logo-mark-bg" x="0" y="0" width="40" height="40" rx="11" fill="#1E4ED8"/>
+      <!-- Stylized P: bowl with platform-cut + descender = stem -->
+      <!-- Stem -->
+      <rect x="11" y="9" width="4.5" height="22" rx="1.2" fill="#fff"/>
+      <!-- Bowl outer -->
+      <path d="M15.5 9 L23 9 C27.4 9 31 12.6 31 17 C31 21.4 27.4 25 23 25 L15.5 25 Z" fill="#fff"/>
+      <!-- Bowl inner cut (counter) -->
+      <path d="M15.5 13.2 L22.6 13.2 C24.7 13.2 26.4 14.9 26.4 17 C26.4 19.1 24.7 20.8 22.6 20.8 L15.5 20.8 Z" fill="#1E4ED8"/>
+      <!-- Live dot — gold, suggests active monitoring -->
+      <circle cx="29" cy="29" r="3.2" fill="#FCD34D"/>
+      <circle cx="29" cy="29" r="1.4" fill="#1E4ED8"/>
+    </svg>
     <div class="logo-text">Pend<span>ly</span></div>
   </a>
   <a href="#pricing" class="btn btn-nav">Kostenlos testen</a>
@@ -1250,20 +1726,20 @@ footer a:hover { color: #fff; }
     <h2 class="fu">Einfach.<br><em>Fair. Klar.</em></h2>
 
     <div class="pricing-card fu">
-      <div class="trial-badge">🎁 7 Tage kostenlos — keine Kreditkarte</div>
+      <div class="trial-badge">🎁 7 Tage kostenlos testen</div>
       <div class="price-row">
         <div class="price-big">4,99</div>
         <div class="price-unit">€ / Monat</div>
       </div>
-      <div class="price-annual">oder 39,99 € / Jahr — 2 Monate geschenkt</div>
+      <div class="price-annual">oder 49,99 € / Jahr — 2 Monate geschenkt</div>
 
       <ul class="feature-checklist">
         <li><span class="chk">✓</span> Unbegrenzte Routen &amp; Stammzüge</li>
         <li><span class="chk">✓</span> Echtzeit Push-Benachrichtigungen</li>
         <li><span class="chk">✓</span> Gleisänderungs-Alerts</li>
         <li><span class="chk">✓</span> Automatische Alternativen bei Ausfall</li>
-        <li><span class="chk">✓</span> Verspätungs-Verlauf &amp; Statistiken</li>
         <li><span class="chk">✓</span> DB, S-Bahn, RE, Bus, Tram</li>
+        <li><span class="chk">✓</span> 🇩🇪 Deutsches Start-up · DSGVO-konform</li>
       </ul>
 
       <a href="#" class="btn btn-primary">Jetzt kostenlos herunterladen</a>
@@ -1295,7 +1771,7 @@ footer a:hover { color: #fff; }
       </div>
       <div class="faq-item" onclick="this.classList.toggle('open')">
         <div class="faq-q">Was passiert nach den 7 Tagen? <svg class="faq-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
-        <div class="faq-a">Du wirst gefragt ob du weitermachen möchtest. Keine automatische Abbuchung, keine versteckten Kosten. Nur wenn du aktiv zustimmst geht's weiter — für 4,99 €/Monat oder 39,99 €/Jahr.</div>
+        <div class="faq-a">Du wirst gefragt ob du weitermachen möchtest. Keine automatische Abbuchung, keine versteckten Kosten. Nur wenn du aktiv zustimmst geht's weiter — für 4,99 €/Monat oder 49,99 €/Jahr.</div>
       </div>
       <div class="faq-item" onclick="this.classList.toggle('open')">
         <div class="faq-q">Warum kostet Pendly 4,99 €? <svg class="faq-arrow" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></div>
@@ -1310,7 +1786,7 @@ footer a:hover { color: #fff; }
     <h2>Hör auf zu hoffen.<br><em>Fang an zu wissen.</em></h2>
     <p><strong>Morgen früh</strong> steht einer von zehn Pendlern entspannt am Bahnsteig.<br>Weil Pendly für ihn schaut.</p>
     <a href="#pricing" class="btn btn-primary">Jetzt kostenlos herunterladen</a>
-    <p style="margin-top: 16px; font-size: 13px; color: rgba(255,255,255,0.55);">4,99 €/Monat · 39,99 €/Jahr · jederzeit kündbar</p>
+    <p style="margin-top: 16px; font-size: 13px; color: rgba(255,255,255,0.55);">4,99 €/Monat · 49,99 €/Jahr · jederzeit kündbar</p>
   </div>
 </section>
 
@@ -1318,6 +1794,50 @@ footer a:hover { color: #fff; }
   © 2025 Pendly · LMD Commerce<br>
   <a href="#">Impressum</a> · <a href="#">Datenschutz</a> · <a href="#">AGB</a>
 </footer>
+
+<a href="#pricing" class="mobile-sticky-cta" id="mobileStickyCta">
+  <span>7 Tage kostenlos testen</span>
+  <span class="mobile-sticky-cta-arrow">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+  </span>
+</a>
+
+<script>
+/* Sticky CTA show/hide based on scroll */
+(function() {
+  const cta = document.getElementById('mobileStickyCta');
+  if (!cta) return;
+  const pricing = document.getElementById('pricing');
+  let lastVisible = false;
+
+  function update() {
+    if (window.innerWidth >= 768) {
+      if (lastVisible) { cta.classList.remove('visible'); lastVisible = false; }
+      return;
+    }
+    const scrollY = window.scrollY;
+    const showThreshold = window.innerHeight * 0.7;
+    let shouldShow = scrollY > showThreshold;
+
+    // Hide when pricing section is in view
+    if (pricing) {
+      const rect = pricing.getBoundingClientRect();
+      if (rect.top < window.innerHeight && rect.bottom > 0) {
+        shouldShow = false;
+      }
+    }
+
+    if (shouldShow !== lastVisible) {
+      cta.classList.toggle('visible', shouldShow);
+      lastVisible = shouldShow;
+    }
+  }
+
+  window.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update, { passive: true });
+  update();
+})();
+</script>
 
 <div id="tweaks-root"></div>
 
