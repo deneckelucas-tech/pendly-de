@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { WEEKDAY_LABELS, type Weekday } from '@/lib/types';
-import { ArrowLeft, LogOut, Moon, Sun, Bell, Clock, Globe, Calendar, CreditCard, Crown, Loader2 } from 'lucide-react';
+import { ArrowLeft, LogOut, Moon, Sun, Bell, Clock, Globe, Calendar, CreditCard, Crown, Loader2, Smartphone } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePreferences } from '@/hooks/usePreferences';
+import { usePushPermission } from '@/hooks/usePushPermission';
 
 const ALL_WEEKDAYS: Weekday[] = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
 
@@ -25,6 +26,7 @@ export default function Settings() {
   const navigate = useNavigate();
   const { user, subscription, signOut } = useAuth();
   const { prefs, loading, saving, update } = usePreferences();
+  const { permission, requesting, request, supported } = usePushPermission();
   const [portalLoading, setPortalLoading] = useState(false);
 
   const toggleDay = (day: Weekday) => {
@@ -118,6 +120,50 @@ export default function Settings() {
           <Bell className="h-4 w-4" /> Benachrichtigungen
         </p>
         <div className="space-y-3">
+          {/* Push toggle */}
+          <div className="flex items-center justify-between pb-3 border-b border-border">
+            <div className="flex-1 pr-3">
+              <Label className="text-sm flex items-center gap-2"><Smartphone className="h-4 w-4" /> Push-Benachrichtigungen</Label>
+              {!supported && (
+                <p className="text-[11px] text-muted-foreground mt-1">Nur in der mobilen App verfügbar</p>
+              )}
+              {supported && permission === 'denied' && (
+                <p className="text-[11px] text-destructive mt-1">In den Geräteeinstellungen erlauben</p>
+              )}
+              {supported && permission === 'prompt' && (
+                <button
+                  onClick={request}
+                  disabled={requesting}
+                  className="text-[11px] text-primary mt-1 underline"
+                >
+                  {requesting ? 'Wird angefragt…' : 'Erlaubnis erteilen'}
+                </button>
+              )}
+            </div>
+            <Switch
+              checked={prefs.pushEnabled && (permission === 'granted' || !supported)}
+              disabled={supported && permission !== 'granted'}
+              onCheckedChange={v => update({ pushEnabled: v })}
+            />
+          </div>
+
+          {/* Pre-departure window */}
+          <div className="pb-3 border-b border-border">
+            <Label className="text-sm flex items-center justify-between">
+              <span>Vorab-Check vor Abfahrt</span>
+              <span className="text-xs text-muted-foreground">{prefs.preDepartureMinutes} Min.</span>
+            </Label>
+            <input
+              type="range"
+              min={15}
+              max={120}
+              step={5}
+              value={prefs.preDepartureMinutes}
+              onChange={e => update({ preDepartureMinutes: Number(e.target.value) })}
+              className="w-full mt-2 accent-primary"
+            />
+          </div>
+
           {NOTIFICATION_FIELDS.map(({ key, label }) => (
             <div key={key} className="flex items-center justify-between">
               <Label className="text-sm">{label}</Label>
