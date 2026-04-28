@@ -17,6 +17,8 @@ export interface UserPreferences {
   darkMode: boolean;
   timeFormat: '24h' | '12h';
   language: string;
+  pushEnabled: boolean;
+  preDepartureMinutes: number;
 }
 
 export const DEFAULT_PREFERENCES: UserPreferences = {
@@ -32,6 +34,8 @@ export const DEFAULT_PREFERENCES: UserPreferences = {
   darkMode: false,
   timeFormat: '24h',
   language: 'de',
+  pushEnabled: true,
+  preDepartureMinutes: 60,
 };
 
 function rowToPrefs(row: any): UserPreferences {
@@ -48,6 +52,8 @@ function rowToPrefs(row: any): UserPreferences {
     darkMode: row.dark_mode,
     timeFormat: (row.time_format as '24h' | '12h') || '24h',
     language: row.language || 'de',
+    pushEnabled: row.push_enabled ?? true,
+    preDepartureMinutes: row.pre_departure_minutes ?? 60,
   };
 }
 
@@ -65,6 +71,8 @@ function prefsToRow(prefs: Partial<UserPreferences>): Record<string, unknown> {
   if (prefs.darkMode !== undefined) out.dark_mode = prefs.darkMode;
   if (prefs.timeFormat !== undefined) out.time_format = prefs.timeFormat;
   if (prefs.language !== undefined) out.language = prefs.language;
+  if (prefs.pushEnabled !== undefined) out.push_enabled = prefs.pushEnabled;
+  if (prefs.preDepartureMinutes !== undefined) out.pre_departure_minutes = prefs.preDepartureMinutes;
   return out;
 }
 
