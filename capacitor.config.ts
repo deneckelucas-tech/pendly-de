@@ -7,6 +7,15 @@ const config: CapacitorConfig = {
   ios: {
     backgroundColor: '#f7f4f0',
   },
+  server: {
+    url: 'https://dd7c08af-3db7-46ed-8595-6570d08c946a.lovableproject.com?forceHideBadge=true',
+    cleartext: true,
+  },
+  plugins: {
+    PushNotifications: {
+      presentationOptions: ['badge', 'sound', 'alert'],
+    },
+  },
 };
 
 export default config;
