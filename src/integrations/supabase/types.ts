@@ -101,6 +101,54 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_log: {
+        Row: {
+          body: string
+          connection_id: string | null
+          created_at: string
+          data: Json | null
+          dedup_key: string
+          failed_count: number
+          id: string
+          kind: string
+          route_id: string | null
+          sent_count: number
+          severity: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          connection_id?: string | null
+          created_at?: string
+          data?: Json | null
+          dedup_key: string
+          failed_count?: number
+          id?: string
+          kind: string
+          route_id?: string | null
+          sent_count?: number
+          severity?: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          connection_id?: string | null
+          created_at?: string
+          data?: Json | null
+          dedup_key?: string
+          failed_count?: number
+          id?: string
+          kind?: string
+          route_id?: string | null
+          sent_count?: number
+          severity?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -129,6 +177,42 @@ export type Database = {
           subscription_end?: string | null
           subscription_status?: string
           trial_start?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      push_tokens: {
+        Row: {
+          app_version: string | null
+          created_at: string
+          device_id: string | null
+          id: string
+          last_seen_at: string
+          platform: string
+          token: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          app_version?: string | null
+          created_at?: string
+          device_id?: string | null
+          id?: string
+          last_seen_at?: string
+          platform: string
+          token: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          app_version?: string | null
+          created_at?: string
+          device_id?: string | null
+          id?: string
+          last_seen_at?: string
+          platform?: string
+          token?: string
           updated_at?: string
           user_id?: string
         }
@@ -340,6 +424,8 @@ export type Database = {
           notify_delays: boolean
           notify_disruptions: boolean
           notify_platform_changes: boolean
+          pre_departure_minutes: number
+          push_enabled: boolean
           quiet_hours_end: string
           quiet_hours_start: string
           time_format: string
@@ -358,6 +444,8 @@ export type Database = {
           notify_delays?: boolean
           notify_disruptions?: boolean
           notify_platform_changes?: boolean
+          pre_departure_minutes?: number
+          push_enabled?: boolean
           quiet_hours_end?: string
           quiet_hours_start?: string
           time_format?: string
@@ -376,6 +464,8 @@ export type Database = {
           notify_delays?: boolean
           notify_disruptions?: boolean
           notify_platform_changes?: boolean
+          pre_departure_minutes?: number
+          push_enabled?: boolean
           quiet_hours_end?: string
           quiet_hours_start?: string
           time_format?: string
