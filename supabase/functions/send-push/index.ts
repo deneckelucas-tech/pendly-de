@@ -47,6 +47,23 @@ interface PushToken {
   platform: 'ios' | 'android' | 'web';
 }
 
+// Defense in depth: verify_jwt=true already enforces a valid JWT at the gateway,
+// but we additionally require the service_role claim so only trusted callers
+// (other edge functions, the cron job) can fan out push notifications.
+function parseJwtClaims(token: string): Record<string, unknown> | null {
+  const parts = token.split('.');
+  if (parts.length < 2) return null;
+  try {
+    const payload = parts[1]
+      .replaceAll('-', '+')
+      .replaceAll('_', '/')
+      .padEnd(Math.ceil(parts[1].length / 4) * 4, '=');
+    return JSON.parse(atob(payload)) as Record<string, unknown>;
+  } catch {
+    return null;
+  }
+}
+
 // ----------------- FCM (Android) -----------------
 
 let fcmTokenCache: { token: string; expiresAt: number; projectId: string } | null = null;
@@ -204,6 +221,19 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
   try {
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'unauthorized' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+    const claims = parseJwtClaims(authHeader.slice('Bearer '.length).trim());
+    if (claims?.role !== 'service_role') {
+      return new Response(JSON.stringify({ error: 'forbidden' }), {
+        status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const body = await req.json() as Body;
     if (!body.user_id || !body.title || !body.body) {
       return new Response(JSON.stringify({ error: 'invalid body' }), {

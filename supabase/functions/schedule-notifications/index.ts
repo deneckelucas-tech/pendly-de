@@ -161,11 +161,24 @@ Deno.serve(async (req) => {
 
     let checked = 0;
     let pushed = 0;
+    const today = now.toISOString().slice(0, 10);
 
-    // 4. Walk each first-leg per connection (we focus on departure of first leg)
-    const firstLegs = (legs as Leg[]).filter(l => l.leg_index === 0);
+    // Pre-load today's notification log so we can skip HAFAS calls for legs
+    // whose dedup keys already fired. notification_log has UNIQUE(user_id, dedup_key)
+    // but checking up-front saves ~1 HAFAS call per already-notified leg per minute.
+    const { data: sentLog } = await admin
+      .from('notification_log')
+      .select('user_id, dedup_key')
+      .gte('created_at', `${today}T00:00:00Z`);
 
-    for (const leg of firstLegs) {
+    const sentKeys = new Set<string>(
+      (sentLog ?? []).map((r: { user_id: string; dedup_key: string }) => `${r.user_id}|${r.dedup_key}`),
+    );
+    const wasSent = (userId: string, dedup: string) => sentKeys.has(`${userId}|${dedup}`);
+
+    // 4. Walk every leg of every active connection. Pendler often have transfers,
+    // so a problem on leg 1 or 2 must be detected too.
+    for (const leg of legs as Leg[]) {
       const conn = connById.get(leg.connection_id);
       if (!conn) continue;
       const prefs = prefsByUser.get(conn.user_id);
@@ -175,16 +188,32 @@ Deno.serve(async (req) => {
       const plannedDep = timeToTodayDate(leg.planned_departure, now);
       const minutesUntil = Math.round((plannedDep.getTime() - now.getTime()) / 60_000);
 
-      // Out of window: < -5 (already gone) or > pre_departure_minutes (too far)
+      // Out of window: > 5 min after departure (already gone) or > pre_departure_minutes (too far)
       if (minutesUntil < -5 || minutesUntil > prefs.pre_departure_minutes) continue;
+
+      // Dedup-keys we *might* fire for this leg today. If every relevant key is
+      // already in the log, skip the HAFAS call entirely.
+      const legBase = `${today}:${leg.connection_id}:l${leg.leg_index}`;
+      const possibleKeys = [
+        `${legBase}:cancellation:cancel`,
+        `${legBase}:platform_change`, // prefix-match handled below
+        `${legBase}:delay`,
+        `${legBase}:pre_departure:precheck`,
+      ];
+      const cancelFired = wasSent(conn.user_id, possibleKeys[0]);
+      const preCheckFired = wasSent(conn.user_id, possibleKeys[3]);
+      // For delay/platform we have multiple sub-keys, so we always re-check.
+
+      // If cancelled-push already fired we don't need to check this leg again today.
+      if (cancelFired) continue;
 
       checked++;
       const status = await checkLeg(leg.origin_id, leg.destination_id, plannedDep);
       if (!status) continue;
 
-      const today = now.toISOString().slice(0, 10);
       const sendPush = async (kind: string, title: string, body: string, severity: 'info' | 'warning' | 'critical', dedupSuffix: string) => {
-        const dedup = `${today}:${leg.connection_id}:${kind}:${dedupSuffix}`;
+        const dedup = `${legBase}:${kind}:${dedupSuffix}`;
+        if (wasSent(conn.user_id, dedup)) return;
         const res = await admin.functions.invoke('send-push', {
           body: {
             user_id: conn.user_id,
@@ -195,13 +224,16 @@ Deno.serve(async (req) => {
             dedup_key: dedup,
             connection_id: conn.id,
             route_id: conn.route_id,
-            data: { route_id: conn.route_id, connection_id: conn.id, kind },
+            data: { route_id: conn.route_id, connection_id: conn.id, kind, leg_index: String(leg.leg_index) },
           },
         });
-        if (!res.error) pushed++;
+        if (!res.error) {
+          pushed++;
+          sentKeys.add(`${conn.user_id}|${dedup}`);
+        }
       };
 
-      // Cancellation → höchste Priorität
+      // Cancellation → highest priority
       if (status.cancelled && prefs.notify_cancellations) {
         await sendPush(
           'cancellation',
@@ -236,9 +268,18 @@ Deno.serve(async (req) => {
         );
       }
 
-      // Pre-Departure Reminder (nur einmal pro Tag, wenn keine Probleme)
-      if (minutesUntil >= prefs.pre_departure_minutes - 1 && minutesUntil <= prefs.pre_departure_minutes + 1
-          && status.delayMin < 3 && !status.cancelled && !status.platformChange) {
+      // Pre-Departure Reminder: fire once when entering the configured window,
+      // only if no problems are detected. Window is [pre_departure_minutes - 5,
+      // pre_departure_minutes] so a delayed cron tick won't miss it.
+      if (
+        leg.leg_index === 0 &&
+        !preCheckFired &&
+        minutesUntil >= prefs.pre_departure_minutes - 5 &&
+        minutesUntil <= prefs.pre_departure_minutes &&
+        status.delayMin < 3 &&
+        !status.cancelled &&
+        !status.platformChange
+      ) {
         await sendPush(
           'pre_departure',
           'Bahn pünktlich',

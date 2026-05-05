@@ -8,6 +8,6 @@ project_id = "fxjxxlcbpkrmwmcqllyx"
   [functions.register-push-token]
     verify_jwt = true
   [functions.send-push]
-    verify_jwt = false
+    verify_jwt = true
   [functions.schedule-notifications]
     verify_jwt = false
